@@ -28,6 +28,65 @@
   color: #61dafb;
 }
 
+.form-label {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  /* width: 100% */
+}
+
+.list-details .list {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: 11rem;
+  top: 0;
+  bottom: 0;
+  overflow: auto;
+  /* white-space: nowrap */
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.pulse {
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+}
+
+.pulse::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  animation: pulse 1s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+  border-radius: inherit;
+  z-index: -1;
+  background-color: inherit;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(3);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -35,4 +94,25 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+
+.btn-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* td .btn-icon {
+  padding: .05rem .5rem;
+} */
+
+.list-group.is-invalid,
+.list-group.is-invalid .list-group-item {
+  border-color: #dc3545;
+}
+
+.was-validated .list-group.is-valid,
+.was-validated .list-group.is-valid .list-group-item {
+  border-color: #28a745;
 }
