@@ -4,7 +4,7 @@ import { Alert, Button, Col, Form, Spinner } from 'react-bootstrap'
 import { useForm } from 'react-hook-form'
 import { FaSearch } from 'react-icons/fa'
 import { useMutation, useQuery } from 'react-query'
-import * as rules from '../../../commons/components/rules'
+import * as rules from '../../../../commons/components/rules'
 import { EmpleadorService, ListaMoraItem, ListaMoraService } from '../services'
 
 type Inputs = {

@@ -1,5 +1,5 @@
-import apiClient from "../../../commons/services/apiClient"
-import { Page } from "../../../commons/services/Page"
+import apiClient from "../../../../commons/services/apiClient"
+import { Page } from "../../../../commons/services/Page"
 
 export type ListaMoraFilter = {
   numeroPatronal?: string,
@@ -17,7 +17,7 @@ export type ListaMoraItem = {
 
 export const ListaMoraService = {
   fetch: (page: Page, filter: ListaMoraFilter)=>{
-    return apiClient.get<{records: ListaMoraItem[]}>("/lista-mora", {
+    return apiClient.get<{meta: {total: number, page: {current: number, size: number}}, records: ListaMoraItem[]}>("/lista-mora", {
       params: {
         page, filter: {
           numero_patronal: filter.numeroPatronal,
@@ -34,6 +34,7 @@ export const ListaMoraService = {
     })
   },
   quitar: (idEmpleador: number) =>{
+    console.log(idEmpleador)
     return apiClient.post<ListaMoraItem>("/lista-mora/quitar", {
       empleador_id: idEmpleador
     })

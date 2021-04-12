@@ -1,4 +1,4 @@
-import apiClient from "../../../commons/services/apiClient"
+import apiClient from "../../../../commons/services/apiClient"
 
 type Empleador = {
   id: number,

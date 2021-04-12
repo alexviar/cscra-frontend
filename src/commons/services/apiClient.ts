@@ -1,10 +1,10 @@
 import axios from 'axios'
-import {baseUrl} from '../../configs/app.json'
+import {apiEndpoint} from '../../configs/app.json'
 import Qs from 'qs'
 import { keysToCamel } from '../utils'
 
-const apiClient = axios.create({
-  "baseURL": baseUrl,
+export const apiClient = axios.create({
+  "baseURL": apiEndpoint,
   "timeout": 30000,
   // transformRequest: [(data, headers)=>{
   //   console.log("TransformRequest", data)

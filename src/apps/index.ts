@@ -1,0 +1,1 @@
+export {ClinicaApp} from "./clinica/ClinicaApp"

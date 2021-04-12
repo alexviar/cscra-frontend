@@ -8,7 +8,7 @@ import {
 } from "react-router-dom"
 import { MdApps } from 'react-icons/md'
 import { FaBell, FaUserCircle, FaBars, FaClinicMedical, FaUserPlus } from 'react-icons/fa'
-import MedicalApp from "./ClinicaApp";
+import * as Apps from "../../apps";
 import IamApp from "./IamApp";
 import {Login, ProtectedRoute} from "../../features/auth/components"
 import { getUser } from "../../features/auth/selectors/inputSelectors"
@@ -114,7 +114,7 @@ export default ()=>{
             <IamApp />
           </ProtectedRoute>
           <ProtectedRoute path="/clinica">
-            <MedicalApp />
+            <Apps.ClinicaApp />
           </ProtectedRoute>
           <Route exact path="/login">
             <Login></Login>
