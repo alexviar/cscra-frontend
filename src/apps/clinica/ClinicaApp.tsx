@@ -7,6 +7,7 @@ import ListaMoraItemForm from './mora/components/ListaMoraItemForm';
 import { Settings } from './settings/components/Settings';
 import { SolicitudAtencionExternaIndex } from './solicitud_atencion_externa/components/SolicitudAtencionExternaIndex';
 import { FcDebt } from '../../commons/components/icons/FcDebt';
+import { SolicitudAtencionExternaForm } from './solicitud_atencion_externa/components/SolicitudAtencionExternaForm';
 
 export const ClinicaApp = ()=>{
   const { path, url } = useRouteMatch()
@@ -34,14 +35,17 @@ export const ClinicaApp = ()=>{
     ]
   }}>
     <Switch>
-      <Route path={`${url}/lista-mora`}>
-        <ListaMoraIndex />
-      </Route>
       <Route exact path={`${url}/lista-mora/agregar`}>
         <ListaMoraItemForm />
       </Route>
-      <Route path={`${url}/atencion-externa`}>
+      <Route path={`${url}/lista-mora`}>
+        <ListaMoraIndex />
+      </Route>
+      <Route exact path={`${url}/atencion-externa`}>
         <SolicitudAtencionExternaIndex />
+      </Route>
+      <Route exact path={`${url}/atencion-externa/registrar`}>
+        <SolicitudAtencionExternaForm />
       </Route>
       <Route exact path={`${url}/configuracion`} >
         <Settings />

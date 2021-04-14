@@ -1,14 +1,6 @@
 import { User } from "../state"
 
-export default (state: User|null={
-  id: 0,
-  username: "alexviar",
-  active: true,
-  createdAt: "",
-  updatedAt: "",
-  externalId: 0,
-  roleIds: []
-}, action: any): User|null => {
+export default (state: User|null=null, action: any): User|null => {
   const {type, payload, error} = action
   switch(type){
     case "SET_USER":

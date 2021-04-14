@@ -9,9 +9,10 @@ import { SolicitudesAtencionExternaFilter, SolicitudesAtencionExternaService } f
 import { SolicitudAtencionExternaFilterForm } from "./SolicitudAtencionExternaFilterForm"
 import Pagination from "../../../../commons/components/Pagination"
 import {FaFilter, FaPlus, FaSync} from "react-icons/fa"
+import { Link, useLocation } from "react-router-dom"
 
 export const SolicitudAtencionExternaIndex = ()=>{
-  
+  const {pathname: path} = useLocation()
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState<Page>({
     current: 1,
@@ -114,11 +115,11 @@ export const SolicitudAtencionExternaIndex = ()=>{
         </Col>
         <Col xs="auto">
           <Button
-            // as={Link}
-            // to={`${path}/registrar`}
-            className="d-flex align-items-center" onClick={()=>{
-            // showUserRegistrationModal()
-          }}><FaPlus className="mr-2" />Nuevo</Button>
+            as={Link}
+            to={`${path}/registrar`}
+            className="d-flex align-items-center">
+              <FaPlus className="mr-2" />Nuevo
+          </Button>
         </Col>
       </Row>
     </div>

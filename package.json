@@ -16,6 +16,7 @@
     "qs": "^6.10.1",
     "react": "^17.0.2",
     "react-bootstrap": "^1.5.2",
+    "react-bootstrap-typeahead": "^5.1.4",
     "react-dom": "^17.0.2",
     "react-hook-form": "^7.0.1",
     "react-icons": "^4.2.0",
@@ -31,6 +32,7 @@
   "scripts": {
     "start": "set PORT=80&&set HOST=www.example.com&&react-scripts start",
     "build": "react-scripts build",
+    "postbuild": "copyfiles -a build/* ../backend/public && copyfiles -a build\\static/* ../backend/public",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -55,6 +57,7 @@
   "devDependencies": {
     "@types/pdfobject": "^2.0.6",
     "@types/qs": "^6.9.6",
+    "@types/react-bootstrap-typeahead": "^5.1.4",
     "@types/react-router-dom": "^5.1.7"
   }
 }

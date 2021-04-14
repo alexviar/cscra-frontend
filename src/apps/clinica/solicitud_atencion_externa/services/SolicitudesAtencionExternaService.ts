@@ -22,11 +22,20 @@ export type SolicitudAtencionExterna = {
 
 export const SolicitudesAtencionExternaService = {
   buscar: (filter: SolicitudesAtencionExternaFilter, page: Page)=>{
-    return apiClient.get<PaginatedResponse<SolicitudAtencionExterna>>("/solicitudes-atencion-externa", {
+    return apiClient.get<PaginatedResponse<SolicitudAtencionExterna>>("solicitudes-atencion-externa", {
       params: {filter, page}
     })
   },
   generarDm11: (solicitud_id: number) => {
-    return apiClient.put<{url: string}>(`/solicitudes-atencion-externa/${solicitud_id}/generar-dm11`)
+    return apiClient.put<{url: string}>(`solicitudes-atencion-externa/${solicitud_id}/generar-dm11`)
+  },
+  registrar: (regional_id: number, asegurado_id: string, medico_id: number, proveedor_id: number, prestaciones_solicitadas: {prestacion_id: number, nota: string}[]) => {
+    return apiClient.post("solicitudes-atencion-externa", {
+      regional_id,
+      asegurado_id,
+      medico_id,
+      proveedor_id,
+      prestaciones_solicitadas
+    })
   }
 }

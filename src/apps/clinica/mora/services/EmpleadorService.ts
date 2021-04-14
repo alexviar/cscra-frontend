@@ -8,7 +8,7 @@ type Empleador = {
 
 export const EmpleadorService = {
   buscarPorPatronal: (numeroPatronal: string) => {
-    return apiClient.get<Empleador>("/empleadores", {
+    return apiClient.get<Empleador>("empleadores", {
       params: {
         filter: {
           numero_patronal: numeroPatronal

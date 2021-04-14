@@ -1,3 +1,4 @@
 {
-  "apiEndpoint": "http://api.example.com"
+  "apiEndpoint": "http://api.example.com/",
+  "authEndpoint": "http://api.example.com/"
 }

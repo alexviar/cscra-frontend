@@ -1,107 +1,92 @@
 import React, {useEffect} from "react"
 import { Form, Button, Alert, Spinner } from 'react-bootstrap'
+import { useForm } from "react-hook-form"
+import { useMutation } from "react-query"
 import { useDispatch, useSelector } from "react-redux"
 import { Redirect, useLocation } from "react-router"
-import apiClient from "../../../commons/services/apiClient"
-import { getLoginForm, getLoginState, getIsAuthenticated } from "../selectors/inputSelectors"
+import {authClient} from "../../../commons/services"
+import { getIsAuthenticated } from "../selectors/inputSelectors"
+import { AuthService } from "../services/AuthService"
+import * as rules from "../../../commons/components/rules"
 import "./auth.css"
+
+type Credentials = {
+  username: string,
+  password: string
+}
+
+type Inputs = Credentials & {
+  remember_me: boolean
+}
 
 export const Login = () => {
   const dispatch = useDispatch()
   const {state} = useLocation<{from: string}>()
   const isAuthenticated = useSelector(getIsAuthenticated)
-  const {fields, message, errors} = useSelector(getLoginForm)
-  const {completed: loginCompleted} = useSelector(getLoginState)
+
+  const {handleSubmit, register, formState} = useForm<Inputs>({
+    defaultValues: {
+      username:"",
+      password: "",
+      remember_me: false
+    }
+  })
+
+  const login = useMutation(({username, password, remember_me}: Inputs)=>{
+    return AuthService.login(username, password, remember_me)
+  }, {
+    onSuccess: ({data}) => {
+      localStorage.setItem("user", JSON.stringify(data))
+      dispatch({
+        type: "SET_USER",
+        payload: data
+      })
+    }
+  })
 
   return isAuthenticated ? 
     <Redirect to={state?.from || "/"} /> :
     <div className="auth-wrapper bg-light">
       <div className="auth-inner shadow-sm">
-        <Form onSubmit={(e)=>{
-          e.preventDefault()
-          dispatch({
-            type: "LOGIN",
-          })
-          apiClient.get('/sanctum/csrf-cookie').then(response => {
-            apiClient.post('/login', {
-                username: fields.username,
-                password: fields.password
-            }).then(({data, status}) => {
-              localStorage.setItem("user", JSON.stringify(data))
-              dispatch({
-                type: "LOGIN_COMPLETED",
-                payload: data,
-                error: false
-              })
-            }, (error)=>{
-              dispatch({
-                type: "LOGIN_COMPLETED",
-                payload: error.response.data,
-                error: true
-              })
-            })
-          });
-        }}>
+        <Form onSubmit={handleSubmit((credentials)=>{
+            login.mutate(credentials)
+          })}
+        >
           <h3 className="mb-2 text-center" style={{ fontSize: "1.25rem" }}>Iniciar Sesión en Hipócrates</h3>
-          {message ? <Alert variant="danger" >{message}</Alert> :  null}
+          {login.isError ? <Alert variant="danger" >{login.error?.response?.message || login.error?.message}</Alert> :  null}
           <Form.Group>
             <Form.Label>Usuario</Form.Label>
-            <Form.Control type="text" value={fields.username}
-              isInvalid={!!errors.username}
-              onChange={(e)=>{
-                const value = e.target.value
-                dispatch({
-                  type: "UPDATE_LOGIN_FORM",
-                  payload: {
-                    fields: {
-                      ...fields,
-                      username: value
-                    },
-                    errors: {
-                      ...errors,
-                      username: ""
-                    }
-                  }
-                })
-              }}
+            <Form.Control
+              isInvalid={!!formState.errors.username}
+              {...register("username", {
+                required: rules.required()
+              })}
             />
-            <Form.Text className="text-danger" >{errors.username}</Form.Text>
+            <Form.Control.Feedback type="invalid" >{formState.errors.username?.message}</Form.Control.Feedback>
           </Form.Group>
           <Form.Group>
             <Form.Label>Contraseña</Form.Label>
-            <Form.Control type="password" value={fields.password}
-              isInvalid={!!errors.password}
-              onChange={(e)=>{
-                const value = e.target.value
-                dispatch({
-                  type: "UPDATE_LOGIN_FORM",
-                  payload: {
-                    fields: {
-                      ...fields,
-                      password: value
-                    },
-                    errors: {
-                      ...errors,
-                      password: ""
-                    }
-                  }
-                })
-              }}
+            <Form.Control type="password"
+              isInvalid={!!formState.errors.password}              
+              {...register("password", {
+                required: rules.required()
+              })}
             />
-            <Form.Text className="text-danger" >{errors.password}</Form.Text>
+            <Form.Control.Feedback type="invalid" >{formState.errors.password?.message}</Form.Control.Feedback>
           </Form.Group>
 
-          {/* <div className="form-group">
-        <div className="custom-control custom-checkbox">
-          <input type="checkbox" className="custom-control-input" id="customCheck1" />
-          <label className="custom-control-label" htmlFor="customCheck1">Remember me</label>
-        </div>
-      </div> */}
+          <Form.Group>
+            <Form.Check
+              type={"checkbox"}
+              label="Recordar sesión"
+              {...register("remember_me")}
+            />
+          </Form.Group>
 
           <Button type="submit" className="btn btn-primary btn-block">
-            {loginCompleted === false ? <Spinner size="sm" animation="border" /> : null}
+            {login.isLoading ? <Spinner size="sm" animation="border" /> : null}
             <span className="align-middle ml-1">Iniciar Sesión</span>
-            </Button>
+          </Button>
           {/* <p className="forgot-password text-right">
         ¿Olvidó su <a href="#">contraseña?</a>
       </p> */}

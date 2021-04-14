@@ -32,7 +32,6 @@ export default ()=>{
     apiClient.interceptors.response.use(
       response=>response,
       error => {
-        console.log("Error Axios", error)
         if(error.response?.status == 401 || error.response?.status == 419){
           dispatch(unauthorized())
         }
