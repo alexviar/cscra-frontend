@@ -1,4 +1,4 @@
-import React, { ComponentProps } from "react"
+import React, { ComponentProps, useRef } from "react"
 import { Accordion, Button, Card,Col,Form, FormControl, InputGroup, Spinner, Table } from "react-bootstrap"
 import { useForm, Controller, FormProvider } from "react-hook-form"
 import { FaPlus, FaSearch } from "react-icons/fa"
@@ -10,17 +10,22 @@ import * as rules from "../../../../commons/components/rules"
 import { useMutation } from "react-query"
 import { SolicitudesAtencionExternaService } from "../services/SolicitudesAtencionExternaService"
 import { RegionalesTypeahead } from "../../../../commons/components/RegionalesTypeahead"
+import { Medico } from "../services/MedicosService"
+import { Dm11Viewer, Dm11ViewerRef } from "./Dm11Viewer"
 
 type Inputs = AseguradoInputs & PrestacionesSolicitadasInputs & {
   regionalId: number | null
-  medicoId: number | null
+  medico?: Medico[]
 }
 
 export const SolicitudAtencionExternaForm = ()=>{
   const formMethods = useForm<Inputs>({
     mode: "onBlur",
     defaultValues: {
-      prestacionesSolicitadas: []
+      prestacionesSolicitadas: [],
+      asegurado: {
+        titular: undefined
+      }
     }
   })
   const {
@@ -28,33 +33,44 @@ export const SolicitudAtencionExternaForm = ()=>{
     register,
     formState,
     control,
+    setValue,
     watch
   } = formMethods
+
+  const dm11ViewerRef = useRef<Dm11ViewerRef>(null)
 
   const registrar = useMutation((values: Inputs)=>{
     return SolicitudesAtencionExternaService.registrar(
       values.regionalId as number,
       values.asegurado.id,
-      values.medicoId as number,
-      values.proveedor.id,
+      values.medico![0].id,
+      values.proveedor![0].id,
       values.prestacionesSolicitadas.map(({prestacionId: prestacion_id, nota})=>({
         prestacion_id,
         nota
       }))
     )
+  }, {
+    onSuccess: ({data: {urlDm11}}) => {
+      dm11ViewerRef.current?.setUrl(urlDm11)
+      dm11ViewerRef.current?.show(true)
+    }
   })
 
   // console.log("Solicitud", watch())  
 
   return <FormProvider {...formMethods}>
-    <Form>
+    <Form onSubmit={handleSubmit((values)=>{
+      console.log("onSubmit", values)
+      registrar.mutate(values)
+    })}>
       <h1 style={{fontSize: "1.75rem"}}>Solicitud de atención externa</h1>
       <Accordion className="mt-3"  defaultActiveKey="0">
-      <Card style={{overflow: "visible"}} >
-          <Accordion.Toggle as={Card.Header} className="bg-primary text-light" eventKey="1">
+        <Card style={{overflow: "visible"}} >
+          <Accordion.Toggle as={Card.Header} className="bg-primary text-light" eventKey="0">
             Regional
           </Accordion.Toggle>
-          <Accordion.Collapse eventKey="1">
+          <Accordion.Collapse eventKey="0">
             <Card.Body>
               <Form.Row>
                 <Form.Group as={Col}>
@@ -73,7 +89,9 @@ export const SolicitudAtencionExternaForm = ()=>{
                         isInvalid={!!fieldState.error}
                         onBlur={field.onBlur}
                         onChange={(regional)=>{
-                          console.log("Regional elegida", regional)
+                          setValue("medico", undefined)
+                          setValue("proveedor", undefined)
+                          setValue("prestacionesSolicitadas", [])
                           field.onChange(regional.length ? regional[0].id : null)
                         }}
                       />
@@ -86,32 +104,32 @@ export const SolicitudAtencionExternaForm = ()=>{
         </Card>
         <AseguradoCard />
         <Card style={{overflow: "visible"}} >
-          <Accordion.Toggle as={Card.Header} className="bg-primary text-light" eventKey="1">
+          <Accordion.Toggle as={Card.Header} className="bg-primary text-light" eventKey="2">
             Médico
           </Accordion.Toggle>
-          <Accordion.Collapse eventKey="1">
+          <Accordion.Collapse eventKey="2">
             <Card.Body>
               <Form.Row>
                 <Form.Group as={Col}>
                   <Form.Label>Nombre</Form.Label>
                   <Controller 
                     control={control}
-                    name="medicoId"
+                    name="medico"
                     rules={{
                       required: rules.required()
                     }}
-                    render={({field})=>{
-                      return <MedicosTypeahead
+                    render={({field, fieldState})=>{
+                      return <><MedicosTypeahead
                         id="solicitud-atencion-externa-form/medicos"
                         searchText="Buscando..."
                         promptText="Introduce un texto"
-                        isInvalid={!!formState.errors.medicoId}
+                        filterBy={(medico)=>medico.regionalId == watch("regionalId")}
+                        isInvalid={!!formState.errors.medico}
+                        selected={field.value}
                         onBlur={field.onBlur}
-                        onChange={(medico)=>{
-                          console.log("Medico elegido", medico)
-                          field.onChange(medico.length ? medico[0].id : null)
-                        }}
+                        onChange={field.onChange}
                       />
+                      <Form.Control.Feedback type="invalid">{fieldState.error?.message}</Form.Control.Feedback></>
                     }}
                   />
                 </Form.Group> 
@@ -121,10 +139,10 @@ export const SolicitudAtencionExternaForm = ()=>{
         </Card>
         <PrestacionesSolicitadasCard />
         <Card style={{overflow: "visible"}} >
-          <Accordion.Toggle as={Card.Header} className="bg-primary text-light" eventKey="3">
+          <Accordion.Toggle as={Card.Header} className="bg-primary text-light" eventKey="4">
             Proveedor
           </Accordion.Toggle>
-          <Accordion.Collapse eventKey="3">
+          <Accordion.Collapse eventKey="4">
             <Card.Body>
               <Form.Row>
                 <Form.Group as={Col}>
@@ -138,9 +156,13 @@ export const SolicitudAtencionExternaForm = ()=>{
                     render={({field, fieldState})=>{
                       return <>
                         <ProveedoresTypeahead
-                          id="medico"
+                          id="solicitud-atencion-externa-form/proveedores"
                           searchText="Buscando..."
-                          isInvalid={!!fieldState.error}
+                          promptText="Introduce un texto"
+                          filterBy={(proveedor)=>proveedor.regionalId == watch("regionalId") && watch("prestacionesSolicitadas").every(ps=>proveedor.prestacionesContratadas.some(pc=>pc.prestacionId == ps.prestacionId))}
+                          isInvalid={!!formState.errors.proveedor}
+                          onBlur={field.onBlur}
+                          onChange={field.onChange}
                         />
                         <Form.Control.Feedback type="invalid">{fieldState.error?.message}</Form.Control.Feedback>
                       </>
@@ -152,10 +174,11 @@ export const SolicitudAtencionExternaForm = ()=>{
           </Accordion.Collapse>
         </Card>
       </Accordion>
-      <Button>
+      <Button type="submit">
         {registrar.isLoading ? <Spinner animation="border" size="sm"/> : null}
         Guardar
       </Button>
     </Form>
+    <Dm11Viewer ref={dm11ViewerRef} />
   </FormProvider>
 }

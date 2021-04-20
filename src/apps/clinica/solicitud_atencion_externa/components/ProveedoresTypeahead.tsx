@@ -25,11 +25,11 @@ export const ProveedoresTypeahead = (props: Omit<AsyncTypeaheadProps<Proveedor>,
 
   return <AsyncTypeahead flip {...props}
     isLoading={buscar.isFetching}
-    options={buscar.data?.data.records || []}
+    options={buscar.data?.data || []}
     labelKey={(proveedor: Proveedor)=>{
-      if((proveedor as Medico).especialidad){
-        const medico = (proveedor as Medico)
-        const nombre_completo = (medico.apellidoPaterno ? medico.apellidoPaterno + " " : "") + `${medico.apellidoMaterno} ${medico.nombres}`.trim()
+      if(proveedor.medico){
+        const medico = proveedor.medico
+        const nombre_completo = medico.nombres + (medico.apellidoPaterno ? " " + medico.apellidoPaterno : "") + (medico.apellidoMaterno ? " " + medico.apellidoMaterno : "")
         return nombre_completo
       }
       else {
@@ -47,14 +47,14 @@ export const ProveedoresTypeahead = (props: Omit<AsyncTypeaheadProps<Proveedor>,
     }}
     renderMenuItemChildren={(proveedor) => {
       let title, subtitle;
-      if((proveedor as Medico).especialidad){
-        const medico = (proveedor as Medico)
-        title = (medico.apellidoPaterno ? medico.apellidoPaterno + " " : "") + `${medico.apellidoMaterno} ${medico.nombres}`
+      if(proveedor.medico){
+        const medico = proveedor.medico
+        title = medico.nombres + (medico.apellidoPaterno ? " " + medico.apellidoPaterno : "") + (medico.apellidoMaterno ? " " + medico.apellidoMaterno : "")
         subtitle = medico.especialidad
       }
       else {
-        title = (proveedor as Empresa).nombre
-        subtitle = "empresa"
+        title = proveedor.nombre
+        subtitle = "Empresa"
       }
       return <div>
         <div>{title}</div>

@@ -4,7 +4,7 @@ import { useFormContext, useFieldArray, Controller } from "react-hook-form"
 import { FaPlus, FaMinus } from "react-icons/fa"
 import { PrestacionesTypeahead } from "./PrestacionesTypeahead"
 import * as rules from "../../../../commons/components/rules"
-import { createIndexSignature } from "typescript"
+import { Proveedor } from "../services/ProveedoresService"
 
 export type PrestacionesSolicitadasInputs = {
   prestacionesSolicitadas: {
@@ -12,26 +12,22 @@ export type PrestacionesSolicitadasInputs = {
     prestacionId: number,
     nota: string,
   }[],
-  proveedor: {
-    id: number,
-    nombre: string,
-    prestacionesContratadas: {
-      id: number
-    }[]
-  }
+  proveedor?: Proveedor[]
 }
 
 export const PrestacionesSolicitadasCard = () => {
   const [count, setCount] = useState(1)
   const { register, control, formState, watch } = useFormContext<PrestacionesSolicitadasInputs>()
-  const { fields, append, remove } = useFieldArray<PrestacionesSolicitadasInputs>({
-    name: "prestacionesSolicitadas"
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "prestacionesSolicitadas",
+    keyName: "prestacionId"
   })
   return <Card style={{ overflow: "visible" }} >
-    <Accordion.Toggle as={Card.Header} className="bg-primary text-light" eventKey="2">
+    <Accordion.Toggle as={Card.Header} className="bg-primary text-light" eventKey="3">
       Prestaciones
     </Accordion.Toggle>
-    <Accordion.Collapse eventKey="2">
+    <Accordion.Collapse eventKey="3">
       <Table>
         <thead>
           <tr>
@@ -56,8 +52,11 @@ export const PrestacionesSolicitadasCard = () => {
                     return <PrestacionesTypeahead
                       id={`solicitud-atencion-externa/prestacionesSolicitadas.${index}.prestacionId`}
                       filterBy={(prestacion) => {
-                        const proveedor = watch("proveedor")
-                        return !proveedor || proveedor.prestacionesContratadas.some(pc => pc.id == prestacion.id)
+                        const proveedor = watch("proveedor.0")
+                        const prestacionesSolicitadas = watch("prestacionesSolicitadas")
+                        return !proveedor ||
+                          proveedor.prestacionesContratadas.some(pc => pc.prestacionId == prestacion.id) && 
+                          !prestacionesSolicitadas.some(ps=>ps.prestacionId == prestacion.id)
                       }}
                       onBlur={field.onBlur}
                       onChange={(prestacion) => {

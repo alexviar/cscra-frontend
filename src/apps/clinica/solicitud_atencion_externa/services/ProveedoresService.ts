@@ -7,7 +7,16 @@ export type Empresa = {
   nombre: string
 }
 
-export type Proveedor = Empresa | Medico
+export type Proveedor = {
+  id: number
+  nombre: string
+  medico?: Medico
+  regionalId: number
+  prestacionesContratadas: {
+    prestacionId: number
+    nota: string
+  }[]
+}
 
 export const ProveedorService = {
   buscarPorNombre: (nombre: string) =>{
@@ -15,16 +24,8 @@ export const ProveedorService = {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source()
   
-    const promise = apiClient.get<PaginatedResponse<Proveedor>>("medicos", {
-      params: {
-        filter: {
-          nombre_completo: nombre || undefined,
-        },
-        page: {
-          current: 1,
-          size: 10
-        }
-      },
+    const promise = apiClient.get<Proveedor[]>("proveedores/buscar-nombre", {
+      params: {nombre},
       cancelToken: source.token
     })
     // Cancel the request if React Query calls the `promise.cancel` method

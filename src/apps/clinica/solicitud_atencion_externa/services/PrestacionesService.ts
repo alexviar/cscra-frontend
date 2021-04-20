@@ -11,7 +11,7 @@ export const PrestacionesService = {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source()
   
-    const promise = apiClient.get<Prestacion[]>("/especialidades/buscar-nombre", {
+    const promise = apiClient.get<Prestacion[]>("/prestaciones/buscar-nombre", {
       params: {
         nombre
       }

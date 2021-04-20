@@ -6,7 +6,8 @@ export type Medico = {
   apellidoPaterno: string | null,
   apellidoMaterno: string,
   nombres: string,
-  especialidad: string
+  especialidad: string,
+  regionalId: number
 }
 
 export const MedicosService = {

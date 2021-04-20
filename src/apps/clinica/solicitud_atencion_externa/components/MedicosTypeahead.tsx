@@ -8,7 +8,9 @@ import 'react-bootstrap-typeahead/css/Typeahead.css';
 
 export const MedicosTypeahead = (props: Omit<AsyncTypeaheadProps<Medico>, "isLoading" | "options" | "onSearch">) => {
   const [query, setQuery] = useState("")
-  const buscar = useQuery(["buscarMedico", query], ()=>{
+
+  const queryKey = ["buscarMedico", query];
+  const buscar = useQuery(queryKey, ()=>{
     return MedicosService.buscarPorNombre(query)
   }, {
     enabled: false,
@@ -22,7 +24,9 @@ export const MedicosTypeahead = (props: Omit<AsyncTypeaheadProps<Medico>, "isLoa
   }, [query])
 
   console.log("Medicos", query, buscar.isFetching, buscar.isError, buscar.isIdle, buscar.isStale, buscar.data?.data.records, Date.now())
-  return <AsyncTypeahead flip {...props}
+  return <AsyncTypeahead flip
+    filterBy={()=>true}
+    {...props}
     isLoading={buscar.isFetching}
     options={buscar.data?.data.records || []}
     labelKey={(medico)=>{
@@ -30,12 +34,10 @@ export const MedicosTypeahead = (props: Omit<AsyncTypeaheadProps<Medico>, "isLoa
       return nombre_completo
     }}
     useCache={false}
-    filterBy={()=>true}
     maxResults={10}
     minLength={2}
     onSearch={(newQuery)=>{
-      console.log("Query", newQuery)
-      queryClient.cancelQueries(["buscarMedico", query])
+      queryClient.cancelQueries(queryKey)
       setQuery(newQuery)
     }}
     renderMenuItemChildren={(medico) => {

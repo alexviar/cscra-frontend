@@ -31,7 +31,7 @@ export default ()=>{
   const buscarEmpleador = useQuery(["buscarEmpleadorPorPatronal", numeroPatronal], ()=>{
     return EmpleadorService.buscarPorPatronal(numeroPatronal)
   }, {
-    enabled: false
+    enabled: false,
   })
 
   const agregarEmpleadorEnMora = useMutation((empleadorId: number)=>{
