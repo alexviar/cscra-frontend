@@ -83,9 +83,9 @@ export const SolicitudAtencionExternaIndex = ()=>{
             />
               <Dropdown.Menu>
               {
-              !!solicitud.url_dm11 ?
+                !!solicitud.urlDm11 ?
                 <Dropdown.Item href="#" onClick={() => {
-                  dm11ViewerRef.current?.setUrl(solicitud.url_dm11)
+                  dm11ViewerRef.current?.setUrl(solicitud.urlDm11)
                   dm11ViewerRef.current?.show(true)
                 }}>Ver D.M. - 11</Dropdown.Item> :
                 <Dropdown.Item href="#" onClick={() => {
@@ -105,7 +105,7 @@ export const SolicitudAtencionExternaIndex = ()=>{
       <Row className="ml-auto flex-nowrap" >
         <Col className={"pr-0"} xs="auto" >
           <Button onClick={()=>{
-            // refetch()
+            buscarSolicitudesAtencionExterna.refetch()
           }}><FaSync /></Button>
         </Col>
         <Col className={"pr-0"} xs="auto" >
@@ -169,14 +169,8 @@ export const SolicitudAtencionExternaIndex = ()=>{
       <span className="mr-auto">{`Se encontraron ${total} resultados`}</span>
       <Pagination
         current={page.current}
-        minimum={Math.max(1, page.current - 4)}
-        maximum={Math.min(Math.trunc((total - page.size) / page.size) + 1, page.current + 4)}
-        total={((total - page.size) / page.size) + 1}
-        onClickFirst={() => setPage((page) => ({ ...page, current: 1 }))}
-        onClickPrev={() => setPage((page) => ({ ...page, current: page.current - 1 }))}
-        onClickItem={(current) => setPage((page) => ({ ...page, current: page.current }))}
-        onClickNext={() => setPage(page => ({ ...page, current: page.current + 1 }))}
-        onClickLast={() => setPage(page => ({ ...page, current: ((total - page.size) / page.size) + 1 }))}
+        total={Math.ceil((total - page.size) / page.size) + 1}
+        onChange={(current) => setPage((page) => ({ ...page, current }))}
       />
     </div>
     <Dm11Viewer ref={dm11ViewerRef} />

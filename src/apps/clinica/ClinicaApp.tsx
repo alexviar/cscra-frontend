@@ -8,6 +8,8 @@ import { Settings } from './settings/components/Settings';
 import { SolicitudAtencionExternaIndex } from './solicitud_atencion_externa/components/SolicitudAtencionExternaIndex';
 import { FcDebt } from '../../commons/components/icons/FcDebt';
 import { SolicitudAtencionExternaForm } from './solicitud_atencion_externa/components/SolicitudAtencionExternaForm';
+import { EspecialidadesIndex } from './especialidades/components/EspecialidadesIndex';
+import { PrestacionesIndex, PrestacionForm } from './prestaciones/componentes';
 
 export const ClinicaApp = ()=>{
   const { path, url } = useRouteMatch()
@@ -28,9 +30,23 @@ export const ClinicaApp = ()=>{
       },
       {
         id: "configuracion",
-        path: `${url}/configuracion`,
+        // path: `${url}/configuracion`,
         title: "Configuración",
-        icon: <FaCog />
+        icon: <FaCog />,
+        items: [
+          {
+            id: "configuracion/especialidades",
+            path: `${url}/configuracion/especialidades`,
+            title: "Especialidades",
+            icon: <FaCog />,
+          },
+          {
+            id: "configuracion/prestaciones",
+            path: `${url}/configuracion/prestaciones`,
+            title: "Servicios subrogados",
+            icon: <FaCog />,
+          }
+        ]
       }
     ]
   }}>
@@ -47,10 +63,21 @@ export const ClinicaApp = ()=>{
       <Route exact path={`${url}/atencion-externa/registrar`}>
         <SolicitudAtencionExternaForm />
       </Route>
-      <Route exact path={`${url}/configuracion`} >
-        <Settings />
+      <Route exact path={`${url}/configuracion/especialidades`}>
+        <EspecialidadesIndex />
       </Route>
+      <Route path={`${url}/configuracion/prestaciones`}>
+        <PrestacionesIndex />
+      </Route>
+      {/* <Route exact path={`${url}/configuracion`} >
+        <Settings />
+      </Route> */}
     </Switch>
+    
+    <Route exact path={[`${url}/configuracion/prestaciones/registrar`, `${url}/configuracion/prestaciones/:id/editar`]}>
+        Hola mundo
+        <PrestacionForm />
+      </Route>
   </SidebarLayout>
 }
 

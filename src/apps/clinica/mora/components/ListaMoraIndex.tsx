@@ -153,14 +153,8 @@ export default () => {
       <Col>
         <Pagination
           current={page.current}
-          minimum={Math.max(1, page.current - 4)}
-          maximum={Math.min(Math.trunc((total - page.size) / page.size) + 1, page.current + 4)}
-          total={((total - page.size) / page.size) + 1}
-          onClickFirst={() => setPage((page) => ({ ...page, current: 1 }))}
-          onClickPrev={() => setPage((page) => ({ ...page, current: page.current - 1 }))}
-          onClickItem={(current) => setPage((page) => ({ ...page, current: page.current }))}
-          onClickNext={() => setPage(page => ({ ...page, current: page.current + 1 }))}
-          onClickLast={() => setPage(page => ({ ...page, current: ((total - page.size) / page.size) + 1 }))}
+          total={Math.ceil((total - page.size) / page.size) + 1}
+          onChange={(current) => setPage((page) => ({ ...page, current }))}
         />
       </Col>
     </Row>

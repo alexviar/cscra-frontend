@@ -7,19 +7,40 @@ type MenuItem = {
   title: string,
   path: string,
   icon?: React.ReactNode,
-  items?: MenuItem[]
+  items?: undefined
+} | {
+  id: string,
+  title: string,
+  path?: string,
+  icon?: React.ReactNode,
+  items: {
+    id: string,
+    title: string,
+    path: string,
+    icon?: React.ReactNode,
+  }[]
 }
 
 const SidebarItem = (item: MenuItem)=>{
   return <>
-    <Link to={item.path} 
-      className="list-group-item list-group-item-action border-0 text-nowrap"
-      style={{
-        padding: ".5rem 1rem"
-      }}
-      key={item.id}>
-        {item.icon}<span style={{verticalAlign: 'middle', marginLeft: '0.5rem'}}>{item.title}</span>
-    </Link>
+    {item.path ? 
+      <Link to={item.path} 
+        className="list-group-item list-group-item-action border-0 text-nowrap"
+        style={{
+          padding: ".5rem 1rem"
+        }}
+        key={item.id}>
+          {item.icon}<span style={{verticalAlign: 'middle', marginLeft: '0.5rem'}}>{item.title}</span>
+      </Link> : 
+      <div
+        className="list-group-item border-0 text-nowrap"
+        style={{
+          padding: ".5rem 1rem"
+        }}
+        key={item.id}>
+          {item.icon}<span style={{verticalAlign: 'middle', marginLeft: '0.5rem'}}>{item.title}</span>
+      </div>
+    }
     {item.items && item.items.map(subitem=>{
       return <Link to={subitem.path} 
         style={{
@@ -28,7 +49,7 @@ const SidebarItem = (item: MenuItem)=>{
         }}
         className="list-group-item list-group-item-action border-0 text-nowrap" 
         key={subitem.id}>
-          {subitem.icon}<span style={{verticalAlign: 'middle', marginLeft: '0.5rem'}}>{subitem.title}</span>
+          {subitem.icon || null}<span style={{verticalAlign: 'middle', marginLeft: '0.5rem'}}>{subitem.title}</span>
       </Link>
     })}
   </>

@@ -17,7 +17,7 @@ export type SolicitudAtencionExterna = {
   matricula_asegurado: number,
   doctor: string,
   proveedor: string,
-  url_dm11: string
+  urlDm11: string
 }
 
 export const SolicitudesAtencionExternaService = {
