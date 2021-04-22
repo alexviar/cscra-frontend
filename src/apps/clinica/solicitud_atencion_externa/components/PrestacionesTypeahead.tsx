@@ -10,16 +10,22 @@ import { Prestacion, PrestacionesService } from "../services/PrestacionesService
 
 export const PrestacionesTypeahead = (props: Omit<AsyncTypeaheadProps<Prestacion>, "isLoading" | "options" | "onSearch">) => {
   const [query, setQuery] = useState("")
-  const queryKey = ["buscarPrestaciones", query]
+  const [page, setPage] = useState(1)
+  const queryKey = ["buscarPrestaciones", query, page]
   const buscar = useQuery(queryKey, ()=>{
-    return PrestacionesService.buscarPorNombre(query)
+    return PrestacionesService.buscar({
+      nombre: query||undefined
+    }, {
+      size: 50,
+      current: page
+    })
   }, {
     enabled: false,
   })
   const queryClient = useQueryClient()
   
   useEffect(()=>{
-    if(query && !buscar.data){
+    if(!buscar.data){
       buscar.refetch()
     }
   }, [query])
@@ -28,14 +34,18 @@ export const PrestacionesTypeahead = (props: Omit<AsyncTypeaheadProps<Prestacion
     filterBy={()=>true}
     {...props}
     isLoading={buscar.isFetching}
-    options={buscar.data?.data || []}
+    options={buscar.data?.data?.records || []}
     labelKey="nombre"
     useCache={false}
-    maxResults={10}
-    minLength={2}
+    maxResults={50}
+    minLength={0}
     onSearch={(newQuery)=>{
       queryClient.cancelQueries(queryKey)
       setQuery(newQuery)
+    }}
+    paginate
+    onPaginate={(e, size)=>{
+      setPage((page => page + 1))
     }}
     renderMenuItemChildren={(prestacion) => {
       return prestacion.nombre

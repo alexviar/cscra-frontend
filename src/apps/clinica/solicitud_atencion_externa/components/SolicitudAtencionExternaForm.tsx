@@ -22,7 +22,11 @@ export const SolicitudAtencionExternaForm = ()=>{
   const formMethods = useForm<Inputs>({
     mode: "onBlur",
     defaultValues: {
-      prestacionesSolicitadas: [],
+      prestacionesSolicitadas: [{
+        id: 0,
+        prestacionId: null,
+        nota: ""
+      }],
       asegurado: {
         titular: undefined
       }
@@ -31,6 +35,7 @@ export const SolicitudAtencionExternaForm = ()=>{
   const {
     handleSubmit,
     register,
+    trigger,
     formState,
     control,
     setValue,
@@ -46,7 +51,7 @@ export const SolicitudAtencionExternaForm = ()=>{
       values.medico![0].id,
       values.proveedor![0].id,
       values.prestacionesSolicitadas.map(({prestacionId: prestacion_id, nota})=>({
-        prestacion_id,
+        prestacion_id: prestacion_id as number,
         nota
       }))
     )
@@ -66,11 +71,12 @@ export const SolicitudAtencionExternaForm = ()=>{
     })}>
       <h1 style={{fontSize: "1.75rem"}}>Solicitud de atención externa</h1>
       <Accordion className="mt-3"  defaultActiveKey="0">
+        <AseguradoCard />
         <Card style={{overflow: "visible"}} >
-          <Accordion.Toggle as={Card.Header} className="bg-primary text-light" eventKey="0">
+          <Accordion.Toggle as={Card.Header} className="bg-primary text-light" eventKey="1">
             Regional
           </Accordion.Toggle>
-          <Accordion.Collapse eventKey="0">
+          <Accordion.Collapse eventKey="1">
             <Card.Body>
               <Form.Row>
                 <Form.Group as={Col}>
@@ -91,7 +97,8 @@ export const SolicitudAtencionExternaForm = ()=>{
                         onChange={(regional)=>{
                           setValue("medico", undefined)
                           setValue("proveedor", undefined)
-                          setValue("prestacionesSolicitadas", [])
+                          trigger("medico")
+                          trigger("proveedor")
                           field.onChange(regional.length ? regional[0].id : null)
                         }}
                       />
@@ -102,7 +109,6 @@ export const SolicitudAtencionExternaForm = ()=>{
             </Card.Body>
           </Accordion.Collapse>
         </Card>
-        <AseguradoCard />
         <Card style={{overflow: "visible"}} >
           <Accordion.Toggle as={Card.Header} className="bg-primary text-light" eventKey="2">
             Médico
@@ -124,6 +130,7 @@ export const SolicitudAtencionExternaForm = ()=>{
                         searchText="Buscando..."
                         promptText="Introduce un texto"
                         filterBy={(medico)=>medico.regionalId == watch("regionalId")}
+                        className={fieldState.error ? "is-invalid" : ""}
                         isInvalid={!!formState.errors.medico}
                         selected={field.value}
                         onBlur={field.onBlur}
@@ -138,7 +145,7 @@ export const SolicitudAtencionExternaForm = ()=>{
           </Accordion.Collapse>
         </Card>
         <PrestacionesSolicitadasCard />
-        <Card style={{overflow: "visible"}} >
+        {/* <Card style={{overflow: "visible"}} >
           <Accordion.Toggle as={Card.Header} className="bg-primary text-light" eventKey="4">
             Proveedor
           </Accordion.Toggle>
@@ -159,7 +166,8 @@ export const SolicitudAtencionExternaForm = ()=>{
                           id="solicitud-atencion-externa-form/proveedores"
                           searchText="Buscando..."
                           promptText="Introduce un texto"
-                          filterBy={(proveedor)=>proveedor.regionalId == watch("regionalId") && watch("prestacionesSolicitadas").every(ps=>proveedor.prestacionesContratadas.some(pc=>pc.prestacionId == ps.prestacionId))}
+                          filterBy={(proveedor)=>(!watch("regionalId") || proveedor.regionalId == watch("regionalId")) && watch("prestacionesSolicitadas").every(ps=>proveedor.contrato.prestaciones.some(pc=>pc.id == ps.prestacionId))}
+                          className={fieldState.error ? "is-invalid" : ""}
                           isInvalid={!!formState.errors.proveedor}
                           onBlur={field.onBlur}
                           onChange={field.onChange}
@@ -173,8 +181,9 @@ export const SolicitudAtencionExternaForm = ()=>{
             </Card.Body>
           </Accordion.Collapse>
         </Card>
+       */}
       </Accordion>
-      <Button type="submit">
+      <Button className="mt-3" type="submit">
         {registrar.isLoading ? <Spinner animation="border" size="sm"/> : null}
         Guardar
       </Button>

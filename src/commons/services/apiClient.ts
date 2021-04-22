@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosTransformer } from 'axios'
 import {apiEndpoint} from '../../configs/app.json'
 import Qs from 'qs'
 import { keysToCamel } from '../utils'
@@ -10,17 +10,14 @@ export const apiClient = axios.create({
   //   console.log("TransformRequest", data)
   //   return data
   // }],
-  transformResponse: [(data)=>{
-    try{
-      const result = keysToCamel(JSON.parse(data))
+  transformResponse: [
+    ...axios.defaults.transformResponse as AxiosTransformer[],
+    (data)=>{
+      const result = keysToCamel(data)
       console.log("TransformedResponse", result)
       return result
     }
-    catch(e){
-      console.error("OnTransformResponse", data, e)
-    }
-    return data
-  }]
+  ]
 })
 
 apiClient.defaults.withCredentials = true

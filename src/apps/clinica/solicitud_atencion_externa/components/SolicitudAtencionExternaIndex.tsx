@@ -73,8 +73,8 @@ export const SolicitudAtencionExternaIndex = ()=>{
         <td>{index + 1}</td>
         <td>{solicitud.numero}</td>
         <td>{solicitud.fecha}</td>
-        <td>{solicitud.matricula_asegurado}</td>
-        <td>{solicitud.doctor}</td>
+        <td>{solicitud.asegurado.matricula}</td>
+        <td>{solicitud.medico}</td>
         <td>{solicitud.proveedor}</td>
         <td>
           <Dropdown>

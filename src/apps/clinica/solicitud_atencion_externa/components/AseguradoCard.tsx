@@ -37,18 +37,22 @@ export const AseguradoCard = ()=>{
     onSuccess: ({data: {records}}) =>{
       if(records.length == 1){
         const asegurado = records[0]
-        setValue("asegurado", asegurado)
-        trigger("asegurado.fechaExtinsion")
-        trigger("asegurado.fechaBaja")
-        trigger("asegurado.titular.fechaBaja")
-        trigger("asegurado.empleador.fechaBaja")
-        trigger("asegurado.empleador.aportes")
+        onChange(asegurado)
       }
       else {
         aseguradoChooserRef.current?.show(true)
       }
     }
   })
+
+  const onChange = (asegurado: Asegurado) => {
+    setValue("asegurado", asegurado)
+    trigger("asegurado.fechaExtinsion")
+    trigger("asegurado.fechaBaja")
+    trigger("asegurado.titular.fechaBaja")
+    trigger("asegurado.empleador.fechaBaja")
+    trigger("asegurado.empleador.aportes")
+  }
 
   useEffect(()=>{
     if(watch("asegurado.id") && formState.dirtyFields.asegurado?.matricula){
@@ -67,10 +71,10 @@ export const AseguradoCard = ()=>{
   }, [matricula])
 
   return <Card >
-    <Accordion.Toggle as={Card.Header} className="bg-primary text-light" eventKey="1">
+    <Accordion.Toggle as={Card.Header} className="bg-primary text-light" eventKey="0">
       Asegurado
     </Accordion.Toggle>
-    <Accordion.Collapse eventKey="1">
+    <Accordion.Collapse eventKey="0">
       <Card.Body>
         <Form.Row>
           <Col lg={3} md={6}>
@@ -88,11 +92,9 @@ export const AseguradoCard = ()=>{
                 <Button variant="outline-secondary" onClick={()=>{
                   trigger("asegurado.matricula")
                   if(!formState.errors.asegurado?.matricula){
-                    reset({
-                      asegurado: {
-                        matricula: watch("asegurado.matricula")
-                      }
-                    })
+                    // setValue("asegurado.matricula", watch("asegurado.matricula"))
+                    if(formState.dirtyFields.asegurado?.matricula)
+                      delete formState.dirtyFields.asegurado.matricula
                     buscar.refetch()
                   }
                 }}>
@@ -334,12 +336,7 @@ export const AseguradoCard = ()=>{
           asegurados={buscar.data?.data.records || []}
           onSelect={(asegurado: Asegurado)=>{
             // asegurado.matricula = watch("asegurado.matricula")
-            setValue("asegurado", asegurado)
-            trigger("asegurado.fechaExtinsion")
-            trigger("asegurado.fechaBaja")
-            trigger("asegurado.titular.fechaBaja")
-            trigger("asegurado.empleador.fechaBaja")
-            trigger("asegurado.empleador.aportes")
+            onChange(asegurado)
             aseguradoChooserRef.current!.show(false)
           }}
         />

@@ -14,8 +14,10 @@ export type SolicitudAtencionExterna = {
   id: number,
   numero: number,
   fecha: string,
-  matricula_asegurado: number,
-  doctor: string,
+  asegurado: {
+    matricula: string
+  },
+  medico: string,
   proveedor: string,
   urlDm11: string
 }

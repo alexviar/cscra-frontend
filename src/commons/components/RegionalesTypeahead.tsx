@@ -22,7 +22,7 @@ export const RegionalesTypeahead = (props: Omit<AsyncTypeaheadProps<Regional>, "
     }
   })
 
-  return <AsyncTypeahead flip
+  return <AsyncTypeahead
     {...props}
     // filterBy={()=>true}
     isLoading={buscar.isFetching}

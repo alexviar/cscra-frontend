@@ -15,7 +15,7 @@ export const SidebarLayout = ({sidebar, children}: Props)=>{
   
   return <div className={"position-relative d-flex flex-grow-1 bg-light" + (showSidebar ? "" : " toggled")}  id="wrapper">
     <Sidebar className="bg-white shadow-sm" {...sidebar}/>
-    <Container className="d-flex flex-column flex-grow-1" style={{overflow: "auto"}}>
+    <Container className="d-flex flex-column flex-grow-1">
       {/* <Switch>
         <Route exact path={path}>
             <Redirect to={`${path}/organizacion`} />

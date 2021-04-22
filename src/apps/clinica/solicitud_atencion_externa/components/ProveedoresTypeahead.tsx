@@ -8,24 +8,30 @@ import 'react-bootstrap-typeahead/css/Typeahead.css';
 
 
 export const ProveedoresTypeahead = (props: Omit<AsyncTypeaheadProps<Proveedor>, "isLoading" | "options" | "onSearch">) => {
-  const [query, setQuery] = useState("")
-  const queryKey = ["buscarProveedor", query]
-  const buscar = useQuery(queryKey, ()=>{
-    return ProveedorService.buscarPorNombre(query)
-  }, {
-    enabled: false,
-  })
-  const queryClient = useQueryClient()
-  
-  useEffect(()=>{
-    if(query && !buscar.data){
-      buscar.refetch()
-    }
-  }, [query])
+  // const [query, setQuery] = useState("")
+  // const [options, setOptions] = useState<Proveedor[]>([])
 
-  return <AsyncTypeahead flip {...props}
+  
+  const queryKey = "buscarProveedor"
+  const buscar = useQuery(queryKey, ()=>{
+    // return ProveedorService.buscarPorNombre(query)
+    return ProveedorService.buscar()
+  }, {
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    // enabled: false,
+    // onSuccess: ({data})=>{
+    //   setOptions(data)
+    // }
+  })
+
+  return <AsyncTypeahead flip 
+    // filterBy={()=>true}
+    {...props}
     isLoading={buscar.isFetching}
     options={buscar.data?.data || []}
+    // options={options}
     labelKey={(proveedor: Proveedor)=>{
       if(proveedor.medico){
         const medico = proveedor.medico
@@ -37,14 +43,9 @@ export const ProveedoresTypeahead = (props: Omit<AsyncTypeaheadProps<Proveedor>,
       }
     }}
     useCache={false}
-    filterBy={()=>true}
-    maxResults={10}
-    minLength={2}
-    onSearch={(newQuery)=>{
-      console.log("Query", newQuery)
-      queryClient.cancelQueries(queryKey)
-      setQuery(newQuery)
-    }}
+    maxResults={50}
+    minLength={0}
+    onSearch={(newQuery)=>{}}
     renderMenuItemChildren={(proveedor) => {
       let title, subtitle;
       if(proveedor.medico){

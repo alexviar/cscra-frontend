@@ -1,4 +1,4 @@
-import { apiClient, PaginatedResponse } from "../../../../commons/services"
+import { apiClient, Page, PaginatedResponse } from "../../../../commons/services"
 import axios from 'axios'
 import { Medico } from "./MedicosService"
 
@@ -12,13 +12,27 @@ export type Proveedor = {
   nombre: string
   medico?: Medico
   regionalId: number
-  prestacionesContratadas: {
-    prestacionId: number
-    nota: string
-  }[]
+  contrato: {
+    prestaciones: {
+      id: number
+      nombre: string
+    }[]
+  }
+}
+
+export type Filter = {
+  regionalId: number
 }
 
 export const ProveedorService = {
+  buscar: (filter?: Filter, page?: Page) => {
+    return apiClient.get<Proveedor[]>("proveedores", {
+      params: {
+        filter,
+        page
+      }
+    })
+  },
   buscarPorNombre: (nombre: string) =>{
     // Create a new CancelToken source for this request
     const CancelToken = axios.CancelToken;

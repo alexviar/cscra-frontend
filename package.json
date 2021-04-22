@@ -35,7 +35,7 @@
     "build": "react-scripts build",
     "typecheck": "tsc",
     "typecheck:watch": "tsc -w",
-    "postbuild": "copyfiles -a build/* ../backend/public && copyfiles -a build\\static/* ../backend/public",
+    "postbuild": "rmdir /s /q ..\\backend\\public\\build 2>null & rmdir /s /q ..\\backend\\public\\static 2>null & xcopy /s /i /y build ..\\backend\\public\\build & move /Y ..\\backend\\public\\build\\static ..\\backend\\public",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
