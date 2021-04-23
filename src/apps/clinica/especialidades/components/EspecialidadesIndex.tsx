@@ -21,7 +21,7 @@ export const EspecialidadesIndex = ()=>{
   const importModalRef = useRef<{show(visible: boolean): void}>()
 
   const buscarEspecialidades = useQuery(["buscarEspecialidades", page, filter], ()=>{
-    return EspecialidadesService.buscar(page, filter)
+    return EspecialidadesService.buscar(filter, page)
   }, {
     keepPreviousData: true,
     refetchOnReconnect: false,

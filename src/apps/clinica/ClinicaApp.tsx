@@ -1,6 +1,6 @@
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
 import SidebarLayout from '../../commons/components/layouts/SidebarLayout';
-import { FaCog, FaCoins } from 'react-icons/fa';
+import { FaCog, FaCoins, FaHandshake, FaUserMd } from 'react-icons/fa';
 import { BiTransfer } from 'react-icons/bi';
 import ListaMoraIndex from './mora/components/ListaMoraIndex';
 import ListaMoraItemForm from './mora/components/ListaMoraItemForm';
@@ -10,6 +10,8 @@ import { FcDebt } from '../../commons/components/icons/FcDebt';
 import { SolicitudAtencionExternaForm } from './solicitud_atencion_externa/components/SolicitudAtencionExternaForm';
 import { EspecialidadesIndex } from './especialidades/components/EspecialidadesIndex';
 import { PrestacionesIndex, PrestacionForm } from './prestaciones/componentes';
+import MedicosIndex from './medicos/components/MedicosIndex';
+import MedicosForm from './medicos/components/MedicosForm';
 
 export const ClinicaApp = ()=>{
   const { path, url } = useRouteMatch()
@@ -27,6 +29,18 @@ export const ClinicaApp = ()=>{
         path: `${url}/atencion-externa`,
         title: "Atención exterana",
         icon: <BiTransfer />
+      },
+      {
+        id: "configuracion/medicos",
+        path: `${url}/medicos`,
+        title: "Medicos",
+        icon: <FaUserMd />,
+      },
+      {
+        id: "configuracion/proveedores",
+        path: `${url}/proveedores`,
+        title: "Proveedores",
+        icon: <FaHandshake />,
       },
       {
         id: "configuracion",
@@ -63,6 +77,12 @@ export const ClinicaApp = ()=>{
       <Route exact path={`${url}/atencion-externa/registrar`}>
         <SolicitudAtencionExternaForm />
       </Route>
+      <Route exact path={`${url}/medicos`}>
+        <MedicosIndex />
+      </Route>
+      <Route exact path={[`${url}/medicos/registrar`, `${url}/medicos/:id/editar`]}>
+        <MedicosForm />
+      </Route>
       <Route exact path={`${url}/configuracion/especialidades`}>
         <EspecialidadesIndex />
       </Route>
@@ -75,7 +95,6 @@ export const ClinicaApp = ()=>{
     </Switch>
     
     <Route exact path={[`${url}/configuracion/prestaciones/registrar`, `${url}/configuracion/prestaciones/:id/editar`]}>
-        Hola mundo
         <PrestacionForm />
       </Route>
   </SidebarLayout>

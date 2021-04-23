@@ -46,6 +46,10 @@
   /* white-space: nowrap */
 }
 
+/* .rbt-menu {
+  width: initial !important;
+} */
+
 #root {
   display: flex;
   flex-direction: column;

@@ -1,18 +1,26 @@
+import axios, { AxiosPromise } from "axios"
+import { PaginatedResponse } from "../../../../commons/services"
 import apiClient from "../../../../commons/services/apiClient"
 import { Page } from "../../../../commons/services/Page"
 
-type Especialidad = {
+export type Especialidad = {
   id: number,
   nombre: string,
 }
-export const EspecialidadesService = {
-  buscar: (page: Page, filter: string) => {
-    return apiClient.get<{
-      meta: {
-        total: number
-      },
-      records: Especialidad[]
-    }>("/especialidades", {
+
+interface EspecialidadesService {
+  buscar(filter: string): AxiosPromise<Especialidad[]>
+  buscar(filter: string, page: Page): AxiosPromise<PaginatedResponse<Especialidad>>
+  // buscar(filter: string, page?: Page): AxiosPromise<PaginatedResponse<Especialidad>|Especialidad[]>
+  importar(archivo: File, separador: string, formato: string): AxiosPromise
+}
+
+export const EspecialidadesService: EspecialidadesService = {
+  buscar: (filter: string, page?: Page) => {
+    const CancelToken = axios.CancelToken;
+    const source = CancelToken.source()
+  
+    const promise = apiClient.get("/especialidades", {
       params: {
         filter: {
           nombre: filter || undefined
@@ -20,6 +28,11 @@ export const EspecialidadesService = {
         page
       }
     })
+    //@ts-ignore
+    promise.cancel = () => {
+      source.cancel('Query was cancelled by React Query')
+    }
+    return promise
   },
   importar: (archivo: File, separador: string, formato: string) =>{
     const formData = new FormData()
