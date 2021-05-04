@@ -83,6 +83,10 @@ export const PrestacionesSolicitadasCard = () => {
               </td>
               <td>
                 <ProveedoresTypeahead
+                  id={`solicitud-atencion-externa/proveedor`}
+                  filter={{
+                    activos: 1,
+                  }}
                   filterBy={(proveedor)=>(!watch("regionalId") || proveedor.regionalId == watch("regionalId")) && watch("prestacionesSolicitadas").every(ps=>proveedor.contrato.prestaciones.some(pc=>pc.id == ps.prestacionId))}
                   onChange={proveedoresTypeaheadController.field.onChange}
                   onBlur={proveedoresTypeaheadController.field.onBlur}

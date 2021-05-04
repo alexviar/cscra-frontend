@@ -1,10 +1,9 @@
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
 import SidebarLayout from '../../commons/components/layouts/SidebarLayout';
-import { FaCog, FaCoins, FaHandshake, FaUserMd } from 'react-icons/fa';
+import { FaCog, /*FaCoins,*/ FaHandshake, FaUserMd } from 'react-icons/fa';
 import { BiTransfer } from 'react-icons/bi';
 import ListaMoraIndex from './mora/components/ListaMoraIndex';
 import ListaMoraItemForm from './mora/components/ListaMoraItemForm';
-import { Settings } from './settings/components/Settings';
 import { SolicitudAtencionExternaIndex } from './solicitud_atencion_externa/components/SolicitudAtencionExternaIndex';
 import { FcDebt } from '../../commons/components/icons/FcDebt';
 import { SolicitudAtencionExternaForm } from './solicitud_atencion_externa/components/SolicitudAtencionExternaForm';
@@ -12,6 +11,7 @@ import { EspecialidadesIndex } from './especialidades/components/EspecialidadesI
 import { PrestacionesIndex, PrestacionForm } from './prestaciones/componentes';
 import MedicosIndex from './medicos/components/MedicosIndex';
 import MedicosForm from './medicos/components/MedicosForm';
+import { ProveedoresIndex, ProveedorForm, ContactoForm, ContratoForm } from './proveedores/components';
 
 export const ClinicaApp = ()=>{
   const { path, url } = useRouteMatch()
@@ -82,6 +82,18 @@ export const ClinicaApp = ()=>{
       </Route>
       <Route exact path={[`${url}/medicos/registrar`, `${url}/medicos/:id/editar`]}>
         <MedicosForm />
+      </Route>
+      <Route exact path={`${url}/proveedores`}>
+        <ProveedoresIndex />
+      </Route>
+      <Route exact path={`${url}/proveedores/registrar`}>
+        <ProveedorForm />
+      </Route>
+      <Route exact path={`${url}/proveedores/:id/contacto`}>
+        <ContactoForm />
+      </Route>
+      <Route exact path={`${url}/proveedores/:idProveedor/contratos/registrar`}>
+        <ContratoForm />
       </Route>
       <Route exact path={`${url}/configuracion/especialidades`}>
         <EspecialidadesIndex />

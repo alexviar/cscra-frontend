@@ -6,10 +6,9 @@ import { keysToCamel } from '../utils'
 export const apiClient = axios.create({
   "baseURL": apiEndpoint,
   "timeout": 30000,
-  // transformRequest: [(data, headers)=>{
-  //   console.log("TransformRequest", data)
-  //   return data
-  // }],
+  "headers": {
+    "Accept": "application/json"
+  },
   transformResponse: [
     ...axios.defaults.transformResponse as AxiosTransformer[],
     (data)=>{

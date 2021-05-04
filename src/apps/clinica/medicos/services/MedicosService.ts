@@ -9,6 +9,7 @@ export type Medico = {
   apellidoPaterno: string,
   apellidoMaterno: string,
   nombres: string,
+  sexo: string,
   especialidadId: number
   especialidad: string
   regionalId: number
@@ -19,6 +20,7 @@ export type Filter = {
   nombre?: string,
   especialidadId?: number
   regionalId?: number
+  incluirProveedores?: boolean
 }
 
 export const MedicosService = {

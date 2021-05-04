@@ -19,8 +19,14 @@ type Props = {
   onChange(page: number): void
 }
 export default ({current, total, onChange}: Props)=>{
-  const minimum=Math.max(1, current - 4)
-  const maximum=Math.min(total, current + 4)
+  current = Math.min(current, total+1);
+  let ld = current - 1
+  let rd = total - current//Math.min(current, total)
+  ld= Math.min(2+2-Math.min(2,rd), ld)
+  rd = Math.min(2+2-Math.min(2,ld), rd)
+  const minimum = current - ld
+  const maximum=current + rd
+  console.log("pag.", current, total, minimum,maximum)
   const pageItems = []
   if(maximum > 1 ) for(let i = minimum; i <= maximum; i++){
     if(current == i)

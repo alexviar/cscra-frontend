@@ -1,4 +1,4 @@
-import React, { ComponentProps, useRef } from "react"
+import React, { ComponentProps, useRef, useEffect } from "react"
 import { Accordion, Button, Card,Col,Form, FormControl, InputGroup, Spinner, Table } from "react-bootstrap"
 import { useForm, Controller, FormProvider } from "react-hook-form"
 import { FaPlus, FaSearch } from "react-icons/fa"
@@ -28,7 +28,12 @@ export const SolicitudAtencionExternaForm = ()=>{
         nota: ""
       }],
       asegurado: {
-        titular: undefined
+        apellidoPaterno: "",
+        apellidoMaterno: "",
+        nombres: "",
+        estado: "",
+        fechaExtinsion: "",
+        fechaValidezSeguro: ""
       }
     }
   })
@@ -41,6 +46,8 @@ export const SolicitudAtencionExternaForm = ()=>{
     setValue,
     watch
   } = formMethods
+
+  console.log("Errors", formState.errors)
 
   const dm11ViewerRef = useRef<Dm11ViewerRef>(null)
 
@@ -61,6 +68,10 @@ export const SolicitudAtencionExternaForm = ()=>{
       dm11ViewerRef.current?.show(true)
     }
   })
+
+  useEffect(()=>{
+    setValue("asegurado.estado", "-2")
+  }, [])
 
   // console.log("Solicitud", watch())  
 

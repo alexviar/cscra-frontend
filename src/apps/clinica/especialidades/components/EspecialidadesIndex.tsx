@@ -23,7 +23,6 @@ export const EspecialidadesIndex = ()=>{
   const buscarEspecialidades = useQuery(["buscarEspecialidades", page, filter], ()=>{
     return EspecialidadesService.buscar(filter, page)
   }, {
-    keepPreviousData: true,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
     onSuccess: ({data: {meta}}) => {
@@ -105,7 +104,7 @@ export const EspecialidadesIndex = ()=>{
             <Form.Control className="mx-2" as="select" value={page.size} onChange={(e) => {
               const value = e.target.value
               setPage((page) => ({
-                ...page,
+                current: 1,
                 size: parseInt(value)
               }))
             }}>
@@ -131,13 +130,17 @@ export const EspecialidadesIndex = ()=>{
         {renderRows()}
       </tbody>
     </Table>
-    <div className="d-flex flex-row">
-      <span className="mr-auto">{`Se encontraron ${total} resultados`}</span>
-      <Pagination
-        current={page.current}
-        total={Math.ceil((total - page.size) / page.size) + 1}
-        onChange={(current) => setPage((page) => ({ ...page, current }))}
-      />
+    <div className="row">
+      <Col>
+        <span className="mr-auto">{`Se encontraron ${total} resultados`}</span>
+      </Col>
+      <Col>
+        <Pagination
+          current={page.current}
+          total={Math.ceil((total - page.size) / page.size) + 1}
+          onChange={(current) => setPage((page) => ({ ...page, current }))}
+        />
+      </Col>
     </div>
     <ImportarForm modalRef={importModalRef} />
   </div>

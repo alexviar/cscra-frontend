@@ -2,20 +2,20 @@
 import { forwardRef, useEffect, useRef, useState } from "react"
 import { AsyncTypeahead, AsyncTypeaheadProps } from 'react-bootstrap-typeahead'
 import { useQuery, useQueryClient } from 'react-query'
-import { Proveedor, Empresa, ProveedorService } from "../services/ProveedoresService"
+import { Filter, Proveedor, Empresa, ProveedorService } from "../services/ProveedoresService"
 import { Medico } from "../services/MedicosService";
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 
 
-export const ProveedoresTypeahead = (props: Omit<AsyncTypeaheadProps<Proveedor>, "isLoading" | "options" | "onSearch">) => {
+export const ProveedoresTypeahead = (props: {filter:Filter} & Omit<AsyncTypeaheadProps<Proveedor>, "isLoading" | "options" | "onSearch">) => {
   // const [query, setQuery] = useState("")
   // const [options, setOptions] = useState<Proveedor[]>([])
 
   
-  const queryKey = "buscarProveedor"
+  const queryKey = ["buscarProveedor", props.filter]
   const buscar = useQuery(queryKey, ()=>{
     // return ProveedorService.buscarPorNombre(query)
-    return ProveedorService.buscar()
+    return ProveedorService.buscar(props.filter)
   }, {
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,

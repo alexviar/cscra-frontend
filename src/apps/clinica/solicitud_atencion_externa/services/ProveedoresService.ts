@@ -21,7 +21,8 @@ export type Proveedor = {
 }
 
 export type Filter = {
-  regionalId: number
+  regionalId?: number,
+  activos?: number
 }
 
 export const ProveedorService = {
