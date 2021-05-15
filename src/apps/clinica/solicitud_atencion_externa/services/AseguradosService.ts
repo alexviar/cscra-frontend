@@ -27,14 +27,17 @@ import { apiClient, Page, PaginatedResponse } from "../../../../commons/services
 export type Asegurado = {
   id: string,
   matricula: string,
+  matriculaComplemento: string,
   apellidoPaterno: string | null,
   apellidoMaterno: string,
   nombres: string,
   tipo_id: number,
-  estado: string,
-  fechaBaja?: string,
-  fechaExtinsion?: string,
-  empleadorId: string
+  estado: number,
+  baja: {
+    regDate: string,
+    fechaValidezSeguro: string
+  },
+  fechaExtinsion?: string
   titularId: string
   empleador: {
     id: number,
@@ -48,10 +51,13 @@ export type Asegurado = {
     id: string,
     matricula: string,
     apellidoPaterno: string | null,
-    apellidoMaterno: string,
+    apellidoMaterno: string | null,
     nombres: string,
     estado: string,
-    fechaBaja?: string,
+    baja: {
+      regDate: string,
+      fechaValidezSeguro: string
+    },
   }
 }
 

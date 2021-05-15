@@ -27,7 +27,13 @@ apiClient.interceptors.request.use(config => {
     // Qs is not included in the Axios package
     return Qs.stringify(params, {
       arrayFormat: "brackets",
-      encode: false
+      encode: false,
+      filter: (prefix, value)=>{
+        if(typeof value === "boolean"){
+          return value ? 1 : 0
+        }
+        return value
+      }
     });
   };
   console.log("Axios config", config)

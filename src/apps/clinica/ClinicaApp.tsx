@@ -1,3 +1,4 @@
+import { useMemo } from "react"
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
 import SidebarLayout from '../../commons/components/layouts/SidebarLayout';
 import { FaCog, /*FaCoins,*/ FaHandshake, FaUserMd } from 'react-icons/fa';
@@ -12,32 +13,45 @@ import { PrestacionesIndex, PrestacionForm } from './prestaciones/componentes';
 import MedicosIndex from './medicos/components/MedicosIndex';
 import MedicosForm from './medicos/components/MedicosForm';
 import { ProveedoresIndex, ProveedorForm, ContactoForm, ContratoForm } from './proveedores/components';
+import { ProtectedRoute } from '../../commons/auth/components';
+import { Permisos } from '../../commons/auth/constants';
+import { useLoggedUser } from '../../commons/auth/hooks';
+import { SolicitudATPolicy } from './solicitud_atencion_externa/policies';
 
 export const ClinicaApp = ()=>{
-  const { path, url } = useRouteMatch()
+  const { url } = useRouteMatch()
+  const loggedUser = useLoggedUser()
 
-  return <SidebarLayout sidebar={{
-    items: [
+  const sidebarItems = useMemo(()=>{
+    const items = [] as any[]
+
+    items.push(
       {
         id: "lista-mora",
         path: `${url}/lista-mora`,
         title: "Lista de mora",
         icon: <FcDebt  />
-      },
-      {
+      }
+    )
+
+    if(SolicitudATPolicy.index(loggedUser)) {
+      items.push({
         id: "atencion-externa",
         path: `${url}/atencion-externa`,
-        title: "Atención exterana",
+        title: "Atención externa",
         icon: <BiTransfer />
-      },
+      })
+    }
+
+    items.push(
       {
-        id: "configuracion/medicos",
+        id: "medicos",
         path: `${url}/medicos`,
         title: "Medicos",
         icon: <FaUserMd />,
       },
       {
-        id: "configuracion/proveedores",
+        id: "proveedores",
         path: `${url}/proveedores`,
         title: "Proveedores",
         icon: <FaHandshake />,
@@ -62,7 +76,12 @@ export const ClinicaApp = ()=>{
           }
         ]
       }
-    ]
+    )
+    return items
+  }, [loggedUser])
+
+  return <SidebarLayout sidebar={{
+    items: sidebarItems
   }}>
     <Switch>
       <Route exact path={`${url}/lista-mora/agregar`}>
@@ -71,9 +90,10 @@ export const ClinicaApp = ()=>{
       <Route path={`${url}/lista-mora`}>
         <ListaMoraIndex />
       </Route>
-      <Route exact path={`${url}/atencion-externa`}>
+      <ProtectedRoute exact path={`${url}/atencion-externa`}
+        authorize={SolicitudATPolicy.index}>
         <SolicitudAtencionExternaIndex />
-      </Route>
+      </ProtectedRoute>
       <Route exact path={`${url}/atencion-externa/registrar`}>
         <SolicitudAtencionExternaForm />
       </Route>

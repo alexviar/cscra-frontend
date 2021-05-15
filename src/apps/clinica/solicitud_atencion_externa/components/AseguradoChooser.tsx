@@ -1,9 +1,9 @@
 import React, { forwardRef, useImperativeHandle, useRef, useCallback } from "react"
 import { Button, Modal, ModalProps, Table } from "react-bootstrap"
-import { PDFViewer } from "../../../../commons/components"
 import { ImperativeModal, ImperativeModalRef } from "../../../../commons/components/ImperativeModal"
 import { nombreCompleto } from "../../../../commons/utils/nombreCompleto"
-import { Asegurado } from "../services/AseguradosService"
+import { Asegurado } from "../services"
+import { EstadosAfi } from "../utils"
 
 type Props = Omit<ModalProps, "children"> & {
   asegurados: Asegurado[]
@@ -33,9 +33,9 @@ export const AseguradoChooser = forwardRef<ImperativeModalRef, Props>((props, re
           {!!props.asegurados.length ? props.asegurados.map((asegurado, index)=>{
             return <tr key={asegurado.id}>
               <th scope="row">{index+1}</th>
-              <td>{asegurado.matricula}</td>
+              <td>{asegurado.matricula}-{asegurado.matriculaComplemento}</td>
               <td>{nombreCompleto(asegurado.apellidoPaterno, asegurado.apellidoMaterno, asegurado.nombres)}</td>
-              <td>{asegurado.estado ? "Alta" : "Baja"}</td>
+              <td className={EstadosAfi[asegurado.estado] ? "" : "bg-ligth"}>{EstadosAfi[asegurado.estado] || "Desconocido"}</td>
               <td><Button onClick={()=>{
                 console.log(asegurado)
                 props.onSelect(asegurado)

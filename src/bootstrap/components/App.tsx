@@ -1,32 +1,40 @@
-import React, { useEffect } from 'react';
-import { Button, Col, Navbar, Nav, Modal, NavDropdown, Popover, OverlayTrigger, Row } from 'react-bootstrap'
+import React, { useEffect, Suspense } from 'react';
+import { Button, Col, Navbar, Nav, NavDropdown, Popover, OverlayTrigger, Row } from 'react-bootstrap'
 import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link
+  Link,
 } from "react-router-dom"
 import { MdApps } from 'react-icons/md'
-import { FaBell, FaUserCircle, FaBars, FaClinicMedical, FaUserPlus } from 'react-icons/fa'
-import * as Apps from "../../apps";
-import IamApp from "./IamApp";
-import {Login, ProtectedRoute} from "../../features/auth/components"
-import { getUser } from "../../features/auth/selectors/inputSelectors"
+import { FaBell, FaUserCircle, FaBars, FaClinicMedical } from 'react-icons/fa'
 import { useDispatch, useSelector } from 'react-redux'
+import { useQueryClient } from 'react-query'
+// import * as Apps from "../../apps";
+import { QueryProgressModal } from "../../commons/components"
+import { useModal } from "../../commons/reusable-modal"
+import {Login, ProtectedRoute} from "../../commons/auth/components"
+import { getUser } from "../../commons/auth/selectors/inputSelectors"
+import { AuthService } from '../../commons/auth/services';
+import { apiClient } from '../../commons/services';
+import { unauthorized } from '../../commons/auth/actions';
+import { ToggleSidebar } from './ToggleSidebar'
+import { setLocale } from 'yup';
+import { yup as yupMessages } from '../../configs/messages.json'
 import '../../App.css';
-import apiClient from '../../commons/services/apiClient';
-import { unauthorized } from '../../features/auth/actions';
+
+setLocale(yupMessages)
+
+const IamApp = React.lazy(()=>import("../../apps/iam/IamApp"))
+const ClinicaApp = React.lazy(()=>import("../../apps/clinica/ClinicaApp"))
 
 export default ()=>{
   const dispatch = useDispatch()
   const user = useSelector(getUser)
 
+  const modal = useModal("queryProgress")
 
-  const toggleSidebar = () => {
-    dispatch({
-      type:"TOGGLE_SIDEBAR"
-    })
-  }
+  const queryClient = useQueryClient()
 
   useEffect(()=>{
     apiClient.interceptors.response.use(
@@ -49,8 +57,8 @@ export default ()=>{
 
   return <Router>
     <Navbar className="shadow-sm border-bottom" bg="white" variant="light" style={{zIndex: 1}}>
-      {user ? <Navbar.Toggle style={{display: "initial"}} onClick={toggleSidebar} ><FaBars /></Navbar.Toggle> : null}
-      <Navbar.Brand href="#home" className="ml-4">Hipócrates</Navbar.Brand>
+      <ToggleSidebar />
+      <Navbar.Brand href="#home" className="ml-4">Galeno - DM11</Navbar.Brand>
       <Nav className="ml-auto">
         <OverlayTrigger
           trigger="click"
@@ -70,7 +78,7 @@ export default ()=>{
         >
           <Nav.Link><MdApps size="1.5em" /></Nav.Link>
         </OverlayTrigger>
-        {user ? <OverlayTrigger
+        {/* {user ? <OverlayTrigger
           trigger="click"
           rootClose
           placement="bottom"
@@ -85,7 +93,6 @@ export default ()=>{
         >
           <Nav.Link style={{whiteSpace: "nowrap"}}>
             <FaBell />
-            {/* <Badge className="pulse" pill variant="danger">9</Badge> */}
             <div className="pulse bg-danger" style={{
               left: "0.65rem",
               top: "-1.35rem",
@@ -94,30 +101,42 @@ export default ()=>{
               borderRadius: "50%"
             }}></div>
           </Nav.Link>
-        </OverlayTrigger> : null}
+        </OverlayTrigger> : null} */}
         {user ? <NavDropdown title={<><FaUserCircle /><span className="d-none d-sm-inline ml-1">{user.username}</span></>} id="collasible-nav-dropdown">
-          <NavDropdown.Item href="#action/3.2">Cuenta</NavDropdown.Item>
-          <NavDropdown.Item href="#action/3.3">Configuracion</NavDropdown.Item>
+          {/* <NavDropdown.Item href="#action/3.2">Cuenta</NavDropdown.Item>
+          <NavDropdown.Item href="#action/3.3">Configuracion</NavDropdown.Item> */}
           <NavDropdown.Divider />
           <NavDropdown.Item as={Button} className="btn-link" onClick={()=>{
-            apiClient.post("logout").then(()=>{
-              dispatch(unauthorized())
-              localStorage.removeItem("user")
+            modal.open({
+              state: "loading"
             })
+            AuthService.logout().then(()=>{
+              localStorage.removeItem("user")
+              queryClient.clear()
+              dispatch(unauthorized())
+              modal.close()
+            }).catch((error)=>modal.open({
+              state: "error",
+              error
+            }))
           }} >Cerrar sesión</NavDropdown.Item>
         </NavDropdown> : <Nav.Link as={Link} to="/login">Iniciar sesión</Nav.Link>}
       </Nav>
     </Navbar>
-        <Switch>
-          <ProtectedRoute path="/iam">
-            <IamApp />
-          </ProtectedRoute>
-          <ProtectedRoute path="/clinica">
-            <Apps.ClinicaApp />
-          </ProtectedRoute>
-          <Route exact path="/login">
-            <Login></Login>
-          </Route>
-        </Switch>
+
+    <QueryProgressModal />
+    <Suspense fallback={<div>Cargando...</div>}>
+      <Switch>
+        <ProtectedRoute path="/iam">
+          <IamApp />
+        </ProtectedRoute>
+        <ProtectedRoute path="/clinica">
+          <ClinicaApp />
+        </ProtectedRoute>
+        <Route exact path="/login">
+          <Login></Login>
+        </Route>
+      </Switch>
+    </Suspense>
   </Router>
 };

@@ -87,11 +87,14 @@ export const PrestacionesSolicitadasCard = () => {
                   filter={{
                     activos: 1,
                   }}
+                  className={proveedoresTypeaheadController.fieldState?.error ? "is-invalid" : ""}
+                  isInvalid={!!proveedoresTypeaheadController.fieldState?.error}
                   filterBy={(proveedor)=>(!watch("regionalId") || proveedor.regionalId == watch("regionalId")) && watch("prestacionesSolicitadas").every(ps=>proveedor.contrato.prestaciones.some(pc=>pc.id == ps.prestacionId))}
                   onChange={proveedoresTypeaheadController.field.onChange}
                   onBlur={proveedoresTypeaheadController.field.onBlur}
                   selected={proveedoresTypeaheadController.field.value}
                 />
+                <Form.Control.Feedback type="invalid">{proveedoresTypeaheadController.fieldState?.error?.message}</Form.Control.Feedback>
               </td>
               <td>
                 <Form.Control as="textarea" {...register(`prestacionesSolicitadas.${index}.nota` as const)} />

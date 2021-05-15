@@ -7,12 +7,18 @@ export const required = (): ValidationValueMessage<boolean> => ({
   message: validation.required
 })
 
+export const minLength = (length: number): RegisterOptions["maxLength"]=>({
+  value: length,
+  message: validation.minLength.format(length)
+})
+
 export const maxLength = (length: number): RegisterOptions["maxLength"]=>({
   value: length,
   message: validation.maxLength.format(length)
 })
 
-export const pattern = (pattern: RegExp): RegisterOptions["pattern"] =>({
+
+export const pattern = (pattern: RegExp, message?: string): RegisterOptions["pattern"] =>({
   value: pattern,
-  message: validation.pattern.format(pattern)
+  message: message || validation.pattern.format(pattern)
 })

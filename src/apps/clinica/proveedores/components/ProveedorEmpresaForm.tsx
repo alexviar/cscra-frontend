@@ -71,8 +71,9 @@ export const ProveedorEmpresaForm = ({proveedor, noRedirect=false, next}: Props)
       <Form.Group as={Col} sm={4}>
         <Form.Label>NIT</Form.Label>
         <Form.Control
+          // isInvalid={formState}
           {...register("nit", {
-            pattern: rules.pattern(/\d{9,11}/)
+            pattern: rules.pattern(/\d*/)
           })}
         />
       </Form.Group>

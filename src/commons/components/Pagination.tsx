@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from "react"
-import { Button, Pagination } from "react-bootstrap"
+import { Button, Pagination as BSPagination } from "react-bootstrap"
 import { useDispatch, useSelector } from "react-redux"
 import { Link, useLocation } from "react-router-dom"
 import Qs from 'qs'
@@ -18,7 +18,7 @@ type Props = {
   total: number
   onChange(page: number): void
 }
-export default ({current, total, onChange}: Props)=>{
+export const Pagination = ({current, total, onChange}: Props)=>{
   current = Math.min(current, total+1);
   let ld = current - 1
   let rd = total - current//Math.min(current, total)
@@ -30,28 +30,29 @@ export default ({current, total, onChange}: Props)=>{
   const pageItems = []
   if(maximum > 1 ) for(let i = minimum; i <= maximum; i++){
     if(current == i)
-      pageItems.push(<Pagination.Item key={i} active={true}>{i}</Pagination.Item>)
+      pageItems.push(<BSPagination.Item key={i} active={true}>{i}</BSPagination.Item>)
     else
-      // pageItems.push(<Pagination.Item key={i} as={Link} href={`${pathname}?${Qs.stringify({...parsedSearch, page: {current: i, size}}, { arrayFormat: "brackets", encode: false})}`} to={`${pathname}?${Qs.stringify({...parsedSearch, page: {current: i, size}}, { arrayFormat: "brackets", encode: false})}`}>{i}</Pagination.Item>)
-      pageItems.push(<Pagination.Item key={i} onClick={()=>onChange(i)}>{i}</Pagination.Item>)
+      pageItems.push(<BSPagination.Item key={i} onClick={()=>onChange(i)}>{i}</BSPagination.Item>)
   }
   
-  return <Pagination>
-    {minimum > 1 ? <Pagination.First
+  return <BSPagination>
+    {minimum > 1 ? <BSPagination.First
       onClick={()=>onChange(1)}
     /> : null}
-    {current > 1 ? <Pagination.Prev 
+    {current > 1 ? <BSPagination.Prev 
       onClick={()=>onChange(current-1)}
     /> : null}
     
     {pageItems}
     
-    {current < total ? <Pagination.Next
+    {current < total ? <BSPagination.Next
       onClick={()=>onChange(current+1)}
     /> : null}
-    {maximum < total ? <Pagination.Last
+    {maximum < total ? <BSPagination.Last
       onClick={()=>onChange(total)}
     /> : null}
       
-  </Pagination>
+  </BSPagination>
 }
+
+export default Pagination

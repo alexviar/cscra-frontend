@@ -1,15 +1,17 @@
 
-import { forwardRef, MutableRefObject, useEffect, useRef, useState } from "react"
-import { AsyncTypeahead, AsyncTypeaheadProps } from 'react-bootstrap-typeahead'
-import { useQuery, useQueryClient } from 'react-query'
+import { useEffect } from "react"
+import { Button, Form, InputGroup } from "react-bootstrap"
+import { Typeahead, TypeaheadProps } from 'react-bootstrap-typeahead'
+import { FaSync } from 'react-icons/fa'
+import { useQuery } from 'react-query'
 import { Regional, RegionalesService } from "../services/RegionalesService";
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 
+export type { Regional }
 
-export const RegionalesTypeahead = (props: {onLoad?: (options: Regional[])=>void} & Omit<AsyncTypeaheadProps<Regional>, "isLoading" | "options" | "onSearch">) => {
-
-  const [options, setOptions] = useState<Regional[]>([])
-
+let count = 0
+export const RegionalesTypeahead = ({isInvalid, feedback, ...props}: {feedback?: string, onLoad?: (options: Regional[])=>void} & Omit<TypeaheadProps<Regional>, "isLoading" | "options" >) => {
+  console.log("Render count", count++)
   const queryKey = "obtenerRegionales"
 
   const buscar = useQuery(queryKey, ()=>{
@@ -22,25 +24,29 @@ export const RegionalesTypeahead = (props: {onLoad?: (options: Regional[])=>void
 
   useEffect(()=>{
     if(buscar.data){
-      setOptions(buscar.data?.data)
       props.onLoad && props.onLoad(buscar.data?.data)
     }
   }, [buscar.data])
 
-  return <AsyncTypeahead
-    {...props}
-    // filterBy={()=>true}
-    isLoading={buscar.isFetching}
-    options={options}
-    labelKey="nombre"
-    useCache={false}
-    // maxResults={10}
-    minLength={0}
-    onSearch={(newQuery)=>{
-      // setOptions(buscar.data?.data.filter(r=>r.nombre.includes(newQuery))||[])
-    }}
-    renderMenuItemChildren={(prestacion) => {
-      return prestacion.nombre
-    }}
-  />
+  return <InputGroup hasValidation>
+    <Typeahead
+      className={buscar.isError || isInvalid ? "is-invalid" : ""}
+      isInvalid={buscar.isError || isInvalid}
+      {...props}
+      isLoading={buscar.isFetching}
+      options={buscar.data?.data||[]}
+      labelKey="nombre"
+      minLength={0}
+      renderMenuItemChildren={(regional) => {
+        return regional.nombre
+      }}
+    />
+    {buscar.isError ? <>
+      <InputGroup.Append>
+        <Button variant="outline-danger" onClick={()=>buscar.refetch()}><FaSync /></Button>
+      </InputGroup.Append>
+      <Form.Control.Feedback type="invalid">{buscar.error?.response?.message || buscar.error?.message || feedback}</Form.Control.Feedback>
+    </>
+    : null}
+  </InputGroup>
 }

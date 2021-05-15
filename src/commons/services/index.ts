@@ -4,3 +4,4 @@ export * from "./Page"
 export * from "./PaginatedResponse"
 
 export * from "./UnidadesTerritorialesService"
+export * from "./RegionalesService"

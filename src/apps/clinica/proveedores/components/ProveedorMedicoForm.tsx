@@ -121,7 +121,9 @@ export const ProveedorMedicoForm = ({proveedor, noRedirect=false, next}: Props)=
           <Form.Label>NIT</Form.Label>
           <Form.Control
             isInvalid={!!formState.errors.nit}
-            {...register("nit")}
+            {...register("nit", {
+              pattern: rules.pattern(/\d*/)
+            })}
           />
           <Form.Control.Feedback type="invalid">{formState.errors.ci?.message}</Form.Control.Feedback>
         </Form.Group>

@@ -32,7 +32,7 @@
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-  /* width: 100% */
+  max-width: 100%
 }
 
 .list-details .list {

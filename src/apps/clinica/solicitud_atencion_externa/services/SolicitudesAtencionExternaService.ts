@@ -1,5 +1,5 @@
 import { apiClient, PaginatedResponse, Page } from "../../../../commons/services"
-import { apiEndpoint } from "../../../../configs/app.json"
+import { keysToUnderscore } from "../../../../commons/utils"
 
 export type SolicitudesAtencionExternaFilter = {
   id?: number,
@@ -8,6 +8,8 @@ export type SolicitudesAtencionExternaFilter = {
   matricula_asegurado?: string,
   doctor_id?: number,
   proveedor_id?: number
+  regionalId?: number
+  registradoPor?: number
 }
 
 export type SolicitudAtencionExterna = {
@@ -25,7 +27,7 @@ export type SolicitudAtencionExterna = {
 export const SolicitudesAtencionExternaService = {
   buscar: (filter: SolicitudesAtencionExternaFilter, page: Page)=>{
     return apiClient.get<PaginatedResponse<SolicitudAtencionExterna>>("solicitudes-atencion-externa", {
-      params: {filter, page}
+      params: {filter: keysToUnderscore(filter), page}
     })
   },
   generarDm11: (solicitud_id: number) => {

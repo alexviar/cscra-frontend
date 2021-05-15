@@ -10,6 +10,19 @@ import { ImperativeModalRef } from "../../../../commons/components/ImperativeMod
 import * as rules from "../../../../commons/components/rules"
 import moment from 'moment';
 
+const estadoText = (code?: number) => {
+  console.log(code)
+  if(code == 1) return "Alta"
+  if(code == 2) return "Baja"
+  return ""
+}
+
+const aportesText = (code?: number) => {
+  if(code == 1) return "Al Día"
+  if(code == 2) return "En Mora"
+  return ""
+}
+
 export type AseguradoInputs = {
   regionalId: number,
   asegurado: {
@@ -21,16 +34,18 @@ export type AseguradoInputs = {
     fechaExtinsion: string | null
     tipo: number
     estado: string
-    fechaValidezSeguro: string | null
+    tieneBaja: boolean
+    fechaRegBaja: string,
+    fechaValidezSeguro?: string | null
   },
   titular: {
-    id: string
-    matricula: string
-    apellidoPaterno: string | null
-    apellidoMaterno: string
-    nombres: string
-    estado: string
-    fechaValidezSeguro: string | null
+    id?: string
+    matricula?: string
+    apellidoPaterno?: string | null
+    apellidoMaterno?: string
+    nombres?: string
+    estado?: string
+    fechaValidezSeguro?: string | null
   },
   empleador: {
     id: string, 
@@ -41,6 +56,7 @@ export type AseguradoInputs = {
     fechaBaja: string | null
   }
 }
+
 export const AseguradoCard = ()=>{
 
   const {
@@ -48,7 +64,7 @@ export const AseguradoCard = ()=>{
     formState,
     trigger,
     setValue,
-    getValues,
+    clearErrors,
     control,
     watch
   } = useFormContext<AseguradoInputs>()
@@ -64,12 +80,12 @@ export const AseguradoCard = ()=>{
   const empleador = useWatch({
     control,
     name: 'empleador', // without supply name will watch the entire form, or ['firstName', 'lastName'] to watch both
-  });
+  }); 
 
   const aseguradoChooserRef = useRef<ImperativeModalRef|null>(null)
 
-  const matricula = asegurado.matricula//watch("asegurado.matricula")
-  const buscar = useQuery(["buscarAseguradoPorMatricula", matricula], ()=>{
+  const matricula = asegurado.matricula
+  const buscar = useQuery(["asegurados.buscar", matricula], ()=>{
     return AseguradosService.buscarPorMatricula(matricula)
   }, {
     enabled: false,
@@ -85,9 +101,34 @@ export const AseguradoCard = ()=>{
   })
 
   const onChange = ({empleador, titular, ...asegurado}: any) => {
-    setValue("asegurado", asegurado)
-    setValue("titular", titular||{})
-    setValue("empleador", empleador || {})
+    setValue("asegurado.id", asegurado.id)
+    setValue("asegurado.apellidoPaterno", asegurado.apellidoPaterno || "")
+    setValue("asegurado.apellidoMaterno", asegurado.apellidoMaterno || "")
+    setValue("asegurado.nombres", asegurado.nombres)
+    setValue("asegurado.tipo", asegurado.tipo)
+    setValue("asegurado.estado", estadoText(asegurado.estado))
+    setValue("asegurado.tieneBaja", !!asegurado.baja)
+    setValue("asegurado.fechaRegBaja", asegurado.baja?.regDate)
+    setValue("asegurado.fechaValidezSeguro", asegurado.baja?.fechaValidezSeguro)
+    setValue("asegurado.fechaExtinsion", asegurado.fechaExtinsion)
+    if(titular){
+      setValue("titular.id", titular?.id)
+      setValue("titular.matricula", titular?.matricula)
+      setValue("titular.apellidoPaterno", titular?.apellidoPaterno)
+      setValue("titular.apellidoMaterno", titular?.apellidoMaterno)
+      setValue("titular.nombres", titular?.nombres)
+      setValue("titular.estado", estadoText(titular?.estado))
+      setValue("titular.fechaValidezSeguro", titular?.fechaValidezd)
+    }
+    else{
+      setValue("titular", {})
+    }    
+    setValue("empleador.id", empleador?.id)
+    setValue("empleador.numeroPatronal", empleador?.numeroPatronal)
+    setValue("empleador.nombre", empleador?.nombre)
+    setValue("empleador.estado", estadoText(empleador?.estado))
+    setValue("empleador.fechaBaja", empleador?.fecha_baja)
+    setValue("empleador.aportes", aportesText(empleador?.estado))
   }
 
   useEffect(()=>{
@@ -96,15 +137,14 @@ export const AseguradoCard = ()=>{
       setValue("asegurado.apellidoPaterno", "")
       setValue("asegurado.apellidoMaterno", "")
       setValue("asegurado.nombres", "")
+      setValue("asegurado.tipo", -1)
       setValue("asegurado.estado", "")
+      setValue("asegurado.tieneBaja", false)
+      setValue("asegurado.fechaRegBaja", "")
       setValue("asegurado.fechaValidezSeguro", "")
       setValue("asegurado.fechaExtinsion", "")
-      setValue("titular.id", "")
-      setValue("titular.apellidoPaterno", "")
-      setValue("titular.apellidoMaterno", "")
-      setValue("titular.nombres", "")
-      setValue("titular.estado", "")
-      setValue("titular.fechaValidezSeguro", "")
+      setValue("titular", {})
+      setValue("empleador.id", "")
       setValue("empleador.numeroPatronal", "")
       setValue("empleador.nombre", "")
       setValue("empleador.estado", "")
@@ -112,10 +152,6 @@ export const AseguradoCard = ()=>{
       setValue("empleador.aportes", "")
     }
   }, [matricula])
-
-  useEffect(()=>{
-    console.log("Change ", asegurado)
-  }, [asegurado])
 
   return <Card >
     <Accordion.Toggle as={Card.Header} className="bg-primary text-light" eventKey="0">
@@ -131,18 +167,27 @@ export const AseguradoCard = ()=>{
             <InputGroup hasValidation className="mb-2">
               <FormControl id="asegurado-matricula"
                 isInvalid={!!formState.errors.asegurado?.matricula || !!formState.errors.asegurado?.id}
-                className="text-uppercase" {...register("asegurado.matricula", {
-                required: rules.required(),
-                pattern: rules.pattern(/^\d{2}-\d{4}-[aábcdeéfghijklmnñoópqrstuúüvwxyzAÁBCDEÉFGHIJKLMNÑOÓPQRSTUÚÜVWXYZ]{2,3}$/)
-              })} />
+                className="text-uppercase" {...register("asegurado.matricula")} />
               <InputGroup.Append >
                 <Button variant="outline-secondary" onClick={()=>{
                   trigger("asegurado.matricula")
                   if(!formState.errors.asegurado?.matricula){
-                    // setValue("asegurado.matricula", watch("asegurado.matricula"))
                     if(formState.dirtyFields.asegurado?.matricula)
                       delete formState.dirtyFields.asegurado.matricula
-                    buscar.refetch()
+                    clearErrors(["asegurado", "titular", "empleador"])
+                    if(!buscar.data){
+                      buscar.refetch()
+                    }
+                    else{
+                      const {data: {records}} = buscar.data
+                      if(records.length == 1){
+                        const asegurado = records[0]
+                        onChange(asegurado)
+                      }
+                      else {
+                        aseguradoChooserRef.current?.show(true)
+                      }
+                    }
                   }
                 }}>
                   {buscar.isFetching ? <Spinner animation="border" size="sm" /> : <FaSearch />}
@@ -154,25 +199,22 @@ export const AseguradoCard = ()=>{
           <Form.Group as={Col} lg={3} md={6}>
             <Form.Label>Apellido Paterno</Form.Label>
             <Form.Control 
-              disabled
-              isInvalid={!!formState.errors.asegurado?.apellidoPaterno}
+              readOnly
               {...register("asegurado.apellidoPaterno")}
             />
           </Form.Group>
           <Form.Group as={Col} lg={3} md={6}>
             <Form.Label>Apellido Materno</Form.Label>
             <Form.Control 
-              disabled
-              isInvalid={!!formState.errors.asegurado?.apellidoPaterno}
+              readOnly
               {...register("asegurado.apellidoMaterno")}
             />
           </Form.Group>
           <Form.Group as={Col} lg={3} md={6}>
             <Form.Label>Nombre</Form.Label>
             <Form.Control 
-              disabled
-              isInvalid={!!formState.errors.asegurado?.apellidoPaterno}
-              {...register("asegurado.nombres", {required: rules.required()})}
+              readOnly
+              {...register("asegurado.nombres")}
             />
           </Form.Group>
         </Form.Row>
@@ -180,39 +222,29 @@ export const AseguradoCard = ()=>{
           <Form.Group as={Col} sm={4}>
             <Form.Label>Estado</Form.Label>
             <Form.Control 
-              as="select"
-              disabled
+              readOnly
               isInvalid={!!formState.errors.asegurado?.estado}
               {...register("asegurado.estado")}
             >
-              <option value=""></option>
-              <option value="1">Alta</option>
-              <option value="2">Baja</option>
             </Form.Control>
+            <Form.Control.Feedback type="invalid">{formState.errors.asegurado?.estado?.message}</Form.Control.Feedback>
           </Form.Group>
           <Form.Group as={Col} sm={4}>
             <Form.Label>Validez del seguro</Form.Label>
             <Form.Control 
-              disabled
+              readOnly
+              type="date"
               isInvalid={!!formState.errors.asegurado?.fechaValidezSeguro}
-              {...register("asegurado.fechaValidezSeguro", {
-                validate: {
-                  afterDate: (value) => {
-                    const now = moment()
-                    console.log("CHECK", watch("asegurado"))
-                    if(asegurado.estado != "1" && (!value || moment(value, "DD/MM/YYYY").isSameOrBefore(now))){
-                      return "El seguro ya no tiene validez"
-                    } 
-                  }
-                }
-              })}
+              {...register("asegurado.fechaValidezSeguro")}
             />
-            <Form.Control.Feedback type="invalid">{formState.errors.asegurado?.fechaValidezSeguro?.message}</Form.Control.Feedback>
+            <Form.Control.Feedback type="invalid">{
+              formState.errors.asegurado?.fechaValidezSeguro?.message
+            }</Form.Control.Feedback>
           </Form.Group>
-          {watch("asegurado.tipo") == 2 ? <Form.Group as={Col} sm={4}>
+          {asegurado.tipo == 2 ? <Form.Group as={Col} sm={4}>
             <Form.Label>Fecha extinsion</Form.Label>
             <Form.Control 
-              disabled
+              readOnly
               isInvalid={!!formState.errors.asegurado?.fechaExtinsion}
               {...register("asegurado.fechaExtinsion", {
                 validate: {
@@ -228,35 +260,35 @@ export const AseguradoCard = ()=>{
             <Form.Control.Feedback type="invalid">{formState.errors.asegurado?.fechaExtinsion?.message}</Form.Control.Feedback>
           </Form.Group> : null}
         </Form.Row>
-        <div className={titular.id ? "" : "d-none"}>
+        { titular ? <div className={asegurado.tipo == 2 ? "" : "d-none"}>
           {/* {watch("titular.id") ? <> */}
           <h2 style={{fontSize: "1.25rem"}}>Titular</h2>
           <Form.Row>
             <Form.Group as={Col} lg={3} md={6}>
               <Form.Label>Matricula</Form.Label>
               <Form.Control 
-                disabled
+                readOnly
                 {...register("titular.matricula")}
               />
             </Form.Group>
             <Form.Group as={Col} lg={3} md={6}>
               <Form.Label>Apellido Paterno</Form.Label>
               <Form.Control 
-                disabled
+                readOnly
                 {...register("titular.apellidoPaterno")}
               />
             </Form.Group>
             <Form.Group as={Col} lg={3} md={6}>
               <Form.Label>Apellido Materno</Form.Label>
               <Form.Control 
-                disabled
+                readOnly
                 {...register("titular.apellidoMaterno")}
               />
             </Form.Group>
             <Form.Group as={Col} lg={3} md={6}>
               <Form.Label>Nombre</Form.Label>
               <Form.Control 
-                disabled
+                readOnly
                 {...register("titular.nombres")}
               />
             </Form.Group>
@@ -265,27 +297,34 @@ export const AseguradoCard = ()=>{
             <Form.Group as={Col} sm={4}>
               <Form.Label>Estado</Form.Label>
               <Form.Control 
-                as="select"
-                disabled
-                {...register("titular.estado")}
+                readOnly
+                isInvalid={!!formState.errors.titular?.estado}
+                {...register("titular.estado", {
+                  validate: {
+                    unknown: (value) =>{
+                      if(titular.id && value != "Alta" && value != "Baja"){
+                        return "Estado desconocido";
+                      }
+                    }
+                  }
+                })}
               >
-                <option value=""></option>
-                <option value="1">Alta</option>
-                <option value="2">Baja</option>
               </Form.Control>
+              <Form.Control.Feedback type="invalid">{formState.errors.titular?.estado?.message}</Form.Control.Feedback>
             </Form.Group>
             <Form.Group as={Col} sm={4}>
               <Form.Label>Fecha de baja</Form.Label>
               <Form.Control 
-                disabled
+                readOnly
                 isInvalid={!!formState.errors.titular?.fechaValidezSeguro}
                 {...register("titular.fechaValidezSeguro", {
                   validate: {
                     afterDate: (value) => {
                       const now = moment()
-                      if(titular.id && titular.estado != "1" && (!value || moment(value, "DD/MM/YYYY").isSameOrBefore(now))){
-                        return "El seguro del titular ya no tiene validez"
-                      } 
+                      if(titular.estado == "Baja"){
+                        if(!value) return "Fecha sin especificar, se asume que el seguro ya no tiene validez"
+                        if(moment(value, "DD/MM/YYYY").isSameOrBefore(now)) return "El seguro ya no tiene validez"
+                      }
                     }
                   }
                 })}
@@ -295,13 +334,13 @@ export const AseguradoCard = ()=>{
           </Form.Row>
           {/* </> : null} */}
         </div>
-
+        : null}
         <h2 style={{fontSize: "1.25rem"}}>Empleador</h2>
         <Form.Row>
           <Form.Group as={Col} md={4}>
             <Form.Label>Nº Patronal</Form.Label>
             <Form.Control
-              disabled
+              readOnly
               isInvalid={!!formState.errors.empleador?.numeroPatronal}
               {...register("empleador.numeroPatronal", {
                 required: rules.required()
@@ -312,7 +351,7 @@ export const AseguradoCard = ()=>{
           <Form.Group as={Col} md={8}>
             <Form.Label>Nombre</Form.Label>
             <Form.Control 
-              disabled
+              readOnly
               {...register("empleador.nombre")}
             />
           </Form.Group>
@@ -321,27 +360,33 @@ export const AseguradoCard = ()=>{
           <Form.Group as={Col} sm={4}>
             <Form.Label>Estado</Form.Label>
             <Form.Control
-              as="select"
-              disabled
-              {...register("empleador.estado")}
-            >
-              <option value=""></option>
-              <option value="2">Baja</option>
-              <option value="1">Alta</option>
-            </Form.Control>
+              readOnly
+              isInvalid={!!formState.errors.empleador?.estado}
+              {...register("empleador.estado", {
+                validate: {
+                  unknown: (value) =>{
+                    if(empleador.id && value != "Alta" && value != "Baja"){
+                      return "Estado desconocido";
+                    }
+                  }
+                }
+              })}
+            />
+            <Form.Control.Feedback type="invalid">{formState.errors.empleador?.estado?.message}</Form.Control.Feedback>
           </Form.Group>
           <Form.Group as={Col} sm={4}>
             <Form.Label>Fecha de baja</Form.Label>
             <Form.Control 
-              disabled
+              readOnly
               isInvalid={!!formState.errors.empleador?.fechaBaja}
               {...register("empleador.fechaBaja", {
                 validate: {
                   afterDate: (value) => {
                     const now = moment()
-                    if(empleador.estado != "1" && (!value || moment(value, "DD/MM/YYYY").add(2, "months").isSameOrBefore(now))){
-                      return "El empleador ha sido dado de baja"
-                    } 
+                    if(empleador.id && empleador.estado == "Baja"){
+                      if(!value) return "Fecha sin especificar, se asume que el seguro ya no tiene validez"
+                      if(moment(value, "DD/MM/YYYY").isSameOrBefore(now)) return "El seguro ya no tiene validez"
+                    }
                   }
                 }
               })}
@@ -351,23 +396,18 @@ export const AseguradoCard = ()=>{
           <Form.Group as={Col} sm={4}>
             <Form.Label>Aportes</Form.Label>
             <Form.Control
-              as="select"
-              disabled
+              readOnly
               isInvalid={!!formState.errors.empleador?.aportes}
               {...register("empleador.aportes", {
                 validate: {
                   mora: (value) => {
-                    if(value == "2"){
+                    if(value == "En Mora"){
                       return "El empleador esta en mora"
                     }
                   }
                 }
               })}
-            >
-              <option></option>
-              <option value="2">En mora</option>
-              <option value="1">Al día</option>
-            </Form.Control>
+            />
             <Form.Control.Feedback type="invalid">{formState.errors.empleador?.aportes?.message}</Form.Control.Feedback>
           </Form.Group>
         </Form.Row>
