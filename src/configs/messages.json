@@ -11,7 +11,8 @@
       "notType": "El campo ${path} debe ser de tipo `${type}`"
     },
     "string": {
-      "min": "El campo ${path} debe tener al menos ${min} caracteres"
+      "min": "El campo ${path} debe tener al menos ${min} caracteres",
+      "max": "La cantidad maxima de caracteres permitidos es ${max}"
     }
   }
 }

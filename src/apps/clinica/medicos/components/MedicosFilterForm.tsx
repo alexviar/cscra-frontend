@@ -1,5 +1,5 @@
 import React from "react"
-import { Filter } from "../services"
+import { MedicoFilter as Filter } from "../services"
 
 type Props = {
   onFilter: (filter: Filter) => void

@@ -1,19 +1,14 @@
 import { useEffect, useState } from "react"
 import { Alert, Modal as BSModal, Spinner } from "react-bootstrap"
-import { useSelector } from "react-redux"
 import { PDFViewer } from "../../../../commons/components"
+import { useModal } from "../../../../commons/reusable-modal"
 
 export const Dm11Viewer = ()=>{
   //@ts-ignore
-  const modal = useSelector((state)=>state.modals.dm11Viewer)
-  const [show, setShow] = useState(false)
+  const modal = useModal("dm11Viewer")
 
-  useEffect(()=>{
-    setShow(modal.show)
-  }, [modal.show])
-
-  return <BSModal centered show={show} onHide={()=>{
-    if(modal.state !== "loading") setShow(false)
+  return <BSModal centered show={modal.show} onHide={()=>{
+    modal.close()
   }}>
     <BSModal.Header>
       D.M. - 11

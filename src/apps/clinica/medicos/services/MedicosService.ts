@@ -1,4 +1,5 @@
 import { apiClient, PaginatedResponse, Page } from "../../../../commons/services"
+import { keysToUnderscore } from "../../../../commons/utils"
 
 export type Medico = {
   id: number,
@@ -9,27 +10,28 @@ export type Medico = {
   apellidoPaterno: string,
   apellidoMaterno: string,
   nombres: string,
+  nombreCompleto: string,
   sexo: string,
   especialidadId: number
   especialidad: string
   regionalId: number
 }
 
-export type Filter = {
+export type MedicoFilter = {
   ci?: string,
   nombre?: string,
   especialidadId?: number
   regionalId?: number
-  incluirProveedores?: boolean
+  tipo?: number
 }
 
 export const MedicosService = {
-  buscar: (filter: Filter, page: Page) => {
-    return apiClient.get<PaginatedResponse<Medico>>("medicos", {
-      params:{
+  buscar: (filter?: MedicoFilter, page?: Page) => {
+    return apiClient.get<PaginatedResponse<Medico> | Medico[]>("medicos", {
+      params: keysToUnderscore({
         filter,
         page
-      }
+      })
     })
   },
   load: (id: number) => {

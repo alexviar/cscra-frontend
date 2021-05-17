@@ -1,66 +1,78 @@
 
-import { forwardRef, useEffect, useRef, useState } from "react"
-import { AsyncTypeahead, AsyncTypeaheadProps } from 'react-bootstrap-typeahead'
-import { useQuery, useQueryClient } from 'react-query'
-import { Filter, Proveedor, Empresa, ProveedorService } from "../services/ProveedoresService"
-import { Medico } from "../services/MedicosService";
+import { useEffect } from "react"
+import { Button, Form, InputGroup } from "react-bootstrap"
+import { FaSync } from "react-icons/fa"
+import { Typeahead, TypeaheadProps } from 'react-bootstrap-typeahead'
+import { useQuery } from 'react-query'
+import { Proveedor, Empresa, ProveedorService } from "../services/ProveedoresService"
+import { isMatch } from "../../../../commons/utils";
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 
 
-export const ProveedoresTypeahead = (props: {filter:Filter} & Omit<AsyncTypeaheadProps<Proveedor>, "isLoading" | "options" | "onSearch">) => {
-  // const [query, setQuery] = useState("")
-  // const [options, setOptions] = useState<Proveedor[]>([])
+export const ProveedoresTypeahead = ({isInvalid, feedback, filterBy, ...props}: {feedback?: string, onLoad?: (options: Proveedor[])=>void} &  Omit<TypeaheadProps<Proveedor>, "isLoading" | "options" | "onSearch">) => {
+  const queryKey = "proveedores.buscar"
 
-  
-  const queryKey = ["buscarProveedor", props.filter]
   const buscar = useQuery(queryKey, ()=>{
-    // return ProveedorService.buscarPorNombre(query)
-    return ProveedorService.buscar(props.filter)
+    return ProveedorService.buscar({
+      activos: 1
+    })
   }, {
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
     refetchOnMount: false,
-    // enabled: false,
-    // onSuccess: ({data})=>{
-    //   setOptions(data)
-    // }
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false
   })
 
-  return <AsyncTypeahead flip 
-    // filterBy={()=>true}
-    {...props}
-    isLoading={buscar.isFetching}
-    options={buscar.data?.data || []}
-    // options={options}
-    labelKey={(proveedor: Proveedor)=>{
-      if(proveedor.medico){
-        const medico = proveedor.medico
-        const nombre_completo = medico.nombres + (medico.apellidoPaterno ? " " + medico.apellidoPaterno : "") + (medico.apellidoMaterno ? " " + medico.apellidoMaterno : "")
-        return nombre_completo
-      }
-      else {
-        return (proveedor as Empresa).nombre
-      }
-    }}
-    useCache={false}
-    maxResults={50}
-    minLength={0}
-    onSearch={(newQuery)=>{}}
-    renderMenuItemChildren={(proveedor) => {
-      let title, subtitle;
-      if(proveedor.medico){
-        const medico = proveedor.medico
-        title = medico.nombres + (medico.apellidoPaterno ? " " + medico.apellidoPaterno : "") + (medico.apellidoMaterno ? " " + medico.apellidoMaterno : "")
-        subtitle = medico.especialidad
-      }
-      else {
-        title = proveedor.nombre
-        subtitle = "Empresa"
-      }
-      return <div>
-        <div>{title}</div>
-        <div className={"small text-secondary"}>{subtitle}</div> 
-      </div>
-    }}
-  />
+  useEffect(()=>{
+    if(buscar.data){
+      props.onLoad && props.onLoad(buscar.data?.data)
+    }
+  }, [buscar.data])
+
+  return <InputGroup hasValidation>
+    <Typeahead
+      className={buscar.isError || isInvalid ? "is-invalid" : ""}
+      isInvalid={buscar.isError || isInvalid}
+      {...props}
+      filterBy={(proveedor, props)=>{
+        return (proveedor.medico ? isMatch(proveedor.medico.nombreCompleto, props) : isMatch(proveedor.nombre, props)) && !!(typeof filterBy === "function" && filterBy(prestacion, props))
+      }}
+      isLoading={buscar.isFetching}
+      options={buscar.data?.data || []}
+      labelKey={(proveedor: Proveedor)=>{
+        if(proveedor.medico){
+          const medico = proveedor.medico
+          const nombre_completo = medico.nombres + (medico.apellidoPaterno ? " " + medico.apellidoPaterno : "") + (medico.apellidoMaterno ? " " + medico.apellidoMaterno : "")
+          return nombre_completo
+        }
+        else {
+          return (proveedor as Empresa).nombre
+        }
+      }}
+      minLength={0}
+      renderMenuItemChildren={(proveedor) => {
+        let title, subtitle;
+        if(proveedor.medico){
+          const medico = proveedor.medico
+          title = medico.nombres + (medico.apellidoPaterno ? " " + medico.apellidoPaterno : "") + (medico.apellidoMaterno ? " " + medico.apellidoMaterno : "")
+          subtitle = medico.especialidad
+        }
+        else {
+          title = proveedor.nombre
+          subtitle = "Empresa"
+        }
+        return <div>
+          <div>{title}</div>
+          <div className={"small text-secondary"}>{subtitle}</div> 
+        </div>
+      }}
+    />
+    {buscar.isError ? <>
+      <InputGroup.Append>
+        <Button variant="outline-danger" onClick={()=>buscar.refetch()}><FaSync /></Button>
+      </InputGroup.Append>
+      <Form.Control.Feedback type="invalid">{buscar.error?.response?.message || buscar.error?.message}</Form.Control.Feedback>
+    </>
+    : null}
+    {feedback ? <Form.Control.Feedback type="invalid">{feedback}</Form.Control.Feedback> : null}
+  </InputGroup>
 }

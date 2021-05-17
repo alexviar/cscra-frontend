@@ -1,4 +1,5 @@
 export * from "./latLngExpressionToString"
+export * from "./isMatch"
 
 export const toCamel = (s: string) => {
   return s.replace(/([-_][a-z])/ig, ($1) => {

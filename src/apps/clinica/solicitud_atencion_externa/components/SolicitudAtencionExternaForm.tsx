@@ -18,85 +18,77 @@ import { useLoggedUser } from "../../../../commons/auth/hooks"
 import { EstadosAfi, EstadosEmp } from "../utils"
 
 type Inputs = AseguradoInputs & PrestacionesSolicitadasInputs & {
-  regionalId: number | null
+  regional: Regional[]
   medico?: Medico[]
 }
 
 const hoy = moment()
 
-const schema = yup.object().shape({
-  "asegurado": yup.object().shape({
-    "matricula": yup.string().trim().matches(/^\d{2}-\d{4}-[a-zA-ZñÑ]{2,3}/).required(),
-    "estado": yup.string().oneOf(Object.values(EstadosAfi), "Estado desconocido")
-      .test("estado-incoherente", "", function(value, context) {
-        if(value == EstadosAfi[1] && context.parent.tieneBaja){
-          return context.createError({
-            message: "El asegurado figura como activo, pero hay un registro de su baja con fecha ${date}",
-            params: {
-              date: context.parent.fechaRegBaja
-            }
-          })
-        }
-        if(value == EstadosAfi[2] && !context.parent.tieneBaja){
-          return context.createError({
-            message: "El asegurado figura como dado de baja, pero no se encontraron registros de la baja."
-          })
-        }
-        return true
-      }),
-    "fechaExtinsion": yup.date().label("fecha de extinsion").nullable().notRequired().min(hoy.toDate(), "Fecha de extinsion alcanzada"),
-    "fechaValidezSeguro": yup.date().label("fecha de extinsion").test("min", "", function(value, context){
-      const {estado, tieneBaja} = context.parent
-      if(estado == EstadosAfi[2] && tieneBaja)
-        if(!value) return context.createError({
-          message: "Fecha sin especificar, se asume que el seguro ya no tiene validez"
-        })
-        if(moment(value).isSameOrBefore(hoy)) return context.createError({
-          message: "El seguro ya no tiene validez"
-        })
-      return true
+const estadoAfiSchema = yup.string().label("estado").oneOf(Object.values(EstadosAfi), "Estado desconocido")
+.test("estado-incoherente", "", function(value, context) {
+  if(value == EstadosAfi[1] && context.parent.tieneBaja){
+    return context.createError({
+      message: "El asegurado figura como activo, pero hay un registro de su baja con fecha ${date}",
+      params: {
+        date: context.parent.fechaRegBaja
+      }
     })
+  }
+  if(value == EstadosAfi[2] && !context.parent.tieneBaja){
+    return context.createError({
+      message: "El asegurado figura como dado de baja, aunque no se encontraron registros de la baja"
+    })
+  }
+  return true
+})
+
+const validezSchema = yup.mixed().label("fecha de extinsion")
+.test("min", "", function(value, context){
+  const {estado, tieneBaja} = context.parent
+  if(estado == EstadosAfi[2] && tieneBaja)
+    if(!value) return context.createError({
+      message: "Fecha sin especificar, se asume que el seguro ya no tiene validez"
+    })
+    if(moment(value).isSameOrBefore(hoy)) return context.createError({
+      message: "El seguro ya no tiene validez"
+    })
+  return true
+})
+
+const schema = yup.object().shape({
+  asegurado: yup.object().shape({
+    matricula: yup.string().label("matricula").trim().uppercase().required().matches(/^\d{2}-\d{4}-[a-zA-ZñÑ]{2,3}$/, "Formato incorrecto."),
+    estado: estadoAfiSchema,
+    fechaExtinsion: yup.lazy(value => value ? 
+      yup.date().label("fecha de extinsion").nullable().notRequired().min(hoy.toDate(), "Fecha de extinsion alcanzada") :
+      yup.mixed()),
+    fechaValidezSeguro: validezSchema
   }),
-  "titular": yup.lazy( titular => {
-    console.log("Titular", titular)
-    return titular ? yup.object().shape({
-      "matricula": yup.string().trim().matches(/^\d{2}-\d{4}-[A-ZÑ]{2,3}/).required(),
-      // "estado": yup.string().oneOf(Object.values(EstadosAfi)).test("estado-incoherente", "El asegurado figura como activo, pero hay un registro de su baja con fecha {$regDate}", function(value, context) {
-      //   if(value == EstadosAfi[1] && context.parent.baja){
-      //     context.createError({
-      //       params: {
-      //         regDate: context.parent.baja.regDate
-      //       }
-      //     })
-      //     return true
-      //   }
-      //   return false
-      // }),
-      // "baja": yup.object().shape({
-      //   "fechaValidezSeguro": yup.date().label("validez del seguro").nullable().notRequired().when("estado", {
-      //     is: (estado: string) => estado == EstadosAfi[2],
-      //     then: yup.date().min(hoy.toDate())
-      //   })
-      // })
-    }) : yup.object().nullable().notRequired() 
-  }),
+  "titular": yup.lazy(value => value?.id ? yup.object().shape({
+    "matricula": yup.string().label("matricula").required(),
+    "estado": estadoAfiSchema,
+    "fechaValidezSeguro": validezSchema
+  }): yup.object() ),
   "empleador": yup.object().shape({
-    "numeroPatronal": yup.string().required(),
-    // "nombre": yup.string(),
-    // "estado": yup.string().oneOf(Object.values(EstadosEmp)).test("estado-incoherente", "El empleador figura como activo, pero hay un registro de su baja con fecha {$fechaBaja}", function(value, context) {
-    //   if(value == EstadosEmp[1] && context.parent.fechaBaja){
-    //     context.createError({
-    //       params: {
-    //         fechaBaja: context.parent.fechaBaja
-    //       }
-    //     })
-    //     return true
-    //   }
-    //   return false
-    // }),
-    // "fechaBaja": yup.lazy((value) => yup.date().min(hoy.subtract(2, "months").toDate())),
-    // "enMora": yup.string().oneOf(["No"], "El empleador esta en mora")
-  }).required()
+    "numeroPatronal": yup.string().label("numero patronal").required(),
+    "estado": yup.string().label("estado").oneOf(Object.values(EstadosEmp), "Estado desconocido")
+    .test("estado-incoherente", "El empleador figura como activo, pero tiene fecha de baja", function(value, context) {
+      return value != EstadosEmp[1] || !context.parent.fechaBaja
+    }),
+    "fechaBaja": yup.mixed().when("estado", {
+      is: (estado: string) => estado == EstadosEmp[2] || estado == EstadosEmp[3],
+      then: yup.date().required("Fecha sin especificar, se asume que el seguro ya no tiene validez")
+               .min(hoy.subtract(2, "months").toDate())
+    }),
+    "aportes": yup.lazy(value => value ? yup.string().oneOf(["No"], "El empleador esta en mora") : yup.string())
+  }),
+  "regional": yup.array().length(1, "Debe seleccionar una regional"),
+  "medico": yup.array().length(1, "Debe seleccionar un medico"),
+  "proveedor": yup.array().length(1, "Debe seleccionar un proveedor"),
+  prestacionesSolicitadas: yup.array().of(yup.object().shape({
+    prestacion: yup.array().length(1, "Debe seleccionar una prestacion"),
+    nota: yup.string().label("nota").nullable().notRequired().max(150)
+  })).min(1, "Debe solicitar un servicio").max(1, "Solo puede solicitar un servicio por solicitud")
 })
 
 export const SolicitudAtencionExternaForm = ()=>{
@@ -104,19 +96,17 @@ export const SolicitudAtencionExternaForm = ()=>{
     mode: "onBlur",
     resolver: yupResolver(schema),
     defaultValues: {
+      regional: [],
+      medico: [],
+      proveedor: [],
       prestacionesSolicitadas: [{
         id: 0,
-        prestacionId: null,
+        prestacion: [],
         nota: ""
       }],
-      asegurado: {
-        apellidoPaterno: "",
-        apellidoMaterno: "",
-        nombres: "",
-        estado: "",
-        fechaExtinsion: "",
-        // fechaValidezSeguro: ""
-      }
+      asegurado: {},
+      titular: {},
+      empleador: {}
     }
   })
   const {
@@ -132,16 +122,16 @@ export const SolicitudAtencionExternaForm = ()=>{
 
   const loggedUser = useLoggedUser()
 
-  console.log("Errors", formState.errors)
+  console.log("Errors", watch(), formState.errors)
 
   const registrar = useMutation((values: Inputs)=>{
     return SolicitudesAtencionExternaService.registrar(
-      values.regionalId as number,
+      values.regional![0].id,
       values.asegurado.id,
       values.medico![0].id,
       values.proveedor![0].id,
-      values.prestacionesSolicitadas.map(({prestacionId: prestacion_id, nota})=>({
-        prestacion_id: prestacion_id as number,
+      values.prestacionesSolicitadas.map(({prestacion, nota})=>({
+        prestacion_id: prestacion![0].id,
         nota
       }))
     )
@@ -151,21 +141,22 @@ export const SolicitudAtencionExternaForm = ()=>{
         Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA,
         Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA_REGISTRADO_POR
       ]) || (loggedUser.can(Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL) && regionalId == loggedUser.regionalId)){
-        dm11Viewer.open(urlDm11)
+        dm11Viewer.open({url: urlDm11})
       }
     }
   })
 
+  const formErrors = formState.errors
+
   return <FormProvider {...formMethods}>
     <Form onSubmit={handleSubmit((values)=>{
-      console.log("onSubmit", values)
       registrar.mutate(values)
     })}>
       <h1 style={{fontSize: "1.75rem"}}>Solicitud de atención externa</h1>
       <Accordion className="mt-3"  defaultActiveKey="0">
         <AseguradoCard />
         <Card style={{overflow: "visible"}} >
-          <Accordion.Toggle as={Card.Header} className="bg-primary text-light" eventKey="1">
+          <Accordion.Toggle as={Card.Header} className={"text-light " + (formErrors.regional ? "bg-danger" : "bg-primary")} eventKey="1">
             Regional
           </Accordion.Toggle>
           <Accordion.Collapse eventKey="1">
@@ -175,25 +166,22 @@ export const SolicitudAtencionExternaForm = ()=>{
                   <Form.Label>Nombre</Form.Label>
                   <Controller 
                     control={control}
-                    name="regionalId"
-                    rules={{
-                      required: rules.required()
-                    }}
+                    name="regional"
                     render={({field, fieldState})=>{
                       return <RegionalesTypeahead
                         id="solicitud-atencion-externa-form/regionales"
-                        filterBy={(regional: Regional)=>{
-                          return loggedUser.can(Permisos.REGISTRAR_SOLICITUDES_DE_ATENCION_EXTERNA) ? true : (regional.id == loggedUser.regionalId)
+                        filterBy={(regional: Regional, props: any)=>{
+                          return (loggedUser.can(Permisos.REGISTRAR_SOLICITUDES_DE_ATENCION_EXTERNA) ? true : 
+                            (regional.id == loggedUser.regionalId))
                         }}
                         isInvalid={!!fieldState.error}
                         feedback={fieldState.error?.message}
+                        selected={field.value}
                         onBlur={field.onBlur}
                         onChange={(regional)=>{
-                          // setValue("medico", [])
-                          // setValue("proveedor", [])
-                          // trigger("medico")
-                          // trigger("proveedor")
-                          field.onChange(regional.length ? regional[0].id : null)
+                          setValue("medico", [])
+                          setValue("proveedor", [])
+                          field.onChange(regional)
                         }}
                       />
                     }}
@@ -204,7 +192,7 @@ export const SolicitudAtencionExternaForm = ()=>{
           </Accordion.Collapse>
         </Card>
         <Card style={{overflow: "visible"}} >
-          <Accordion.Toggle as={Card.Header} className="bg-primary text-light" eventKey="2">
+          <Accordion.Toggle as={Card.Header}  className={"text-light " + (formErrors.medico ? "bg-danger" : "bg-primary")} eventKey="2">
             Médico
           </Accordion.Toggle>
           <Accordion.Collapse eventKey="2">
@@ -221,9 +209,7 @@ export const SolicitudAtencionExternaForm = ()=>{
                     render={({field, fieldState})=>{
                       return <><MedicosTypeahead
                         id="solicitud-atencion-externa-form/medicos"
-                        searchText="Buscando..."
-                        promptText="Introduce un texto"
-                        filterBy={(medico)=>medico.regionalId == watch("regionalId")}
+                        filterBy={(medico) => medico.regionalId == watch("regional")[0]?.id}
                         className={fieldState.error ? "is-invalid" : ""}
                         isInvalid={!!formState.errors.medico}
                         selected={field.value}

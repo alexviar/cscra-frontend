@@ -5,10 +5,11 @@ import { Typeahead, TypeaheadProps } from 'react-bootstrap-typeahead'
 import { FaSync } from 'react-icons/fa'
 import { useQuery } from 'react-query'
 import { Municipio, UnidadesTerritorialesService } from "../services";
+import { isMatch } from "../utils";
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 
 
-export const MunicipiosTypeahead = ({isInvalid, feedback, ...props}: {feedback?: string, onLoad?: (options: Municipio[])=>void} & Omit<TypeaheadProps<Municipio>, "isLoading" | "options">) => {
+export const MunicipiosTypeahead = ({isInvalid, feedback, filterBy, ...props}: {feedback?: string, onLoad?: (options: Municipio[])=>void} & Omit<TypeaheadProps<Municipio>, "isLoading" | "options">) => {
 
 
   const queryKey = "getMunicipios"
@@ -32,6 +33,9 @@ export const MunicipiosTypeahead = ({isInvalid, feedback, ...props}: {feedback?:
       className={buscar.isError || isInvalid ? "is-invalid" : ""}
       isInvalid={buscar.isError || isInvalid}
       {...props}
+      filterBy={(municipio, props)=>{
+        return isMatch(municipio.nombre, props) && !!(typeof filterBy === "function" && filterBy(municipio, props))
+      }}
       isLoading={buscar.isFetching}
       options={buscar.data?.data||[]}
       labelKey="nombre"

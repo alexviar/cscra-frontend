@@ -1,54 +1,56 @@
 
-import { forwardRef, useEffect, useRef, useState } from "react"
-import { AsyncTypeahead, AsyncTypeaheadProps } from 'react-bootstrap-typeahead'
-import { useQuery, useQueryClient } from 'react-query'
-import { Proveedor, Empresa, ProveedorService } from "../services/ProveedoresService"
-import { Medico } from "../services/MedicosService";
-import 'react-bootstrap-typeahead/css/Typeahead.css';
+import { useEffect, useState } from "react"
+import { AxiosPromise } from "axios"
+import { Button, Form, InputGroup } from "react-bootstrap"
+import { FaSync } from "react-icons/fa"
+import { Typeahead, TypeaheadProps } from 'react-bootstrap-typeahead'
+import { useQuery } from 'react-query'
 import { Prestacion, PrestacionesService } from "../services/PrestacionesService";
+import { isMatch } from "../../../../commons/utils";
+import 'react-bootstrap-typeahead/css/Typeahead.css';
 
+export type { Prestacion }
 
-export const PrestacionesTypeahead = (props: Omit<AsyncTypeaheadProps<Prestacion>, "isLoading" | "options" | "onSearch">) => {
-  const [query, setQuery] = useState("")
-  const [page, setPage] = useState(1)
-  const queryKey = ["buscarPrestaciones", query, page]
+export const PrestacionesTypeahead = ({isInvalid, feedback, filterBy, ...props}: {feedback?: string, onLoad?: (options: Prestacion[])=>void} & Omit<TypeaheadProps<Prestacion>, "isLoading" | "options">) => {
+  const queryKey = "prestaciones.buscar"
+
   const buscar = useQuery(queryKey, ()=>{
-    return PrestacionesService.buscar({
-      nombre: query||undefined
-    }, {
-      size: 50,
-      current: page
-    })
+    return PrestacionesService.buscar({}) as AxiosPromise<Prestacion[]>
   }, {
-    enabled: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false
   })
-  const queryClient = useQueryClient()
-  
-  useEffect(()=>{
-    if(!buscar.data){
-      buscar.refetch()
-    }
-  }, [query])
 
-  return <AsyncTypeahead flip
-    filterBy={()=>true}
-    {...props}
-    isLoading={buscar.isFetching}
-    options={buscar.data?.data?.records || []}
-    labelKey="nombre"
-    useCache={false}
-    maxResults={50}
-    minLength={0}
-    onSearch={(newQuery)=>{
-      queryClient.cancelQueries(queryKey)
-      setQuery(newQuery)
-    }}
-    paginate
-    onPaginate={(e, size)=>{
-      setPage((page => page + 1))
-    }}
-    renderMenuItemChildren={(prestacion) => {
-      return prestacion.nombre
-    }}
-  />
+  useEffect(()=>{
+    if(buscar.data){
+      props.onLoad && props.onLoad(buscar.data?.data)
+    }
+  }, [buscar.data])
+
+  return <InputGroup hasValidation>
+    <Typeahead
+      className={buscar.isError || isInvalid ? "is-invalid" : ""}
+      isInvalid={buscar.isError || isInvalid}
+      {...props}
+      filterBy={(prestacion, props)=>{
+        return isMatch(prestacion.nombre, props) && !!(typeof filterBy === "function" && filterBy(prestacion, props))
+      }}
+      isLoading={buscar.isFetching}
+      options={buscar.data?.data||[]}
+      labelKey="nombre"
+      minLength={0}
+      renderMenuItemChildren={(regional) => {
+        return regional.nombre
+      }}
+    />
+    {buscar.isError ? <>
+      <InputGroup.Append>
+        <Button variant="outline-danger" onClick={()=>buscar.refetch()}><FaSync /></Button>
+      </InputGroup.Append>
+      <Form.Control.Feedback type="invalid">{buscar.error?.response?.message || buscar.error?.message}</Form.Control.Feedback>
+    </>
+    : null}
+    {feedback ? <Form.Control.Feedback type="invalid">{feedback}</Form.Control.Feedback> : null}
+  </InputGroup>
 }

@@ -22,11 +22,11 @@ export const PrestacionesService = {
     }
     return promise
   },
-  buscar: (filter: {nombre?: string}, page: Page) => {
+  buscar: (filter: {nombre?: string}, page?: Page) => {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source()
   
-    const promise = apiClient.get<PaginatedResponse<Prestacion>>("prestaciones", {
+    const promise = apiClient.get<PaginatedResponse<Prestacion>|Prestacion[]>("prestaciones", {
       params: {
         filter, page
       }

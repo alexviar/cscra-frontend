@@ -1,13 +1,13 @@
-import { AxiosError } from "axios"
+import { AxiosError, AxiosPromise } from "axios"
 import React, { useState } from "react"
 import { Button, Col, Dropdown, Form, Row, Spinner, Table } from "react-bootstrap"
 import { FaEdit, FaTrash, FaFilter, FaSync, FaPlus } from "react-icons/fa"
 import { useMutation, useQuery } from "react-query"
 import { Link, useLocation } from "react-router-dom"
-import Pagination from "../../../../commons/components/Pagination"
-import VerticalEllipsisDropdownToggle from "../../../../commons/components/VerticalEllipsisDropdownToggle"
+import {Pagination, VerticalEllipsisDropdownToggle} from "../../../../commons/components"
+import { PaginatedResponse } from "../../../../commons/services"
 import { nombreCompleto } from "../../../../commons/utils/nombreCompleto"
-import { MedicosService, Filter } from "../services"
+import { Medico, MedicosService, MedicoFilter as Filter } from "../services"
 import { MedicosFilterForm } from "./MedicosFilterForm"
 
 export default () => {
@@ -17,13 +17,14 @@ export default () => {
     size: 10
   })
   const [filter, setFilter] = useState<Filter>({
-
+    tipo: 1, 
   })
   const [filterFormVisible, showFilterForm] = useState(false)
 
   const buscar = useQuery(["buscarMedicos", page.current, page.size], () => {
-    return MedicosService.buscar(filter, page)
+    return MedicosService.buscar(filter, page) as AxiosPromise<PaginatedResponse<Medico>>
   }, {
+    refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false
   })
