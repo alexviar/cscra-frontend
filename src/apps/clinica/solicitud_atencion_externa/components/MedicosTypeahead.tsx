@@ -6,7 +6,8 @@ import { FaSync } from "react-icons/fa"
 import { Typeahead, TypeaheadProps } from 'react-bootstrap-typeahead'
 import { useQuery } from 'react-query'
 import { Medico, MedicosService } from "../services"
-import 'react-bootstrap-typeahead/css/Typeahead.css';
+import { isMatch } from "../../../../commons/utils"
+import 'react-bootstrap-typeahead/css/Typeahead.css'
 
 
 export const MedicosTypeahead = ({isInvalid, feedback, filterBy, ...props}: {feedback?: string, onLoad?: (options: Medico[])=>void} & Omit<TypeaheadProps<Medico>, "isLoading" | "options" | "onSearch">) => {
@@ -32,7 +33,8 @@ export const MedicosTypeahead = ({isInvalid, feedback, filterBy, ...props}: {fee
       isInvalid={buscar.isError || isInvalid}
       {...props}
       filterBy={(medico, props)=>{
-        return (isMatch(medico.nombreCompleto, props) || isMatch(medico.especialidad, props)) && !!(typeof filterBy === "function" && filterBy(medico, props))
+        return (isMatch(medico.nombreCompleto, props) || isMatch(medico.especialidad, props)) 
+          && !!(typeof filterBy === "function" && filterBy(medico, props))
       }}
       isLoading={buscar.isFetching}
       options={buscar.data?.data || []}

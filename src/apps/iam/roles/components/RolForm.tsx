@@ -82,7 +82,7 @@ export const RolForm = () => {
         ignoreAuthorization: true
       })
     },
-    onError: (error) => {
+    onError: (error: AxiosError) => {
       if(error!.response?.status !== 422)
         modalRef.current?.show(true)
     }
@@ -111,7 +111,6 @@ export const RolForm = () => {
       const error = (guardar.error as AxiosError)
       if(error.response?.status == 422){
         const { errors } = error.response.data
-        console.log("422 Errors", errors)
         if(errors.name) setError("name", {message: errors.name})
         if(errors.description) setError("description", {message: errors.description})
         if(errors.permissions) setError("permissions", {message: errors.permissions})

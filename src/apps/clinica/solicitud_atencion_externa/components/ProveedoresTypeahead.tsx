@@ -5,8 +5,8 @@ import { FaSync } from "react-icons/fa"
 import { Typeahead, TypeaheadProps } from 'react-bootstrap-typeahead'
 import { useQuery } from 'react-query'
 import { Proveedor, Empresa, ProveedorService } from "../services/ProveedoresService"
-import { isMatch } from "../../../../commons/utils";
-import 'react-bootstrap-typeahead/css/Typeahead.css';
+import { isMatch } from "../../../../commons/utils"
+import 'react-bootstrap-typeahead/css/Typeahead.css'
 
 
 export const ProveedoresTypeahead = ({isInvalid, feedback, filterBy, ...props}: {feedback?: string, onLoad?: (options: Proveedor[])=>void} &  Omit<TypeaheadProps<Proveedor>, "isLoading" | "options" | "onSearch">) => {
@@ -34,7 +34,8 @@ export const ProveedoresTypeahead = ({isInvalid, feedback, filterBy, ...props}: 
       isInvalid={buscar.isError || isInvalid}
       {...props}
       filterBy={(proveedor, props)=>{
-        return (proveedor.medico ? isMatch(proveedor.medico.nombreCompleto, props) : isMatch(proveedor.nombre, props)) && !!(typeof filterBy === "function" && filterBy(prestacion, props))
+        return (proveedor.medico ? isMatch(proveedor.medico.nombreCompleto, props) : isMatch(proveedor.nombre, props)) 
+          && !!(typeof filterBy === "function" && filterBy(proveedor, props))
       }}
       isLoading={buscar.isFetching}
       options={buscar.data?.data || []}

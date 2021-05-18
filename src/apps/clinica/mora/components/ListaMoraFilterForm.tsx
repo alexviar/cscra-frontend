@@ -5,6 +5,6 @@ type Props = {
   onApply: (filter: Filter) => void
 }
 
-export default (props: Props)=>{
+export const ListaMoraFilterForm = (props: Props)=>{
   return null
 }

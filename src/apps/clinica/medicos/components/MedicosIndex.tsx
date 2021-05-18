@@ -1,14 +1,16 @@
 import { AxiosError, AxiosPromise } from "axios"
-import React, { useState } from "react"
-import { Button, Col, Dropdown, Form, Row, Spinner, Table } from "react-bootstrap"
-import { FaEdit, FaTrash, FaFilter, FaSync, FaPlus } from "react-icons/fa"
-import { useMutation, useQuery } from "react-query"
+import { useEffect, useRef, useState } from "react"
+import { Button, Col, Form, Row, Spinner, Table } from "react-bootstrap"
+import { FaFilter, FaSync, FaPlus } from "react-icons/fa"
+import { useQuery } from "react-query"
 import { Link, useLocation } from "react-router-dom"
-import {Pagination, VerticalEllipsisDropdownToggle} from "../../../../commons/components"
+import { Pagination } from "../../../../commons/components"
+import { ProtectedContent, useLoggedUser, Permisos } from "../../../../commons/auth"
 import { PaginatedResponse } from "../../../../commons/services"
-import { nombreCompleto } from "../../../../commons/utils/nombreCompleto"
 import { Medico, MedicosService, MedicoFilter as Filter } from "../services"
 import { MedicosFilterForm } from "./MedicosFilterForm"
+import { RowOptions } from "./RowOptions"
+import { MedicoPolicy } from "./policies"
 
 export default () => {
   const {pathname: path} = useLocation()
@@ -16,14 +18,27 @@ export default () => {
     current: 1,
     size: 10
   })
-  const [filter, setFilter] = useState<Filter>({
-    tipo: 1, 
-  })
+
+  const loggedUser = useLoggedUser();
+  
+  const getDefaultFilter = ()=>{
+    const filter: Filter = { tipo: 1 }
+    if(!loggedUser.can(Permisos.VER_LISTA_DE_MORA)){
+      if(loggedUser.can(Permisos.VER_LISTA_DE_MORA_REGIONAL)){
+        filter.regionalId = loggedUser.regionalId;
+      }
+    }
+    return filter
+  }
+  const [filter, setFilter] = useState<Filter>(getDefaultFilter)
+  
   const [filterFormVisible, showFilterForm] = useState(false)
 
-  const buscar = useQuery(["buscarMedicos", page.current, page.size], () => {
+  const queryKey = "medicos.buscar";
+  const buscar = useQuery(queryKey, () => {
     return MedicosService.buscar(filter, page) as AxiosPromise<PaginatedResponse<Medico>>
   }, {
+    enabled: MedicoPolicy.view(loggedUser),
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false
@@ -31,13 +46,14 @@ export default () => {
 
   const total = buscar.data?.data?.meta?.total || 0
 
-  const eliminar = useMutation((id: number) => {
-    return MedicosService.eliminar(id)
-  }, {
-    onSuccess: () => {
-      buscar.refetch()
+  const didMountRef = useRef(false)
+  useEffect(()=>{
+    if(!didMountRef.current) {
+      didMountRef.current = true
+      return
     }
-  })
+    if(MedicoPolicy.view(loggedUser)) buscar.refetch()
+  }, [page, filter, loggedUser])
 
   const renderRows = () => {
     if (buscar.isFetching) {
@@ -48,7 +64,7 @@ export default () => {
         </td>
       </tr>
     }
-    else if (buscar.isError) {
+    if (buscar.isError) {
       const error = buscar.error as AxiosError
       return <tr>
         <td className="bg-danger text-light text-center" colSpan={100}>
@@ -56,46 +72,35 @@ export default () => {
         </td>
       </tr>
     }
-    const { data } = buscar
-    const listaMora = data!.data.records
-    return listaMora.map((item, index) => {
-      return <tr key={item.id}>
-        <th scope="row" style={{ lineHeight: "26px" }}>
-          {index + 1}
-        </th>
-        <td style={{ lineHeight: "26px" }}>
-          {/* {item.ci.raiz}-{item.ci.complemento} */}
-          {item.ci.raiz}{item.ci.complemento ? `-${item.ci.complemento}` : ""}
-        </td>
-        <td style={{ lineHeight: "26px" }}>
-          {nombreCompleto(item.apellidoPaterno, item.apellidoMaterno, item.nombres)}
-        </td>
-        <td style={{ lineHeight: "26px" }}>
-          {item.especialidad}
-        </td>
-        <td>
-          <Dropdown>
-            <Dropdown.Toggle as={VerticalEllipsisDropdownToggle}
-              variant="link" id={`dropdown-${item.id}`}
-            />
-
-            <Dropdown.Menu>
-              <Dropdown.Item as={Link} to={{
-                pathname: `/clinica/medicos/${item.id}/editar`,
-                state: {
-                  medico: item
-                }
-              }} ><FaEdit /><span className="ml-2 align-middle">Editar</span></Dropdown.Item>
-              <Dropdown.Item className="text-danger" href="#" onClick={() => {
-                if (window.confirm("¿Está seguro?")) {
-                  eliminar.mutate(item.id)
-                }
-              }}><FaTrash /><span className="ml-2 align-middle" >Eliminar</span></Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
-        </td>
+    if(buscar.data){
+      const records = buscar.data.data.records
+      if(records.length == 0){
+        return  <tr>
+          <td className="bg-light text-center" colSpan={100}>
+            No se encontraron resultados
+          </td>
       </tr>
-    })
+      }
+      return records.map((medico, index) => {
+        return <tr key={item.id}>
+          <th scope="row">
+            {index + 1}
+          </th>
+          <td>
+            {item.ci.raiz}{item.ci.complemento ? `-${item.ci.complemento}` : ""}
+          </td>
+          <td>
+            {item.nombreCompleto}
+          </td>
+          <td>
+            {item.especialidad}
+          </td>
+          <td>
+            <RowOptions medico={medico} />
+          </td>
+        </tr>
+      })
+    }
   }
 
   

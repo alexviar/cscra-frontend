@@ -1,18 +1,19 @@
 import { AxiosError } from "axios"
 import { useRef, useState} from "react"
 import { Button, Col, Dropdown, Form, Spinner, Table } from "react-bootstrap"
-import { Dm11Viewer } from "./Dm11Viewer"
-import { useMutation, useQuery } from "react-query"
-import { Page } from "../../../../commons/services/Page"
-import { SolicitudesAtencionExternaFilter, SolicitudesAtencionExternaService } from "../services/SolicitudesAtencionExternaService"
-import { SolicitudAtencionExternaFilterForm } from "./SolicitudAtencionExternaFilterForm"
-import Pagination from "../../../../commons/components/Pagination"
 import {FaFilter, FaPlus, FaSync} from "react-icons/fa"
 import { Link, useLocation } from "react-router-dom"
+import { useMutation, useQuery } from "react-query"
+import { Pagination } from "../../../../commons/components"
+import { Page } from "../../../../commons/services/Page"
+import { SolicitudesAtencionExternaFilter as Filter, SolicitudesAtencionExternaService } from "../services/SolicitudesAtencionExternaService"
+import { SolicitudAtencionExternaFilterForm } from "./SolicitudAtencionExternaFilterForm"
+import { Dm11Viewer } from "./Dm11Viewer"
 import { Permisos } from "../../../../commons/auth/constants"
 import { useLoggedUser } from "../../../../commons/auth/hooks"
 import { ProtectedContent } from "../../../../commons/auth/components/ProtectedContent"
 import { RowOptions } from "./RowOptions"
+import { SolicitudATPolicy } from "../policies"
 
 export const SolicitudAtencionExternaIndex = ()=>{
   const {pathname: path} = useLocation()
@@ -25,7 +26,7 @@ export const SolicitudAtencionExternaIndex = ()=>{
   const loggedUser = useLoggedUser();
 
   const getDefaultFilter = ()=>{
-    const filter: SolicitudesAtencionExternaFilter = {}
+    const filter: Filter = {}
     if(!loggedUser.can(Permisos.VER_SOLICITUDES_DE_ATENCION_EXTERNA)){
       if(loggedUser?.can(Permisos.VER_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL)){
         filter.regionalId = loggedUser.regionalId;
@@ -37,7 +38,7 @@ export const SolicitudAtencionExternaIndex = ()=>{
     return filter
   }
 
-  const [filter, setFilter] = useState<SolicitudesAtencionExternaFilter>(getDefaultFilter)
+  const [filter, setFilter] = useState<Filter>(getDefaultFilter)
 
   const buscar = useQuery(["solicitudesAtencionExterna.buscar", page, filter], ()=>{
     return SolicitudesAtencionExternaService.buscar({...filter, ...getDefaultFilter()}, page)
@@ -102,13 +103,7 @@ export const SolicitudAtencionExternaIndex = ()=>{
     <div className="d-flex my-2">
       <Form.Row className="ml-auto flex-nowrap" >
         <ProtectedContent
-          authorize={(user)=>{
-            if(user.canAny([
-              Permisos.VER_SOLICITUDES_DE_ATENCION_EXTERNA,
-              Permisos.VER_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL,
-              Permisos.VER_SOLICITUDES_DE_ATENCION_EXTERNA_REGISTRADO_POR
-            ])) return true
-          }}
+          authorize={SolicitudATPolicy.view}
         >
           <Col xs="auto" >
             <Button onClick={()=>{
@@ -122,10 +117,7 @@ export const SolicitudAtencionExternaIndex = ()=>{
           </Col>
         </ProtectedContent>
         <ProtectedContent
-          authorize={(user)=>user.canAny([
-            Permisos.REGISTRAR_SOLICITUDES_DE_ATENCION_EXTERNA,
-            Permisos.REGISTRAR_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL
-          ]) ? true : undefined}
+          authorize={SolicitudATPolicy.register}
         >
           <Col xs="auto">
             <Button
@@ -139,21 +131,15 @@ export const SolicitudAtencionExternaIndex = ()=>{
       </Form.Row>
     </div>
     <ProtectedContent
-      authorize={(user)=>{
-        if(user.canAny([
-          Permisos.VER_SOLICITUDES_DE_ATENCION_EXTERNA,
-          Permisos.VER_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL,
-          Permisos.VER_SOLICITUDES_DE_ATENCION_EXTERNA_REGISTRADO_POR
-        ])) return true
-      }}
+      authorize={SolicitudATPolicy.view}
     >
-      <Form.Row>
-        <Col className="mb-2">
+      <Form.Row className="mb-2">
+        <Col>
           <SolicitudAtencionExternaFilterForm onFilter={(filter)=>{
             setFilter(filter)
           }} />
         </Col>
-        <Col className="mb-2" xs={"auto"}>
+        <Col xs={"auto"}>
           <div className="d-flex flex-row flex-nowrap align-items-center">
               <span>Mostrar</span>
               <Form.Control className="mx-2" as="select" value={page.size} onChange={(e) => {

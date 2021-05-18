@@ -1,110 +1,149 @@
 import { AxiosError, AxiosResponse } from 'axios'
-import React, { useEffect } from 'react'
-import { Alert, Button, Col, Form, Spinner } from 'react-bootstrap'
+import { useEffect } from 'react'
+import { Alert, Button, Col, Form, InputGroup, Spinner } from 'react-bootstrap'
 import { useForm } from 'react-hook-form'
+import { useHistory } from "react-router-dom"
 import { FaSearch } from 'react-icons/fa'
-import { useMutation, useQuery } from 'react-query'
-import * as rules from '../../../../commons/components/rules'
+import { useMutation, useQuery, useQueryClient } from 'react-query'
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from "yup"
 import { EmpleadorService, ListaMoraItem, ListaMoraService } from '../services'
 
 type Inputs = {
   numeroPatronal: string,
   nombre: string
 }
+
+const schema = yup.object().shape({
+  numeroPatronal: yup.string().label("número patronal").trim().uppercase().required(),
+  nombre: yup.string().required()
+})
+
 export default ()=>{
   const {
     handleSubmit,
     register,
     watch,
+    setError,
+    clearErrors,
     setValue,
     reset,
+    trigger,
     formState
   } = useForm<Inputs>({
     mode: "onBlur",
+    resolver: yupResolver(schema),
     defaultValues: {
       nombre: "",
       numeroPatronal: ""
     }
   })
 
+  const formErrors = formState.errors
+  
+  console.log("Vlues", watch(), formErrors)
+
+  const history = useHistory()
+
+  const queryClient = useQueryClient()
+  
+  const onBuscarEmpleadorSuccess = ({data}: any) => {
+    console.log("Nombre",data.nombre)
+    setValue("nombre", data.nombre)
+  }
   const numeroPatronal = watch("numeroPatronal")
   const buscarEmpleador = useQuery(["buscarEmpleadorPorPatronal", numeroPatronal], ()=>{
     return EmpleadorService.buscarPorPatronal(numeroPatronal)
   }, {
     enabled: false,
+    onSuccess: onBuscarEmpleadorSuccess
   })
 
-  const agregarEmpleadorEnMora = useMutation((empleadorId: number)=>{
+  const guardar = useMutation((empleadorId: number)=>{
     return ListaMoraService.agregar(empleadorId)
+  }, {
+    onSuccess: () => {
+      queryClient.invalidateQueries("listaMora.buscar")
+      history.replace("/clinica/lista-mora")
+    }
   })
-  console.log(agregarEmpleadorEnMora)
 
   useEffect(()=>{
-    if(buscarEmpleador.data){
-      setValue("nombre", buscarEmpleador.data.data.nombre)
+    if(buscarEmpleador.isError){
+      const error = buscarEmpleador.error as AxiosError
+      setError("numeroPatronal", {
+        type: "searchError",
+        message: error.response?.status == 404 ? "Empleador no encontrado" : "Ocurrio un error"
+      })
     }
-  }, [buscarEmpleador.data])
+  }, [buscarEmpleador.isError])
 
-  useEffect(()=>{
-    if(agregarEmpleadorEnMora.data){
-      reset({
-        nombre: "",
-        numeroPatronal: ""
-      });
+  const renderAlert = ()=>{
+    if(guardar.isSuccess){
+      return <Alert variant="success">
+      La operacion se realizó exitosamente
+    </Alert>
     }
-  }, [agregarEmpleadorEnMora.data])
-  
+    if(guardar.isError){
+      const guardarError = guardar.error as AxiosError
+      return <Alert variant="danger">
+        {guardarError.response?.data?.message || guardarError.message}
+      </Alert>
+    }
+    return null
+  }
+
   return <Form id="form-empleador-mora"
-    onSubmit={handleSubmit((values)=>{
-      agregarEmpleadorEnMora.mutate(buscarEmpleador.data!.data.id)
+    onSubmit={handleSubmit(()=>{
+      guardar.mutate(buscarEmpleador.data!.data.id)
     })}
   >
-    <h1 style={{fontSize: "2rem"}}>Agregar empleador en mora</h1>
-    {buscarEmpleador.isError ? <Alert variant="danger">
-      {buscarEmpleador.error!.response?.message || buscarEmpleador.error!.message}
-    </Alert> : null}
-    {agregarEmpleadorEnMora.isError ? <Alert variant="danger">
-      {agregarEmpleadorEnMora.error!.response?.message || agregarEmpleadorEnMora.error!.message}
-    </Alert> : null}
+    <h1 style={{fontSize: "1.75rem"}}>Agregar empleador en mora</h1>
+    {renderAlert()}
     <Form.Row>
       <Form.Group as={Col} sm={4}>
         <Form.Label>
           Nº Patronal
         </Form.Label>
-        <Form.Control
-          {...register("numeroPatronal")}
-        />
+        <InputGroup hasValidation className="mb-2">
+          <Form.Control
+            isInvalid={!!formErrors.numeroPatronal}
+            className="text-uppercase" {...register("numeroPatronal")} />
+          <InputGroup.Append >
+            <Button variant={formErrors.numeroPatronal ? "danger" : "outline-secondary"} onClick={()=>{
+              trigger("numeroPatronal")
+              .then((valid)=>{
+                if(!formErrors.numeroPatronal){
+                  clearErrors()
+                  if(!buscarEmpleador.data){
+                    buscarEmpleador.refetch()
+                  }
+                }
+              })
+            }}>
+              {buscarEmpleador.isFetching ? <Spinner animation="border" size="sm" /> : <FaSearch />}
+            </Button>
+          </InputGroup.Append>
+          <Form.Control.Feedback type="invalid">{formErrors.numeroPatronal?.message}</Form.Control.Feedback>
+        </InputGroup>
       </Form.Group>
     </Form.Row>
-    <Button className="mb-3" onClick={()=>{
-      reset({
-        numeroPatronal,
-        nombre: "",
-      })
-      
-      buscarEmpleador.refetch()
-    }}>
-      {buscarEmpleador.isFetching ? <Spinner className="mr-2" animation="border" size="sm" /> : <FaSearch className="mr-2"/>}
-      Buscar
-    </Button>
     <Form.Row>
       <Form.Group as={Col}>
           <Form.Label>
             Nombre
           </Form.Label>
           <Form.Control
-            disabled
+            readOnly
             isInvalid={!!formState.errors.nombre}
-            {...register("nombre", {
-              required: rules.required()
-            })}
+            {...register("nombre")}
           />
           <Form.Control.Feedback type="invalid">{formState.errors.nombre?.message}</Form.Control.Feedback>
       </Form.Group>
     </Form.Row>
     <Button type="subimt">
-      {agregarEmpleadorEnMora.isLoading ? <Spinner animation="border" size="sm" /> : null}
-      Agregar
+      {guardar.isLoading ? <Spinner className="mr-2" animation="border" size="sm" /> : null}
+      <span className=""></span>Agregar
     </Button>
   </Form>
 }

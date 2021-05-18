@@ -19,7 +19,7 @@ export type AseguradoInputs = {
     apellidoPaterno: string | null
     apellidoMaterno: string
     nombres: string
-    fechaExtinsion: string | null
+    fechaExtincion: string | null
     tipo: number
     estado: string
     tieneBaja: boolean
@@ -100,7 +100,7 @@ export const AseguradoCard = ()=>{
     setValue("asegurado.tieneBaja", !!asegurado.baja)
     setValue("asegurado.fechaRegBaja", asegurado.baja?.regDate)
     setValue("asegurado.fechaValidezSeguro", asegurado.baja?.fechaValidezSeguro)
-    setValue("asegurado.fechaExtinsion", asegurado.fechaExtinsion)
+    setValue("asegurado.fechaExtincion", asegurado.fechaExtincion)
     
     setValue("titular.id", titular?.id)
     setValue("titular.matricula", titular?.matricula)
@@ -131,7 +131,7 @@ export const AseguradoCard = ()=>{
       setValue("asegurado.tieneBaja", false)
       setValue("asegurado.fechaRegBaja", "")
       setValue("asegurado.fechaValidezSeguro", null)
-      setValue("asegurado.fechaExtinsion", null)
+      setValue("asegurado.fechaExtincion", null)
       setValue("titular", {
         id: "",
         matricula: "",
@@ -183,8 +183,8 @@ export const AseguradoCard = ()=>{
                     else{
                       const {data: {records}} = buscar.data
                       if(records.length == 1){
-                        const asegurado = records[0]
-                        onChange(asegurado)
+                        // const asegurado = records[0]
+                        // onChange(asegurado)
                       }
                       else {
                         aseguradoChooserRef.current?.show(true)
@@ -248,19 +248,19 @@ export const AseguradoCard = ()=>{
             <Form.Control 
               readOnly
               type="date"
-              isInvalid={!!formErrors.asegurado?.fechaExtinsion}
-              {...register("asegurado.fechaExtinsion", {
+              isInvalid={!!formErrors.asegurado?.fechaExtincion}
+              {...register("asegurado.fechaExtincion", {
                 validate: {
                   afterDate: (value) => {
                     const now = moment()
                     if(value && moment(value, "DD/MM/YYYY").isSameOrBefore(now)){
-                      return "Se ha cumplido la fecha de extinsion"
+                      return "Se ha cumplido la fecha de extincion"
                     } 
                   }
                 }
               })}
             />
-            <Form.Control.Feedback type="invalid">{formErrors.asegurado?.fechaExtinsion?.message}</Form.Control.Feedback>
+            <Form.Control.Feedback type="invalid">{formErrors.asegurado?.fechaExtincion?.message}</Form.Control.Feedback>
           </Form.Group> : null}
         </Form.Row>
         { asegurado.tipo == 2 ? <div /*className={asegurado.tipo == 2 ? "" : "d-none"}*/ >

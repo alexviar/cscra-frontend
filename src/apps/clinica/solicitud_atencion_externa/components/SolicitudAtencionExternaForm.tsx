@@ -1,5 +1,6 @@
 import React, { ComponentProps, useRef, useEffect } from "react"
-import { Accordion, Button, Card,Col,Form, Spinner } from "react-bootstrap"
+import { AxiosError } from "axios"
+import { Accordion, Alert, Button, Card,Col,Form, Spinner } from "react-bootstrap"
 import { useForm, Controller, FormProvider } from "react-hook-form"
 import moment from "moment"
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -7,7 +8,6 @@ import * as yup from "yup"
 import { AseguradoCard, AseguradoInputs } from "./AseguradoCard"
 import { MedicosTypeahead } from "./MedicosTypeahead"
 import { PrestacionesSolicitadasInputs, PrestacionesSolicitadasCard } from "./PrestacionesSolicitadasCard"
-import * as rules from "../../../../commons/components/rules"
 import { useMutation } from "react-query"
 import { Medico, SolicitudesAtencionExternaService } from "../services"
 import { Regional, RegionalesTypeahead } from "../../../../commons/components"
@@ -59,7 +59,7 @@ const schema = yup.object().shape({
   asegurado: yup.object().shape({
     matricula: yup.string().label("matricula").trim().uppercase().required().matches(/^\d{2}-\d{4}-[a-zA-ZñÑ]{2,3}$/, "Formato incorrecto."),
     estado: estadoAfiSchema,
-    fechaExtinsion: yup.lazy(value => value ? 
+    fechaExtincion: yup.lazy(value => value ? 
       yup.date().label("fecha de extinsion").nullable().notRequired().min(hoy.toDate(), "Fecha de extinsion alcanzada") :
       yup.mixed()),
     fechaValidezSeguro: validezSchema
@@ -114,7 +114,9 @@ export const SolicitudAtencionExternaForm = ()=>{
     trigger,
     formState,
     control,
+    reset,
     setValue,
+    setError,
     watch
   } = formMethods
 
@@ -142,17 +144,49 @@ export const SolicitudAtencionExternaForm = ()=>{
         Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA_REGISTRADO_POR
       ]) || (loggedUser.can(Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL) && regionalId == loggedUser.regionalId)){
         dm11Viewer.open({url: urlDm11})
+        //reset()
       }
     }
   })
 
   const formErrors = formState.errors
+  const registrarError = registrar.error as AxiosError
+
+  const serverKeyErrorMappers = (key: string)=>{
+
+  }
+
+  useEffect(()=>{
+    if(registrarError?.response?.status == 422){
+      const {errors} = registrarError.response?.data
+      Object.keys(errors).forEach((key: any)=>{
+        let localKey = key
+        if(key == "asegurado.id") localKey = "asegurado.matricula"
+        setError(localKey, {type: "serverError", message: errors[key]})
+      })
+    }
+  }, [registrarError])
+
+  const renderAlert = ()=>{
+    if(registrar.isSuccess){
+      return <Alert variant="success">
+      La operacion se realizó exitosamente
+    </Alert>
+    }
+    if(registrar.isError){
+      return registrarError.response?.status != 422 ? <Alert variant="danger">
+        {registrarError ? registrarError.response?.data?.message || registrarError.message : ""}
+      </Alert> : null
+    }
+    return null
+  }
 
   return <FormProvider {...formMethods}>
     <Form onSubmit={handleSubmit((values)=>{
       registrar.mutate(values)
     })}>
       <h1 style={{fontSize: "1.75rem"}}>Solicitud de atención externa</h1>
+      {renderAlert()}
       <Accordion className="mt-3"  defaultActiveKey="0">
         <AseguradoCard />
         <Card style={{overflow: "visible"}} >
@@ -170,7 +204,7 @@ export const SolicitudAtencionExternaForm = ()=>{
                     render={({field, fieldState})=>{
                       return <RegionalesTypeahead
                         id="solicitud-atencion-externa-form/regionales"
-                        filterBy={(regional: Regional, props: any)=>{
+                        filterBy={(regional: Regional)=>{
                           return (loggedUser.can(Permisos.REGISTRAR_SOLICITUDES_DE_ATENCION_EXTERNA) ? true : 
                             (regional.id == loggedUser.regionalId))
                         }}
@@ -203,13 +237,10 @@ export const SolicitudAtencionExternaForm = ()=>{
                   <Controller 
                     control={control}
                     name="medico"
-                    rules={{
-                      required: rules.required()
-                    }}
                     render={({field, fieldState})=>{
                       return <><MedicosTypeahead
                         id="solicitud-atencion-externa-form/medicos"
-                        filterBy={(medico) => medico.regionalId == watch("regional")[0]?.id}
+                        filterBy={(medico) => medico.regionalId == watch("regional.0.id")}
                         className={fieldState.error ? "is-invalid" : ""}
                         isInvalid={!!formState.errors.medico}
                         selected={field.value}

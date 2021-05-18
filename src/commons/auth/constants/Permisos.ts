@@ -34,3 +34,58 @@ export const VER_ROLES = "Ver roles";
 export const REGISTRAR_ROLES = "Registrar roles";
 export const EDITAR_ROLES = "Editar roles";
 export const ELIMINAR_ROLES = "Eliminar roles";
+
+
+/**
+ * Permisos de lista de mora
+ */
+export const VER_LISTA_DE_MORA = "Ver lista de mora"
+export const VER_LISTA_DE_MORA_REGIONAL = "Ver lista de mora (regional)"
+export const AGREGAR_EMPLEADOR_EN_MORA = "Agregar empleador en mora";
+export const AGREGAR_EMPLEADOR_EN_MORA_DE_LA_MISMA_REGIONAL = "Agregar empleador en mora (misma regional)";
+export const QUITAR_EMPLEADOR_EN_MORA = "Quitar empleador en mora";
+export const QUITAR_EMPLEADOR_EN_MORA_DE_LA_MISMA_REGIONAL = "Quitar empleador en mora (misma regional)";
+
+
+
+/**
+ * Medicos
+ */
+export const VER_MEDICOS = "Ver médicos";
+export const VER_MEDICOS_REGIONAL = "Ver médicos (regional)";
+export const REGISTRAR_MEDICOS = "Registrar médicos";
+export const REGISTRAR_MEDICOS_REGIONAL = "Registrar médicos (regional)";
+export const EDITAR_MEDICOS = "Editar médicos";
+export const EDITAR_MEDICOS_REGIONAL = "Editar médicos (regional)";
+export const BAJA_MEDICOS = "Baja médicos";
+export const BAJA_MEDICOS_REGIONAL = "Baja médicos (regional)";
+
+/**
+* Proveedores
+*/
+export const VER_PROVEEDORES = "Ver proveedores";
+export const VER_PROVEEDORES_REGIONAL = "Ver proveedores (regional)";
+export const REGISTRAR_PROVEEDORES = "Registrar proveedores";
+export const REGISTRAR_PROVEEDORES_REGIONAL = "Registrar proveedores (regional)";
+export const EDITAR_PROVEEDORES = "Editar proveedores";
+export const EDITAR_PROVEEDORES_REGIONAL = "Editar proveedores (regional)";
+export const BAJA_PROVEEDORES = "Baja proveedores";
+export const BAJA_PROVEEDORES_REGIONAL = "Baja proveedores (regional)";
+
+/**
+* Especialidades
+*/
+export const VER_ESPECIALIDADES = "Ver especialidades";
+export const REGISTRAR_ESPECIALIDADES = "Registrar especialidades";
+export const EDITAR_ESPECIALIDADES = "Editar especialidades";
+export const ELIMINAR_ESPECIALIDADES = "Eliminar especialidades";
+export const IMPORTAR_ESPECIALIDADES = "Importar especialidades";
+
+/**
+* Prestaciones
+*/
+export const VER_PRESTACIONES = "Ver prestaciones";
+export const REGISTRAR_PRESTACIONES = "Registrar prestaciones";
+export const EDITAR_PRESTACIONES = "Editar prestaciones";
+export const ELIMINAR_PRESTACIONES = "Eliminar prestaciones";
+export const IMPORTAR_PRESTACIONES = "Importar prestaciones";

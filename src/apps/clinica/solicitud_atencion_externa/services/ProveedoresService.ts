@@ -1,6 +1,6 @@
 import { apiClient, Page, PaginatedResponse } from "../../../../commons/services"
 import axios from 'axios'
-import { Medico } from "./MedicosService"
+import { Medico } from "../../medicos/services/MedicosService"
 
 export type Empresa = {
   id: number,

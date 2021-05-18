@@ -5,11 +5,6 @@ import { useSelector } from "react-redux"
 export const QueryProgressModal = ()=>{
   //@ts-ignore
   const modal = useSelector((state)=>state.modals.queryLoader)
-  const [show, setShow] = useState(false)
-
-  useEffect(()=>{
-    setShow(modal.show)
-  }, [modal.show])
 
   const renderModalHeader = ()=>{
     if(modal.state == "loading"){
@@ -37,7 +32,7 @@ export const QueryProgressModal = ()=>{
   }
 
   return <BSModal centered show={show} onHide={()=>{
-    if(modal.state !== "loading") setShow(false)
+    if(modal.state !== "loading") modal.close()
   }}>
     <BSModal.Header>
       {renderModalHeader()}
