@@ -33,7 +33,8 @@ export const RegionalesTypeahead = ({isInvalid, feedback, filterBy, ...props}: {
       isInvalid={buscar.isError || isInvalid}
       {...props}
       filterBy={(regional, props)=>{
-        return isMatch(regional.nombre, props) && !!(typeof filterBy === "function" && filterBy(regional, props))
+        return !props.text || (isMatch(regional.nombre, props) && 
+        !!(!filterBy || (typeof filterBy === "function" && filterBy(regional, props))))
       }}
       isLoading={buscar.isFetching||undefined}
       options={buscar.data?.data||[]}

@@ -1,32 +1,47 @@
 
 import { useState, useEffect } from "react"
-import { Alert, Form, Col, Modal, Row, Spinner } from "react-bootstrap"
+import { Form, Col} from "react-bootstrap"
 import { useHistory, useParams } from "react-router"
 import { useQuery } from "react-query"
-import { ProveedorEmpresaForm } from "./ProveedorEmpresaForm"
-import { ProveedorMedicoForm } from "./ProveedorMedicoForm"
+import { useModal } from "../../../../commons/reusable-modal"
+import { Inputs as PEInputs, ProveedorEmpresaForm } from "./ProveedorEmpresaForm"
+import { Inputs as ProveedorMedicoInput, ProveedorMedicoForm } from "./ProveedorMedicoForm"
 import { Proveedor, ProveedoresService } from "../services"
 import { ContactoForm } from "./ContactoForm"
 import { ContratoForm } from "./ContratoForm"
 
-export const ProveedorForm = ()=>{
+export type { ProveedorMedicoInput }
+
+export type Inputs = PEInputs | ProveedorMedicoInput
+
+export const ProveedorForm = (props: { onSubmit?: (data: PEInputs | ProveedorMedicoInput) => void})=>{
   const [tipo, setTipo] = useState(0)
-  const [step, setStep] = useState(1)
-  const [showLoader, setShowLoader] = useState(false)
   const {id} = useParams<{
     id?: string
   }>()
+
   const history = useHistory<{
-    proveedor: Proveedor,
-    // step: number
+    proveedor: Proveedor
   }>()
 
-  const cargar = useQuery(["cargarProveedor",id], ()=>{
+  const loader = useModal("queryLoader")
+
+  const cargar = useQuery(["proveedor",id], ()=>{
     return ProveedoresService.cargar(parseInt(id!))
   }, {
     enabled: !!id && !history.location.state?.proveedor,
+    refetchOnMount: false,
     refetchOnReconnect: false,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
+    onSuccess: ()=>{
+      loader.close()
+    },
+    onError: (error) => {
+      loader.open({
+        state: "error",
+        error
+      })
+    }
   })
 
   const proveedor = cargar.data?.data || history.location.state?.proveedor
@@ -39,81 +54,41 @@ export const ProveedorForm = ()=>{
 
   useEffect(()=>{
     if(cargar.isLoading){
-      setShowLoader(true)
+      loader.open({
+        state: "loading"
+      })
     }
   }, [cargar.isLoading])
 
-  const renderLoader = () => {
-    return <Modal centered show={showLoader} onHide={()=>{
-      if(cargar.isError){
-        setShowLoader(false)
-      }
-    }}>
-      <Modal.Header>
-        Cargando
-      </Modal.Header>
-      <Modal.Body>
-        {cargar.isLoading ? <Spinner animation="border"></Spinner> : <Alert variant="danger">
-          {cargar.error?.response?.message || cargar.error?.message}
-        </Alert>}
-      </Modal.Body>
-    </Modal>
-  }
-
-  console.log(tipo, step)
-
   const renderForm = () => {
     if(tipo == 1) {
-      return <ProveedorMedicoForm proveedor={proveedor}  
-        next={()=>{
-          if(!id){
-            setStep(2)
-          }
-        }}
+      return <ProveedorMedicoForm proveedor={proveedor} 
+        onSubmit={props.onSubmit}
       />
     } 
     if(tipo == 2){
-      return <ProveedorEmpresaForm proveedor={proveedor} 
-        next={()=>{
-          if(!id){
-            setStep(2)
-          }
-        }}
+      return <ProveedorEmpresaForm proveedor={proveedor}
+        onSubmit={props.onSubmit}
       />
     }
     return null
   }
 
-  if(step == 1){
-    return <>
-      <h1 style={{fontSize: "2rem"}}>{id ? "Actualizacion de Proveedor" : "Registro de Proveedor"}</h1>
-      <Form.Group as={Row}>
-        <Form.Label column sm={"auto"}>Tipo de proveedor</Form.Label>
-        <Col className="d-flex" xs={"auto"}>
-          <Form.Check disabled={!!id} inline type="radio" label="Médico" value={1} checked={tipo == 1} onChange={(e)=>{
-            if(e.target.checked && !id)
-              setTipo(1) 
-          }} ></Form.Check>
-          <Form.Check inline type="radio" label="Empresa" value={2} checked={tipo == 2} onChange={(e)=>{
-            if(e.target.checked && !id)
-              setTipo(2) 
-          }} ></Form.Check>
-        </Col>
-      </Form.Group>
-      {renderLoader()}
-      {renderForm()}
-    </>
-  }
-  if(step == 2){
-    return <ContactoForm next={()=>{
-      setStep(3)
-    }}/>
-  }
-  if(step == 3){
-    return <ContratoForm next={()=>{
-      history.replace(`/clinica/proveedores/${history.location.state!.proveedor.id}`)
-    }} />
-  }
-  return null
-
+  return <>
+    <h1 style={{fontSize: "1.75rem"}}>{id ? "Actualizacion de Proveedor" : "Registro de Proveedor"}</h1>
+    <Form.Group as={Form.Row}>
+      <Form.Label column sm={"auto"}>Tipo de proveedor</Form.Label>
+      <Col className="d-flex" xs={"auto"}>
+        <Form.Check disabled={!!id} inline type="radio" label="Médico" value={1} checked={tipo == 1} onChange={(e)=>{
+          if(e.target.checked && !id)
+            setTipo(1) 
+        }} ></Form.Check>
+        <Form.Check disabled={!!id}  inline type="radio" label="Empresa" value={2} checked={tipo == 2} onChange={(e)=>{
+          if(e.target.checked && !id)
+            setTipo(2) 
+        }} ></Form.Check>
+      </Col>
+    </Form.Group>
+    {renderForm()}
+  </>
 }

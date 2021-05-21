@@ -1,122 +1,140 @@
 import { useEffect, useState } from "react"
 import { Button, Form, Col, Spinner } from "react-bootstrap"
 import { Controller, useForm } from "react-hook-form"
-import { Redirect, useParams, useHistory } from "react-router"
+import { useParams, useHistory } from "react-router"
+import { yupResolver } from "@hookform/resolvers/yup"
+import * as yup from "yup"
 import { useMutation } from "react-query"
-import { RegionalesTypeahead } from "../../../../commons/components/RegionalesTypeahead"
-import * as rules from '../../../../commons/components/rules'
-import { Regional } from "../../../../commons/services/RegionalesService"
+import { Regional, RegionalesTypeahead } from '../../../../commons/components'
+import { Permisos, useLoggedUser } from '../../../../commons/auth'
 import { Proveedor, ProveedoresService } from '../services'
 
-type Inputs = {
-  nit: string,
-  nombre: string,
-  regional: Regional
+export type Inputs = {
+  tipo?: 2
+  nit?: number,
+  nombre?: string,
+  regional?: Regional[]
 }
 
 type Props = {
   proveedor?: Proveedor,
-  noRedirect?: boolean,
-  next?: () => void
+  onSubmit?: (data: Inputs) => void
 }
 
-export const ProveedorEmpresaForm = ({proveedor, noRedirect=false, next}: Props)=>{
+const schema = yup.object().shape({
+  nit: yup.number().label("NIT")
+  .emptyStringTo()
+  .typeError("El ${path} no es un numero valido")
+  .required(),
+  // .nullable()
+  // .notRequired(),
+  nombre: yup.string().required().max(150),  
+  regional: yup.array().length(1, "Debe indicar una regional")
+})
+
+export const ProveedorEmpresaForm = ({proveedor, onSubmit}: Props)=>{
   const {id} = useParams<{
     id?: string
   }>()
 
-  const history = useHistory<{
-    proveedor?: Proveedor,
-  }>()
+  const history = useHistory()
 
-  const [regionales, setRegionales] = useState<Regional[]>([])
+  const loggedUser = useLoggedUser()
+
   const {
+    control,
+    formState,
     handleSubmit,
-    register,
-    control
-  } = useForm<Inputs>()
+    setValue,
+    register
+  } = useForm<Inputs>({
+    mode: "onBlur",
+    resolver: yupResolver(schema),
+    defaultValues: {
+      tipo: 2,
+      nit: proveedor?.nit as number,
+      nombre: proveedor?.nombre as string,
+      regional: []
+    }
+  })
+
+  const formErrors = formState.errors
+
+  const [ regionales, setRegionales ] = useState<Regional[]>([])
 
   const guardar = useMutation((values: Inputs)=>{
-    return id ? ProveedoresService.actualizar(parseInt(id), {
-      tipoId: 2,
-      nit: parseInt(values.nit) || undefined,
-      nombre: values.nombre,
-      regionalId: values.regional!.id
-    }) : ProveedoresService.registrar({
-      tipoId: 2,
-      nit: parseInt(values.nit) || undefined,
-      nombre: values.nombre,
-      regionalId: values.regional!.id
+    return ProveedoresService.actualizar(parseInt(id!), {
+      tipoId: values.tipo!,
+      nit: values.nit!,
+      nombre: values.nombre!,
+      regionalId: values.regional![0].id
     })
+  }, {
+    onSuccess: ({data}) => {
+      history.replace(`/clinica/proveedores/${data.id}`)
+    }
   })
 
   useEffect(()=>{
-    if(guardar.data){
-      if(next){
-        history.replace(history.location.pathname, {
-          proveedor: guardar.data.data
-        })
-        next()
-      }
-      else{
-        history.replace(`/clinica/proveedores/${guardar.data.data.id}`)
-      }
+    if(proveedor && regionales.length){
+      setValue("regional", regionales.filter(r=>r.id == proveedor.regionalId))
     }
-  }, [guardar.data])
+  }, [proveedor, regionales])
 
-  return <Form onSubmit={handleSubmit((values)=>{
+  return <Form id="proveedor-form" onSubmit={handleSubmit(onSubmit || ((values)=>{
     guardar.mutate(values)
-  })}>
+  }))}>
     <Form.Row>
       <Form.Group as={Col} sm={4}>
         <Form.Label>NIT</Form.Label>
         <Form.Control
-          // isInvalid={formState}
-          {...register("nit", {
-            pattern: rules.pattern(/\d*/)
-          })}
+          isInvalid={!!formErrors.nit}
+          {...register("nit")}
         />
+        <Form.Control.Feedback type="invalid">{formErrors.nit?.message}</Form.Control.Feedback>
       </Form.Group>
       <Form.Group as={Col} sm={8}>
         <Form.Label>Nombre</Form.Label>
         <Form.Control
-          {...register("nombre", {
-            required: rules.required()
-          })}
+          isInvalid={!!formErrors.nombre}
+          {...register("nombre")}
         />
-      </Form.Group>
-    </Form.Row>
-    <Form.Row>
+        <Form.Control.Feedback type="invalid">{formErrors.nombre?.message}</Form.Control.Feedback>
+      </Form.Group>      
       <Form.Group as={Col} md={4}>
-        <Form.Label>Regional</Form.Label>
-        <Controller
-          name="regional"
-          control={control}
-          rules={{
-            required: rules.required()
-          }}
-          render={({field, fieldState})=>{
-            return <>
-              <RegionalesTypeahead
-                id="medicos-form/regionales-typeahead"
-                onLoad={(regionales)=>setRegionales(regionales)}
-                className={fieldState.error ? "is-invalid" : ""}
-                isInvalid={!!fieldState.error}
-                selected={field.value ? [field.value] : []}
-                onChange={(regionales)=>field.onChange(regionales.length && regionales[0])}
-                onBlur={field.onBlur}
-              />
-              <Form.Control.Feedback type="invalid">{fieldState.error?.message}</Form.Control.Feedback>
-            </>
-          }}
-        />
-      </Form.Group>
+          <Form.Label>Regional</Form.Label>
+          <Controller
+            name="regional"
+            control={control}
+            render={({field, fieldState})=>{
+              return <>
+                <RegionalesTypeahead
+                  id="proveedor-form/regionales-typeahead"
+                  onLoad={(regionales)=>setRegionales(regionales)}
+                  filterBy={(regional) => {
+                    if(loggedUser.can(Permisos.REGISTRAR_PROVEEDORES)) return true 
+                    if(loggedUser.can(Permisos.REGISTRAR_PROVEEDORES_REGIONAL) && loggedUser.regionalId == regional.id) return true
+                    if(id && loggedUser.can(Permisos.EDITAR_PROVEEDORES)) return true
+                    if(id && loggedUser.can(Permisos.EDITAR_PROVEEDORES_REGIONAL) && loggedUser.regionalId == regional.id) return true
+                    return false
+                  }}
+                  feedback={fieldState.error?.message}
+                  isInvalid={!!fieldState.error}
+                  selected={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                />
+              </>
+            }}
+          />
+        </Form.Group>
+      
     </Form.Row>
-    <Button
-      type="submit"
-    >
-      {guardar.isLoading ? <Spinner animation="border" size="sm" />: null}
-      Guardar
-    </Button>
+    {!onSubmit ? <Button
+        type="submit"
+      >
+        {guardar.isLoading ? <Spinner animation="border" size="sm" />: null}
+        Guardar
+      </Button> : null}
   </Form>
 }

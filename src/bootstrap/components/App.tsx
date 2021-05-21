@@ -19,11 +19,8 @@ import { AuthService } from '../../commons/auth/services';
 import { apiClient } from '../../commons/services';
 import { unauthorized } from '../../commons/auth/actions';
 import { ToggleSidebar } from './ToggleSidebar'
-import { setLocale } from 'yup';
-import { yup as yupMessages } from '../../configs/messages.json'
+import "../../configs/yup"
 import '../../App.css';
-
-setLocale(yupMessages)
 
 const IamApp = React.lazy(()=>import("../../apps/iam/IamApp"))
 const ClinicaApp = React.lazy(()=>import("../../apps/clinica/ClinicaApp"))

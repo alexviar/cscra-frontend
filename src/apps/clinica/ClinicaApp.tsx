@@ -5,18 +5,23 @@ import { FaCog, /*FaCoins,*/ FaHandshake, FaUserMd } from 'react-icons/fa';
 import { BiTransfer } from 'react-icons/bi';
 import ListaMoraIndex from './mora/components/ListaMoraIndex';
 import ListaMoraItemForm from './mora/components/ListaMoraItemForm';
-import { SolicitudAtencionExternaIndex } from './solicitud_atencion_externa/components/SolicitudAtencionExternaIndex';
 import { FcDebt } from '../../commons/components/icons/FcDebt';
+import { SolicitudAtencionExternaIndex } from './solicitud_atencion_externa/components/SolicitudAtencionExternaIndex';
 import { SolicitudAtencionExternaForm } from './solicitud_atencion_externa/components/SolicitudAtencionExternaForm';
+import { SolicitudATPolicy } from './solicitud_atencion_externa/policies';
 import { EspecialidadesIndex } from './especialidades/components/EspecialidadesIndex';
 import { PrestacionesIndex, PrestacionForm } from './prestaciones/componentes';
-import MedicosIndex from './medicos/components/MedicosIndex';
-import MedicosForm from './medicos/components/MedicosForm';
-import { ProveedoresIndex, ProveedorForm, ContactoForm, ContratoForm } from './proveedores/components';
-import { ProtectedRoute } from '../../commons/auth/components';
-import { Permisos } from '../../commons/auth/constants';
-import { useLoggedUser } from '../../commons/auth/hooks';
-import { SolicitudATPolicy } from './solicitud_atencion_externa/policies';
+import { MedicosIndex, MedicosForm, MedicoPolicy } from './medicos';
+import { 
+  ProveedoresIndex,
+  ProveedorView,
+  ProveedorWizard,
+  ProveedorForm,
+  ContactoForm,
+  ContratoForm,
+  ProveedorPolicy
+} from './proveedores';
+import { Permisos, ProtectedRoute, useLoggedUser } from '../../commons/auth';
 
 export const ClinicaApp = ()=>{
   const { url } = useRouteMatch()
@@ -42,20 +47,24 @@ export const ClinicaApp = ()=>{
         icon: <BiTransfer />
       })
     }
-
-    items.push(
-      {
+    if(MedicoPolicy.index(loggedUser)){
+      items.push({
         id: "medicos",
         path: `${url}/medicos`,
         title: "Medicos",
         icon: <FaUserMd />,
-      },
-      {
+      })
+    }
+    if(ProveedorPolicy.index(loggedUser)){
+      items.push({
         id: "proveedores",
         path: `${url}/proveedores`,
         title: "Proveedores",
-        icon: <FaHandshake />,
-      },
+        icon: <FaHandshake />
+      })
+    }
+
+    items.push(
       {
         id: "configuracion",
         // path: `${url}/configuracion`,
@@ -94,36 +103,56 @@ export const ClinicaApp = ()=>{
         authorize={SolicitudATPolicy.index}>
         <SolicitudAtencionExternaIndex />
       </ProtectedRoute>
-      <Route exact path={`${url}/atencion-externa/registrar`}>
+      <ProtectedRoute exact path={`${url}/atencion-externa/registrar`}
+        authorize={SolicitudATPolicy.register}
+      >
         <SolicitudAtencionExternaForm />
-      </Route>
-      <Route exact path={`${url}/medicos`}>
+      </ProtectedRoute>
+      <ProtectedRoute exact path={`${url}/medicos`}
+        authorize={MedicoPolicy.index}
+      >
         <MedicosIndex />
-      </Route>
-      <Route exact path={[`${url}/medicos/registrar`, `${url}/medicos/:id/editar`]}>
+      </ProtectedRoute>
+      <ProtectedRoute exact path={[`${url}/medicos/registrar`, `${url}/medicos/:id/editar`]}
+        authorize={(user, path) => path == `${url}/medicos/registrar` ? MedicoPolicy.register(user) : MedicoPolicy.edit(user) }
+      >
         <MedicosForm />
-      </Route>
-      <Route exact path={`${url}/proveedores`}>
+      </ProtectedRoute>
+      <ProtectedRoute exact path={`${url}/proveedores`}
+        authorize={ProveedorPolicy.index}
+      >
         <ProveedoresIndex />
-      </Route>
-      <Route exact path={`${url}/proveedores/registrar`}>
+      </ProtectedRoute>
+      <ProtectedRoute exact path={`${url}/proveedores/:id`}
+        authorize={ProveedorPolicy.view}
+      >
+        <ProveedorView />
+      </ProtectedRoute>
+      <ProtectedRoute exact path={[`${url}/proveedores/registrar`, ]}
+        authorize={ProveedorPolicy.register}
+      >
+        <ProveedorWizard />
+      </ProtectedRoute>
+      <ProtectedRoute exact path={`${url}/proveedores/:id/editar`}
+        authorize={ProveedorPolicy.edit}>
         <ProveedorForm />
-      </Route>
-      <Route exact path={`${url}/proveedores/:id/contacto`}>
+      </ProtectedRoute>
+      <ProtectedRoute exact path={`${url}/proveedores/:id/editar-contacto`}
+        authorize={(user)=>ProveedorPolicy.register(user) || ProveedorPolicy.edit(user)}
+      >
         <ContactoForm />
-      </Route>
-      <Route exact path={`${url}/proveedores/:idProveedor/contratos/registrar`}>
+      </ProtectedRoute>
+      <ProtectedRoute exact path={`${url}/proveedores/:idProveedor/contratos/registrar`}
+        authorize={(user)=>ProveedorPolicy.register(user) || ProveedorPolicy.edit(user)}
+      >
         <ContratoForm />
-      </Route>
+      </ProtectedRoute>
       <Route exact path={`${url}/configuracion/especialidades`}>
         <EspecialidadesIndex />
       </Route>
       <Route path={`${url}/configuracion/prestaciones`}>
         <PrestacionesIndex />
       </Route>
-      {/* <Route exact path={`${url}/configuracion`} >
-        <Settings />
-      </Route> */}
     </Switch>
     
     <Route exact path={[`${url}/configuracion/prestaciones/registrar`, `${url}/configuracion/prestaciones/:id/editar`]}>

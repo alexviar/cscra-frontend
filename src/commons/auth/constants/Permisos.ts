@@ -69,6 +69,8 @@ export const REGISTRAR_PROVEEDORES = "Registrar proveedores";
 export const REGISTRAR_PROVEEDORES_REGIONAL = "Registrar proveedores (regional)";
 export const EDITAR_PROVEEDORES = "Editar proveedores";
 export const EDITAR_PROVEEDORES_REGIONAL = "Editar proveedores (regional)";
+export const REGISTRAR_CONTRATO_PROVEEDOR = "Registrar contratos de preveedores";
+export const REGISTRAR_CONTRATO_PROVEEDOR_REGIONAL = "Registrar contratos de preveedores (regional)";
 export const BAJA_PROVEEDORES = "Baja proveedores";
 export const BAJA_PROVEEDORES_REGIONAL = "Baja proveedores (regional)";
 

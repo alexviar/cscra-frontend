@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { AxiosError } from "axios"
 import { Alert, Modal as BSModal, Spinner } from "react-bootstrap"
 import { useSelector } from "react-redux"
 
@@ -19,19 +20,27 @@ export const QueryProgressModal = ()=>{
   const renderModalBody = ()=>{
     if(modal.state == "loading"){
       return <>
-        <Spinner animation="border"></Spinner>
+        <Spinner variant="primary" animation="border" size="sm"></Spinner>
         <span className="ml-2 align-middle">Espere un momento</span>
       </>
     }
     if(modal.state == "error"){
       return <Alert variant="danger">
-        Ocurrio un error mientras se procesaba su solicitud
+        {errorMessage()}
       </Alert>
     }
     return null
   }
+  
+  const errorMessage = () =>{
+    const status = modal.error?.response?.status
+    switch(status){
+      case 403: return "No tiene los permisos para realizar esta accion"
+      default: return "Ocurrio un error mientras se procesaba su solicitud"
+    }
+  }
 
-  return <BSModal centered show={show} onHide={()=>{
+  return <BSModal centered show={modal.show} onHide={()=>{
     if(modal.state !== "loading") modal.close()
   }}>
     <BSModal.Header>

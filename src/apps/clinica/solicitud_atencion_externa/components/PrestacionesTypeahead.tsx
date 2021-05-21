@@ -33,16 +33,14 @@ export const PrestacionesTypeahead = ({isInvalid, feedback, filterBy, ...props}:
       className={buscar.isError || isInvalid ? "is-invalid" : ""}
       isInvalid={buscar.isError || isInvalid}
       {...props}
-      filterBy={(prestacion, props)=>{
-        return isMatch(prestacion.nombre, props) && !!(typeof filterBy === "function" && filterBy(prestacion, props))
+      filterBy={(departamento, props)=>{
+        return (!props.text || isMatch(departamento.nombre, props)) 
+          && (!filterBy || (typeof filterBy === "function" && filterBy(departamento, props)))
       }}
       isLoading={buscar.isFetching}
       options={buscar.data?.data||[]}
       labelKey="nombre"
       minLength={0}
-      renderMenuItemChildren={(regional) => {
-        return regional.nombre
-      }}
     />
     {buscar.isError ? <>
       <InputGroup.Append>

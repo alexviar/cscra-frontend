@@ -1,5 +1,6 @@
 import { useEffect } from "react"
 import { Dropdown } from "react-bootstrap"
+// import { FaEdit } from "react-icons/fa"
 import { useMutation, useQueryClient } from "react-query"
 import { Link } from "react-router-dom"
 import { VerticalEllipsisDropdownToggle } from "../../../../commons/components"
@@ -21,7 +22,7 @@ export const RowOptions = ({medico}: Props) => {
   const queryClient = useQueryClient()
 
   const cambiarEstado = useMutation(()=>{
-    return medico.estado == 1 ? MedicosService.baja(medico.id) : MedicosService.alta(medico.id)
+    return MedicosService.cambiarEstado(medico.id, medico.estado == 1 ? 2 : 1)
   }, {
     onSuccess: ()=>{
       modal.close()
@@ -64,14 +65,14 @@ export const RowOptions = ({medico}: Props) => {
     
     <Dropdown.Menu>
       <ProtectedContent
-        authorize={MedicoPolicy.editar}
+        authorize={MedicoPolicy.edit}
       >
         <Dropdown.Item as={Link} to={{
           pathname: `/clinica/medicos/${medico.id}/editar`,
           state: {
-            medico: medico
+            medico
           }
-        }} ><FaEdit /><span className="ml-2 align-middle">Editar</span></Dropdown.Item>
+        }} ><span className="align-middle">Editar</span></Dropdown.Item>
       </ProtectedContent>
       <ProtectedContent
         authorize={MedicoPolicy.baja}

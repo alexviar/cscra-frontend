@@ -18,7 +18,6 @@ export const UserIndex = ()=>{
 
   const loggedUser = useLoggedUser()
 
-  const [total, setTotal] = useState(0)
   const [page, setPage] = useState<Page>({
     current: 1,
     size: 10
@@ -38,11 +37,10 @@ export const UserIndex = ()=>{
     enabled: UsuarioPolicy.view(loggedUser),
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    onSuccess: ({data: {meta}}) => {
-      setTotal(meta.total)
-    }
+    refetchOnReconnect: false
   })
+
+  const total = buscar.data?.data?.meta?.total || 0
 
   const didMountRef = useRef(false)
   useEffect(()=>{

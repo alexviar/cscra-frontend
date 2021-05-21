@@ -8,7 +8,9 @@ import { Municipio, UnidadesTerritorialesService } from "../services";
 import { isMatch } from "../utils";
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 
+export type { Municipio }
 
+let count = 0
 export const MunicipiosTypeahead = ({isInvalid, feedback, filterBy, ...props}: {feedback?: string, onLoad?: (options: Municipio[])=>void} & Omit<TypeaheadProps<Municipio>, "isLoading" | "options">) => {
 
 
@@ -34,22 +36,23 @@ export const MunicipiosTypeahead = ({isInvalid, feedback, filterBy, ...props}: {
       isInvalid={buscar.isError || isInvalid}
       {...props}
       filterBy={(municipio, props)=>{
-        return isMatch(municipio.nombre, props) && !!(typeof filterBy === "function" && filterBy(municipio, props))
+        return (!props.text || isMatch(municipio.nombre, props)) 
+          && (!filterBy || (typeof filterBy === "function" && filterBy(municipio, props)))
       }}
       isLoading={buscar.isFetching}
       options={buscar.data?.data||[]}
       labelKey="nombre"
       minLength={0}
-      renderMenuItemChildren={(prestacion) => {
-        return prestacion.nombre
-      }}
     />
+
     {buscar.isError ? <>
       <InputGroup.Append>
         <Button variant="outline-danger" onClick={()=>buscar.refetch()}><FaSync /></Button>
       </InputGroup.Append>
-      <Form.Control.Feedback type="invalid">{buscar.error?.response?.message || buscar.error?.message || feedback}</Form.Control.Feedback>
+      <Form.Control.Feedback type="invalid">{buscar.error?.response?.message || buscar.error?.message}</Form.Control.Feedback>
     </>
     : null}
+    {feedback ? <Form.Control.Feedback type="invalid">{feedback}</Form.Control.Feedback> : null}
+    {/* {++count} */}
   </InputGroup>
 }

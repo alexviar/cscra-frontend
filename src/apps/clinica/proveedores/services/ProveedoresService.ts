@@ -10,17 +10,29 @@ export type Empresa = {
 
 export type Proveedor = {
   id: number
-  nit: number|null
-  nombre: string|null
-  medico?: Medico
+  nit: number | null
+  nombre: string | null
+  medico: Medico | null
   tipoId: number
   tipo: string
   regionalId: number
+
+  municipioId: number
+  municipio: { id: number, nombre: string}
+  provincia: { id: number, nombre: string}
+  departamento: { id: number, nombre: string}
+  direccion: string
+  ubicacion: {
+    latitud: number,
+    longitud: number
+  }
+  telefono1: number
+  telefono2: number | null
+
   contrato: {
     inicio: string
     fin: string
-    tipoId: number
-    tipo: string
+    regionalId: number
     prestaciones: {
       id: number
       nombre: string
@@ -38,28 +50,43 @@ interface IProveedorService {
   buscar(filter: Filter, page: Page): AxiosPromise<PaginatedResponse<Proveedor>>
   cargar(id: number): AxiosPromise<Proveedor>
   registrar(fields: {
-    tipoId: 1,
-    nit?: number,
-    ci: string,
-    ciComplemento: string
-    apellidoPaterno: string
-    apellidoMaterno: string
-    nombres: string
-    especialidadId: number
-    regionalId: number
-  } | {
-    tipoId: 2,
-    nit?: number,
-    nombre: string,
-    regionalId: number
+    general: {
+      tipoId: 1,
+      nit?: number,
+      ci: number,
+      ciComplemento?: string
+      apellidoPaterno?: string
+      apellidoMaterno?: string
+      nombres: string
+      especialidadId: number
+    } | {
+      tipoId: 2,
+      nit?: number,
+      nombre: string,
+    },
+    contacto?: {
+      municipioId: number,
+      direccion: string,
+      ubicacion: {
+        latitud: number,
+        longitud: number
+      },
+      telefono1: number,
+      telefono2?: number
+    },
+    contrato: {
+      inicio: string,
+      fin: string,
+      prestacionIds: number[] 
+    }
   }): AxiosPromise<Proveedor>
   actualizar(id: number, fields: {
     tipoId: 1,
     nit?: number,
-    ci: string,
-    ciComplemento: string
-    apellidoPaterno: string
-    apellidoMaterno: string
+    ci: number,
+    ciComplemento?: string
+    apellidoPaterno?: string
+    apellidoMaterno?: string
     nombres: string
     especialidadId: number
     regionalId: number
@@ -70,13 +97,19 @@ interface IProveedorService {
     regionalId: number
   }): AxiosPromise<Proveedor>
   eliminar(id: number): AxiosPromise
-
-  [key: string]: any
+  actualizarInformacionDeContacto(id: number, infoContacto: {
+    municipioId: number,
+    direccion: string,
+    ubicacion: {
+      latitud: number,
+      longitud: number
+    },
+    telefono1: number,
+    telefono2?: number
+  }): AxiosPromise<Proveedor>
 }
 
 export const ProveedoresService: IProveedorService = {
-  // buscar(filter: Filter): AxiosPromise<Proveedor[]>
-  // buscar(filter: Filter, page: Page): AxiosPromise<PaginatedResponse<Proveedor>>
   buscar: (filter: Filter, page?: Page) => {
     return apiClient.get("proveedores", {
       params: {
@@ -97,16 +130,7 @@ export const ProveedoresService: IProveedorService = {
   eliminar: (id: number) => {
     return apiClient.get(`proveedores/${id}`)
   },
-  actualizarInformacionDeContacto(id: number, infoContacto: {
-    municipioId: number,
-    direccion: string,
-    ubicacion: {
-      latitud: number,
-      longitud: number
-    },
-    telefono1: number,
-    telefono2?: number
-  }){
+  actualizarInformacionDeContacto: (id, infoContacto) => {
     return apiClient.put(`proveedores/${id}/contacto`, keysToUnderscore(infoContacto))
   }
 

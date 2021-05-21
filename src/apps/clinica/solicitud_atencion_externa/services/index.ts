@@ -1,5 +1,5 @@
 export * from "./SolicitudesAtencionExternaService"
 export * from "./AseguradosService"
-export * from "../../medicos/services/MedicosService"
+export * from "../../medicos/services/MedicoService"
 export * from "./ProveedoresService"
 export * from "./PrestacionesService"

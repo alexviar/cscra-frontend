@@ -7,6 +7,7 @@ export type Medico = {
     raiz: number,
     complemento: string,
   },
+  ciText: string,
   apellidoPaterno: string,
   apellidoMaterno: string,
   nombres: string,
@@ -14,6 +15,8 @@ export type Medico = {
   sexo: string,
   especialidadId: number
   especialidad: string
+  estado: number
+  estadoText: string
   regionalId: number
 }
 
@@ -65,7 +68,9 @@ export const MedicosService = {
       regional_id
     })
   },
-  eliminar: (id: number) => {
-    return apiClient.delete(`medicos/${id!}`)
+  cambiarEstado: (id: number, estado: number) => {
+    return apiClient.put(`medicos/${id}/cambiar-estado`, {
+      estado
+    })
   }
 }

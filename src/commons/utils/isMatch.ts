@@ -2,9 +2,9 @@
 //@ts-ignore
 import { stripDiacritics } from 'react-bootstrap-typeahead/lib/utils'
 
-export function isMatch(string: string, props: any) {
+export function isMatch(text: string, props: any) {
   var searchStr = props.text;
-  var str = string;
+  var str = text;
 
   if (!props.caseSensitive) {
     searchStr = searchStr.toLowerCase();

@@ -19,6 +19,7 @@ let DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 type Props = {
+  isInvalid?: boolean
   value: LatLngExpression|null,
   center: LatLngExpression
   onChange: (value?: LatLngExpression|null) => void
@@ -109,12 +110,8 @@ export const LocationInput = (props: Props) => {
           }}
         >
           <FormControl
+            isInvalid={props.isInvalid}
             value={search}
-            onClick={(e: any)=>{
-              console.log("ASFA")
-              e.preventDefault()
-              e.stopPropagation()
-            }}
             onChange={(e)=>{
               const value = e.target.value
               setSearch(value)

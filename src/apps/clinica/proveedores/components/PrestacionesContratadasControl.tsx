@@ -24,6 +24,7 @@ export const PrestacionesContratadasControl = ()=>{
     register,
     control,
     trigger,
+    formState: { errors: formErrors },
     watch
   } = useFormContext<Inputs>()
   const {
@@ -37,55 +38,60 @@ export const PrestacionesContratadasControl = ()=>{
 
   return <div>
     <h2 style={{fontSize: "1.25rem"}}>Servicios subrogados</h2>
-    {fields.map((field,index)=>{
-      return <Form.Row key={field.id} className="py-2 border-bottom">
-        <Form.Group as={Col} xs={12}>
-          {/* <Form.Label>
-            Prestaciones
-          </Form.Label> */}
-            <Controller
-              name={`prestaciones.${index}.prestacion` as const}
-              control={control}
-              rules={{
-                required: rules.required(),
-              }}
-              render={({ field, fieldState }) => {
-                return <>
-                <Form.Row>
-                  <Col>
-                    <PrestacionesTypeahead
-                      id={`proveedor-contrato/prestaciones.${index}`}
-                      className={!!fieldState.error ? "is-invalid" : ""}
-                      isInvalid={!!fieldState.error}
-                      filterBy={(prestacion) => {
-                        const prestaciones = watch("prestaciones")
-                        return !prestaciones.some(p=>p.prestacion?.id == prestacion.id)
-                      }}
-                      selected={field.value ? [field.value]:[]}
-                      onChange={(prestacion) => {
-                        field.onChange(prestacion.length ? prestacion[0] : 0)
-                      }}
-                      onBlur={field.onBlur}
-                    />
-                    <Form.Control.Feedback type="invalid">{fieldState.error?.message}</Form.Control.Feedback>
-                  </Col>
-                  <Col xs="auto">
-                      <Button variant="danger" onClick={()=>{
-                        remove(index)
-                      }}>
-                        Quitar
-                      </Button>
-                  </Col>
-                </Form.Row>
-                </>
-              }}
-            />
-        </Form.Group>
-        {/* <Col className="px-3" xs={12}>
-          <ArancelesControl index={index} />
-        </Col> */}
-      </Form.Row>
-    })}
+    <div className={formErrors.prestaciones ? "is-invalid" : ""}>
+      {fields.map((field,index)=>{
+        return <Form.Row key={field.id} className="py-2 border-bottom">
+          <Form.Group as={Col} xs={12}>
+            {/* <Form.Label>
+              Prestaciones
+            </Form.Label> */}
+              <Controller
+                name={`prestaciones.${index}.prestacion` as const}
+                control={control}
+                rules={{
+                  required: rules.required(),
+                }}
+                render={({ field, fieldState }) => {
+                  return <>
+                  <Form.Row>
+                    <Col>
+                      <PrestacionesTypeahead
+                        id={`proveedor-contrato/prestaciones.${index}`}
+                        className={!!fieldState.error ? "is-invalid" : ""}
+                        isInvalid={!!fieldState.error}
+                        filterBy={(prestacion) => {
+                          const prestaciones = watch("prestaciones")
+                          return !prestaciones.some(p=>p.prestacion?.id == prestacion.id)
+                        }}
+                        selected={field.value ? [field.value]:[]}
+                        onChange={(prestacion) => {
+                          field.onChange(prestacion.length ? prestacion[0] : 0)
+                        }}
+                        onBlur={field.onBlur}
+                      />
+                      <Form.Control.Feedback type="invalid">{fieldState.error?.message}</Form.Control.Feedback>
+                    </Col>
+                    <Col xs="auto">
+                        <Button variant="danger" onClick={()=>{
+                          remove(index)
+                        }}>
+                          Quitar
+                        </Button>
+                    </Col>
+                  </Form.Row>
+                  </>
+                }}
+              />
+          </Form.Group>
+          {/* <Col className="px-3" xs={12}>
+            <ArancelesControl index={index} />
+          </Col> */}
+        </Form.Row>
+      })}
+    </div>
+    <Form.Control.Feedback type="invalid">{
+      //@ts-ignore
+      formErrors.prestaciones?.message}</Form.Control.Feedback>
     <Form.Row className="py-2">
       <Col className="ml-auto" xs={"auto"}>
         <Button

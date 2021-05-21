@@ -69,10 +69,11 @@ export const PrestacionesSolicitadasCard = () => {
                               proveedor.contrato.prestaciones.some(pc => pc.id == prestacion.id) && 
                               !prestacionesSolicitadas.some(ps=>ps.prestacion?.length && ps.prestacion[0].id == prestacion.id)
                           }}
+                          feedback={fieldState.error?.message}
+                          selected={field.value}
                           onBlur={field.onBlur}
                           onChange={field.onChange}
                         />
-                        <Form.Control.Feedback type="invalid">{fieldState.error?.message}</Form.Control.Feedback>
                       </>
                     }}
                   />
@@ -86,11 +87,11 @@ export const PrestacionesSolicitadasCard = () => {
                       proveedor.regionalId == watch("regional.0.id") &&
                       watch("prestacionesSolicitadas").every(ps=> proveedor.contrato.prestaciones.some(pc=>pc.id == (ps.prestacion.length && ps.prestacion[0].id)))
                     )}
+                    feedback={proveedoresTypeaheadController.fieldState?.error?.message}
                     onChange={proveedoresTypeaheadController.field.onChange}
                     onBlur={proveedoresTypeaheadController.field.onBlur}
                     selected={proveedoresTypeaheadController.field.value}
                   />
-                  <Form.Control.Feedback type="invalid">{proveedoresTypeaheadController.fieldState?.error?.message}</Form.Control.Feedback>
                 </td>
                 <td>
                   <Form.Control as="textarea" 

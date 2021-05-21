@@ -7,12 +7,12 @@ import { Link, useLocation } from "react-router-dom"
 import { Pagination } from "../../../../commons/components"
 import { ProtectedContent, useLoggedUser, Permisos } from "../../../../commons/auth"
 import { PaginatedResponse } from "../../../../commons/services"
+import { MedicoPolicy } from "../policies"
 import { Medico, MedicosService, MedicoFilter as Filter } from "../services"
 import { MedicosFilterForm } from "./MedicosFilterForm"
 import { RowOptions } from "./RowOptions"
-import { MedicoPolicy } from "./policies"
 
-export default () => {
+export const MedicosIndex = () => {
   const {pathname: path} = useLocation()
   const [page, setPage] = useState({
     current: 1,
@@ -23,8 +23,8 @@ export default () => {
   
   const getDefaultFilter = ()=>{
     const filter: Filter = { tipo: 1 }
-    if(!loggedUser.can(Permisos.VER_LISTA_DE_MORA)){
-      if(loggedUser.can(Permisos.VER_LISTA_DE_MORA_REGIONAL)){
+    if(!loggedUser.can(Permisos.VER_MEDICOS)){
+      if(loggedUser.can(Permisos.VER_MEDICOS_REGIONAL)){
         filter.regionalId = loggedUser.regionalId;
       }
     }
@@ -82,18 +82,21 @@ export default () => {
       </tr>
       }
       return records.map((medico, index) => {
-        return <tr key={item.id}>
+        return <tr key={medico.id}>
           <th scope="row">
             {index + 1}
           </th>
           <td>
-            {item.ci.raiz}{item.ci.complemento ? `-${item.ci.complemento}` : ""}
+            {medico.ciText}
           </td>
           <td>
-            {item.nombreCompleto}
+            {medico.nombreCompleto}
           </td>
           <td>
-            {item.especialidad}
+            {medico.especialidad}
+          </td>
+          <td>
+            {medico.estadoText}
           </td>
           <td>
             <RowOptions medico={medico} />
@@ -107,74 +110,87 @@ export default () => {
   return <div className="px-1">
     <h1 style={{fontSize: "1.75rem"}}>Medicos</h1>
     <div className="d-flex my-2">
-      <Row className="ml-auto flex-nowrap" >
-        <Col className={"pr-0"} xs="auto" >
-          <Button onClick={()=>{
-            buscar.refetch()
-          }}><FaSync /></Button>
+      <Form.Row className="ml-auto flex-nowrap" >
+        <ProtectedContent
+          authorize={MedicoPolicy.view}
+        >
+          <Col xs="auto" >
+            <Button onClick={()=>{
+              buscar.refetch()
+            }}><FaSync /></Button>
+          </Col>
+          <Col className={"pr-0"} xs="auto" >
+            <Button onClick={()=>{
+              showFilterForm(visible=>!visible)
+            }}><FaFilter /></Button>
+          </Col>
+        </ProtectedContent>
+        <ProtectedContent
+          authorize={MedicoPolicy.register}
+        >
+          <Col xs="auto">
+            <Button
+              as={Link}
+              to={`${path}/registrar`}
+              className="d-flex align-items-center">
+                <FaPlus className="mr-1" /><span>Nuevo</span>
+            </Button>
+          </Col>
+        </ProtectedContent>
+      </Form.Row>
+    </div>
+    <ProtectedContent
+      authorize={MedicoPolicy.view}
+    >
+      <Row>
+        <Col className="mb-2">
+          <MedicosFilterForm onFilter={(filter)=>{
+            setFilter(filter)
+          }} />
         </Col>
-        <Col className={"pr-0"} xs="auto" >
-          <Button onClick={()=>{
-            showFilterForm(visible=>!visible)
-          }}><FaFilter /></Button>
-        </Col>
-        <Col xs="auto">
-          <Button
-            as={Link}
-            to={`${path}/registrar`}
-            className="d-flex align-items-center">
-              <FaPlus /><span className="mr-2">Nuevo</span>
-          </Button>
+        <Col className="mb-2" xs={"auto"}>
+          <div className="d-flex flex-row flex-nowrap align-items-center">
+              <span>Mostrar</span>
+              <Form.Control className="mx-2" as="select" value={page.size} onChange={(e) => {
+                const value = e.target.value
+                setPage((page) => ({
+                  ...page,
+                  size: parseInt(value)
+                }))
+              }}>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={30}>30</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </Form.Control>
+              <span>filas</span>
+          </div>
         </Col>
       </Row>
-    </div>
-    <Row>
-      <Col className="mb-2">
-        <MedicosFilterForm onFilter={(filter)=>{
-          setFilter(filter)
-        }} />
-      </Col>
-      <Col className="mb-2" xs={"auto"}>
-        <div className="d-flex flex-row flex-nowrap align-items-center">
-            <span>Mostrar</span>
-            <Form.Control className="mx-2" as="select" value={page.size} onChange={(e) => {
-              const value = e.target.value
-              setPage((page) => ({
-                ...page,
-                size: parseInt(value)
-              }))
-            }}>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={30}>30</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </Form.Control>
-            <span>filas</span>
-        </div>
-      </Col>
-    </Row>
-    <Table responsive>
-      <thead>
-        <tr>
-          <th style={{width: 1}}>#</th>
-          <th>C.I.</th>
-          <th>Nombre</th>
-          <th>Especialidad</th>
-          <th style={{width: 1}}></th>
-        </tr>
-      </thead>
-      <tbody>
-        {renderRows()}
-      </tbody>
-    </Table>
-    <div className="d-flex flex-row">
-      <span className="mr-auto">{`Se encontraron ${total} resultados`}</span>
-      <Pagination
-        current={page.current}
-        total={Math.ceil((total - page.size) / page.size) + 1}
-        onChange={(current) => setPage((page) => ({ ...page, current }))}
-      />
-    </div>
+      <Table responsive>
+        <thead>
+          <tr>
+            <th style={{width: 1}}>#</th>
+            <th>C.I.</th>
+            <th>Nombre</th>
+            <th>Especialidad</th>
+            <th>Estado</th>
+            <th style={{width: 1}}></th>
+          </tr>
+        </thead>
+        <tbody>
+          {renderRows()}
+        </tbody>
+      </Table>
+      {buscar.status === "success" ? <div className="d-flex flex-row">
+        <span className="mr-auto">{`Se encontraron ${total} resultados`}</span>
+        <Pagination
+          current={page.current}
+          total={Math.ceil((total - page.size) / page.size) + 1}
+          onChange={(current) => setPage((page) => ({ ...page, current }))}
+        />
+      </div> : null}
+    </ProtectedContent>
   </div>
 }

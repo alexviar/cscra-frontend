@@ -1,41 +1,71 @@
 import { AxiosError, AxiosResponse } from 'axios'
-import React, { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Alert, Button, Col, Form, InputGroup, Modal, Spinner } from 'react-bootstrap'
 import { Controller, useForm } from 'react-hook-form'
-import { FaSearch } from 'react-icons/fa'
 import { useMutation, useQuery } from 'react-query'
-import * as rules from '../../../../commons/components/rules'
-import { Proveedor, ProveedoresService } from '../services'
-import { Especialidad } from '../../especialidades/services'
 import { useHistory, useParams } from 'react-router'
-import { Regional } from '../../../../commons/services/RegionalesService'
-import { RegionalesTypeahead } from '../../../../commons/components'
-import { EspecialidadesTypeahead } from '../../medicos/components/EspecialidadesTypeahead'
+import { yupResolver } from "@hookform/resolvers/yup"
+import * as yup from 'yup'
+import { Especialidad, EspecialidadesTypeahead } from '../../medicos/components/EspecialidadesTypeahead'
+import { Regional, RegionalesTypeahead } from '../../../../commons/components'
+import { Permisos, useLoggedUser } from '../../../../commons/auth'
+import { Proveedor, ProveedoresService } from '../services'
 
-type Inputs = {
-  nit: string
-  ci: string
-  ciComplemento: string
-  apellidoPaterno: string
-  apellidoMaterno: string
-  nombres: string
-  especialidad: Especialidad[]
-  regional: Regional[]
+export type Inputs = {
+  tipo?: 1
+  nit?: number
+  ci?: number
+  ciComplemento?: string
+  apellidoPaterno?: string
+  apellidoMaterno?: string
+  nombres?: string
+  especialidad?: Especialidad[]
+  regional?: Regional[]
 }
 
 type Props = {
   proveedor?: Proveedor,
-  noRedirect?: boolean,
-  next?: () => void
+  onSubmit?: (data: Inputs) => void
 }
 
-export const ProveedorMedicoForm = ({proveedor, noRedirect=false, next}: Props)=>{
-  const [regionales, setRegionales] = useState<Regional[]>([])
-  const [especialidades, setEspecialidades] = useState<Especialidad[]>([])
+const schema = yup.object().shape({
+  nit: yup.number().label("NIT")
+    .emptyStringToNull()
+    .typeError("El ${path} no es un numero valido")
+    .nullable()
+    .notRequired(),
+  ci: yup.number().label("número de carnet")
+    .emptyStringToNull()
+    .typeError("El ${path} no es un numero valido")
+    .nullable()
+    .required(),
+  ciComplemento: yup.string().transform(value => value === "" ? null : value).trim().uppercase().nullable().notRequired()
+    .length(2).matches(/[0-1A-Z]/),
+  apellidoPaterno: yup.string().label("apellido paterno").trim().when("apellidoMaterno", {
+    is: (apellidoMaterno: string) => !apellidoMaterno,
+    then: yup.string().required("Debe proporcionar al menos un apellido").max(50)
+  }),
+  apellidoMaterno: yup.string().label("apellido materno").trim().when("apellidoPaterno", {
+    is: (apellidoPaterno: string) => !apellidoPaterno,
+    then: yup.string().required("Debe proporcionar al menos un apellido").max(50)
+  }),
+  nombres: yup.string().label("nombres").trim().required().label("'Nombres'").max(50),
+  especialidad: yup.array().length(1, "Debe indicar una especialidad"),
+  regional: yup.array().length(1, "Debe indicar una regional")
+}, [["apellidoMaterno", "apellidoPaterno"]])
+
+
+export const ProveedorMedicoForm = ({proveedor, onSubmit}: Props)=>{
   const {id} = useParams<{
     id?: string
   }>()
+
   const history = useHistory()
+
+  const loggedUser = useLoggedUser()
+
+  const [especialidades, setEspecialidades] = useState<Especialidad[]>([])
+  const [regionales, setRegionales] = useState<Regional[]>([])
 
   const {
     handleSubmit,
@@ -43,49 +73,42 @@ export const ProveedorMedicoForm = ({proveedor, noRedirect=false, next}: Props)=
     setValue,
     control,
     formState,
+    watch
   } = useForm<Inputs>({
     mode: "onBlur",
+    resolver: yupResolver(schema),
     defaultValues: {
-      nit: proveedor?.nit?.toString() || "",
-      ci: proveedor?.medico?.ci?.raiz.toString() || "",
-      ciComplemento: proveedor?.medico?.ci.complemento || "",
-      apellidoPaterno: proveedor?.medico?.apellidoPaterno || "",
-      apellidoMaterno: proveedor?.medico?.apellidoMaterno || "",
-      nombres: proveedor?.medico?.nombres,
+      tipo: 1,
+      nit: proveedor?.nit as number,
+      ci: proveedor?.medico?.ci?.raiz,
+      ciComplemento: proveedor?.medico?.ci.complemento,
+      apellidoPaterno: proveedor?.medico?.apellidoPaterno||"",
+      apellidoMaterno: proveedor?.medico?.apellidoMaterno||"",
+      nombres: proveedor?.medico?.nombres||"",
       especialidad: [],
-      regional: []
+      regional: [],
     }
   })
 
+  const formErrors = formState.errors
+
   const guardar = useMutation((inputs: Inputs)=>{
-    return id ? ProveedoresService.actualizar(parseInt(id), {
+    return ProveedoresService.actualizar(parseInt(id!), {
       tipoId: 1,
-      nit: parseInt(inputs.nit),
-      ci: inputs.ci,
+      nit: inputs.nit,
+      ci: inputs.ci!,
       ciComplemento: inputs.ciComplemento,
       apellidoPaterno: inputs.apellidoPaterno,
       apellidoMaterno: inputs.apellidoMaterno,
-      nombres: inputs.nombres,
-      especialidadId: inputs.especialidad![0].id,
-      regionalId: inputs.regional![0].id
-    }) : ProveedoresService.registrar({
-      tipoId: 1,
-      nit: parseInt(inputs.nit),
-      ci: inputs.ci,
-      ciComplemento: inputs.ciComplemento,
-      apellidoPaterno: inputs.apellidoPaterno,
-      apellidoMaterno: inputs.apellidoMaterno,
-      nombres: inputs.nombres,
+      nombres: inputs.nombres!,
       especialidadId: inputs.especialidad![0].id,
       regionalId: inputs.regional![0].id
     })
-  })
-
-  useEffect(()=>{
-    if(proveedor && regionales.length){
-      setValue("regional", regionales.filter(r=>r.id == proveedor.regionalId))
+  }, {
+    onSuccess: ({data})=>{
+      history.replace(`/clinica/proveedores/${data.id}`)
     }
-  }, [proveedor, regionales])
+  })
 
   useEffect(()=>{
     if(proveedor && especialidades.length){
@@ -94,24 +117,18 @@ export const ProveedorMedicoForm = ({proveedor, noRedirect=false, next}: Props)=
   }, [proveedor, especialidades])
 
   useEffect(()=>{
-    if(guardar.data){
-      if(next){
-        history.replace(history.location.pathname, {
-          proveedor: guardar.data.data
-        })
-        next()
-      }
-      else{
-        history.replace(`/clinica/proveedores/${guardar.data.data.id}`)
-      }
+    if(proveedor && regionales.length){
+      setValue("regional", regionales.filter(r=>r.id == proveedor.regionalId))
     }
-  }, [guardar.data])
+  }, [proveedor, regionales])
+
+  console.log("Errors", formErrors, watch())
 
   return <>
-    <Form id="prestacion-form"
-      onSubmit={handleSubmit((inputs)=>{
+    <Form id="proveedor-form"
+      onSubmit={handleSubmit(onSubmit || ((inputs)=>{
         guardar.mutate(inputs)
-      })}
+      }))}
     >
       {guardar.status == "error" || guardar.status == "success"  ? <Alert variant={guardar.isError ? "danger" : "success"}>
         {guardar.isError ? (guardar.error as AxiosError).response?.data?.message || (guardar.error as AxiosError).message : "Guardado"}
@@ -120,104 +137,73 @@ export const ProveedorMedicoForm = ({proveedor, noRedirect=false, next}: Props)=
         <Form.Group as={Col} md={4} xs={8}>
           <Form.Label>NIT</Form.Label>
           <Form.Control
-            isInvalid={!!formState.errors.nit}
-            {...register("nit", {
-              pattern: rules.pattern(/\d*/)
-            })}
+            isInvalid={!!formErrors.nit}
+            {...register("nit")}
           />
-          <Form.Control.Feedback type="invalid">{formState.errors.ci?.message}</Form.Control.Feedback>
+          <Form.Control.Feedback type="invalid">{formErrors.nit?.message}</Form.Control.Feedback>
         </Form.Group>
         <Form.Group as={Col} md={4} xs={8}>
           <Form.Label>Carnet de identidad</Form.Label>
           <Form.Control
-            isInvalid={!!formState.errors.ci}
-            {...register("ci", {
-              required: rules.required()
-            })}
+            isInvalid={!!formErrors.ci}
+            {...register("ci")}
           />
-          <Form.Control.Feedback type="invalid">{formState.errors.ci?.message}</Form.Control.Feedback>
+          <Form.Control.Feedback type="invalid">{formErrors.ci?.message}</Form.Control.Feedback>
         </Form.Group>
         <Form.Group as={Col} md={2} xs={4}>
           <Form.Label>Complemento</Form.Label>
           <Form.Control
-            isInvalid={!!formState.errors.ciComplemento}
-            {...register("ciComplemento", {
-              maxLength: rules.maxLength(2)
-            })}
+            isInvalid={!!formErrors.ciComplemento}
+            {...register("ciComplemento")}
           />
-          <Form.Control.Feedback type="invalid">{formState.errors.ciComplemento?.message}</Form.Control.Feedback>
+          <Form.Control.Feedback type="invalid">{formErrors.ciComplemento?.message}</Form.Control.Feedback>
         </Form.Group>
       </Form.Row>
       <Form.Row>
         <Form.Group as={Col} md={4}>
           <Form.Label>Apellido Paterno</Form.Label>
           <Form.Control
-            isInvalid={!!formState.errors.apellidoPaterno}
-            {...register("apellidoPaterno", {
-              // validate: {
-              //   required: (value)=>{
-              //     const apellidoMaterno = watch("apellidoMaterno")
-              //     if(!apellidoMaterno && !value){
-              //       return "Debe indicar al menos un apellido"
-              //     }
-              //   }
-              // }
-            })}
+            isInvalid={!!formErrors.apellidoPaterno}
+            {...register("apellidoPaterno")}
           />
-          <Form.Control.Feedback type="invalid">{formState.errors.apellidoPaterno?.message}</Form.Control.Feedback>
+          <Form.Control.Feedback type="invalid">{formErrors.apellidoPaterno?.message}</Form.Control.Feedback>
         </Form.Group>
         <Form.Group as={Col} md={4}>
           <Form.Label>Apellido Materno</Form.Label>
           <Form.Control
-            isInvalid={!!formState.errors.apellidoMaterno}
-            {...register("apellidoMaterno", {
-              // validate: {
-              //   required: (value)=>{
-              //     const apellidoPaterno = watch("apellidoPaterno")
-              //     if(!apellidoPaterno && !value){
-              //       return "Debe indicar al menos un apellido"
-              //     }
-              //   }
-              // }
-              required: rules.required(),
-              maxLength: rules.maxLength(20)
-            })}
+            isInvalid={!!formErrors.apellidoMaterno}
+            {...register("apellidoMaterno")}
           />
-          <Form.Control.Feedback type="invalid">{formState.errors.apellidoMaterno?.message}</Form.Control.Feedback>
+          <Form.Control.Feedback type="invalid">{formErrors.apellidoMaterno?.message}</Form.Control.Feedback>
         </Form.Group>
         <Form.Group as={Col} md={4}>
           <Form.Label>Nombres</Form.Label>
           <Form.Control
-            isInvalid={!!formState.errors.nombres}
-            {...register("nombres", {
-              required: rules.required(),
-              maxLength: rules.maxLength(40)
-            })}
+            isInvalid={!!formErrors.nombres}
+            {...register("nombres")}
           />
-          <Form.Control.Feedback type="invalid">{formState.errors.nombres?.message}</Form.Control.Feedback>
+          <Form.Control.Feedback type="invalid">{formErrors.nombres?.message}</Form.Control.Feedback>
         </Form.Group>
       </Form.Row>
       <Form.Row>
-        <Form.Group as={Col} md={4}>
+        <Form.Group as={Col} md={8}>
           <Form.Label>Especialidad</Form.Label>
           <Controller
             name="especialidad"
             control={control}
-            rules={{
-              required: rules.required()
-            }}
             render={({field, fieldState})=>{
               return <>
                 <EspecialidadesTypeahead
                   id="medicos-form/especialidades-typeahead"
+                  align="left"
                   onLoad={(especialidades)=>setEspecialidades(especialidades)}
+                  feedback={fieldState.error?.message}
                   className={formState.errors.especialidad ? "is-invalid" : ""}
                   isInvalid={!!fieldState.error}
                   selected={field.value}
                   onChange={field.onChange}
                   onBlur={field.onBlur}
                 />
-                <Form.Control.Feedback type="invalid">{fieldState.error?.message}</Form.Control.Feedback>
               </>
             }}
           />
@@ -227,33 +213,35 @@ export const ProveedorMedicoForm = ({proveedor, noRedirect=false, next}: Props)=
           <Controller
             name="regional"
             control={control}
-            rules={{
-              required: rules.required()
-            }}
             render={({field, fieldState})=>{
               return <>
                 <RegionalesTypeahead
-                  id="medicos-form/regionales-typeahead"
+                  id="proveedor-form/regionales-typeahead"
                   onLoad={(regionales)=>setRegionales(regionales)}
-                  className={fieldState.error ? "is-invalid" : ""}
+                  filterBy={(regional) => {
+                    if(loggedUser.can(Permisos.REGISTRAR_PROVEEDORES)) return true 
+                    if(loggedUser.can(Permisos.REGISTRAR_PROVEEDORES_REGIONAL) && loggedUser.regionalId == regional.id) return true
+                    if(id && loggedUser.can(Permisos.EDITAR_PROVEEDORES)) return true
+                    if(id && loggedUser.can(Permisos.EDITAR_PROVEEDORES_REGIONAL) && loggedUser.regionalId == regional.id) return true
+                    return false
+                  }}
+                  feedback={fieldState.error?.message}
                   isInvalid={!!fieldState.error}
                   selected={field.value}
                   onChange={field.onChange}
                   onBlur={field.onBlur}
                 />
-                <Form.Control.Feedback type="invalid">{fieldState.error?.message}</Form.Control.Feedback>
               </>
             }}
           />
         </Form.Group>
       </Form.Row>
-      <Button
+      {!onSubmit ? <Button
         type="submit"
-        form="prestacion-form"
       >
         {guardar.isLoading ? <Spinner animation="border" size="sm" />: null}
         Guardar
-      </Button>
+      </Button> : null}
     </Form>
   </>
 }

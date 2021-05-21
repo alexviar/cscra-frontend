@@ -1,15 +1,17 @@
 
-import { forwardRef, MutableRefObject, useEffect, useRef, useState } from "react"
-import { AsyncTypeahead, AsyncTypeaheadProps } from 'react-bootstrap-typeahead'
-import { useQuery, useQueryClient } from 'react-query'
+import { useEffect } from "react"
+import { Button, Form, InputGroup } from "react-bootstrap"
+import { Typeahead, TypeaheadProps } from 'react-bootstrap-typeahead'
+import { FaSync } from 'react-icons/fa'
+import { useQuery } from 'react-query'
 import { Especialidad, EspecialidadesService } from "../../especialidades/services";
+import { isMatch } from "../../../../commons/utils";
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 
+export type { Especialidad }
 
-export const EspecialidadesTypeahead = (props: {onLoad?: (options: Especialidad[])=>void} & Omit<AsyncTypeaheadProps<Especialidad>, "isLoading" | "options" | "onSearch">) => {
-
-
-  const queryKey = "obtenerEspecialidades"
+export const EspecialidadesTypeahead = ({isInvalid, feedback, filterBy, ...props}: {feedback?: string, onLoad?: (options: Especialidad[])=>void} & Omit<TypeaheadProps<Especialidad>, "isLoading" | "options" | "onSearch">) => {
+  const queryKey = "especialidades.buscar"
 
   const buscar = useQuery(queryKey, ()=>{
     return EspecialidadesService.buscar("")
@@ -17,9 +19,6 @@ export const EspecialidadesTypeahead = (props: {onLoad?: (options: Especialidad[
     refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
-    // onSuccess: ({data})=>{
-    //   props.onLoad && props.onLoad(data)
-    // }
   })
 
   useEffect(()=>{
@@ -28,21 +27,26 @@ export const EspecialidadesTypeahead = (props: {onLoad?: (options: Especialidad[
     }
   }, [buscar.data])
 
-  return <AsyncTypeahead
-    positionFixed
-    align="left"
-    {...props}
-    // filterBy={()=>true}
-    isLoading={buscar.isFetching}
-    options={buscar.data?.data || []}
-    labelKey="nombre"
-    useCache={false}
-    minLength={0}
-    onSearch={(newQuery)=>{
-      // setOptions(buscar.data?.data.filter(r=>r.nombre.includes(newQuery))||[])
-    }}
-    renderMenuItemChildren={(prestacion) => {
-      return prestacion.nombre
-    }}
-  />
+  return <InputGroup hasValidation>
+    <Typeahead
+      className={buscar.isError || isInvalid ? "is-invalid" : ""}
+      isInvalid={buscar.isError || isInvalid}
+      {...props}
+      filterBy={(especialidad, props)=>{
+        return !props.text || (isMatch(especialidad.nombre, props) && 
+        !!(!filterBy || (typeof filterBy === "function" && filterBy(especialidad, props))))
+      }}
+      isLoading={buscar.isFetching}
+      options={buscar.data?.data||[]}
+      labelKey="nombre"
+    />
+    {buscar.isError ? <>
+      <InputGroup.Append>
+        <Button variant="outline-danger" onClick={()=>buscar.refetch()}><FaSync /></Button>
+      </InputGroup.Append>
+      <Form.Control.Feedback type="invalid">{buscar.error?.response?.message || buscar.error?.message}</Form.Control.Feedback>
+    </>
+    : null}
+    {feedback ? <Form.Control.Feedback type="invalid">{feedback}</Form.Control.Feedback> : null}
+  </InputGroup>
 }

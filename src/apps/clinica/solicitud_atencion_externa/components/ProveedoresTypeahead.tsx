@@ -34,8 +34,8 @@ export const ProveedoresTypeahead = ({isInvalid, feedback, filterBy, ...props}: 
       isInvalid={buscar.isError || isInvalid}
       {...props}
       filterBy={(proveedor, props)=>{
-        return (proveedor.medico ? isMatch(proveedor.medico.nombreCompleto, props) : isMatch(proveedor.nombre, props)) 
-          && !!(typeof filterBy === "function" && filterBy(proveedor, props))
+        return  (!props.text || (proveedor.medico ? isMatch(proveedor.medico.nombreCompleto, props) : isMatch(proveedor.nombre, props)))
+          && (!filterBy || (typeof filterBy === "function" && filterBy(proveedor, props)))
       }}
       isLoading={buscar.isFetching}
       options={buscar.data?.data || []}

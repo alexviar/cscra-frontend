@@ -91,7 +91,7 @@ export const UserForm = () => {
     user: User
   }>()
 
-  const queryKey = ["cargarUsuario", id];
+  const queryKey = ["usuarios.cargar", id];
   const cargar = useQuery(queryKey, () => {
     return UserService.cargar(parseInt(id!))
   }, {
