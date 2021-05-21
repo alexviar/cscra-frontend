@@ -1,7 +1,9 @@
 import { AxiosError } from "axios"
 import React, {useState, useRef} from "react"
 import { Dropdown, ButtonGroup, Button, Form, Table, Spinner, Row, Col } from "react-bootstrap"
-import { useQuery } from "react-query"
+import { FaSync, FaEdit, FaTrash } from "react-icons/fa"
+import { useMutation, useQuery } from "react-query"
+import { Link } from "react-router-dom"
 import Pagination from "../../../../commons/components/Pagination"
 import VerticalEllipsisDropdownToggle from "../../../../commons/components/VerticalEllipsisDropdownToggle"
 import { Page } from "../../../../commons/services/Page"
@@ -20,9 +22,10 @@ export const EspecialidadesIndex = ()=>{
 
   const importModalRef = useRef<{show(visible: boolean): void}>()
 
-  const buscarEspecialidades = useQuery(["buscarEspecialidades", page, filter], ()=>{
+  const buscar = useQuery(["especialidades.buscar", page, filter], ()=>{
     return EspecialidadesService.buscar(filter, page)
   }, {
+    refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
     onSuccess: ({data: {meta}}) => {
@@ -30,8 +33,12 @@ export const EspecialidadesIndex = ()=>{
     }
   })
 
+  const eliminar = useMutation((id: number)=>{
+    return EspecialidadesService.eliminar(id)
+  })
+
   const renderRows = ()=>{
-    if (buscarEspecialidades.isFetching) {
+    if (buscar.isFetching) {
       return <tr>
         <td className="bg-light text-center" colSpan={100}>
           <Spinner className="mr-2" variant="primary" animation="border" size="sm" />
@@ -39,15 +46,15 @@ export const EspecialidadesIndex = ()=>{
         </td>
       </tr>
     }
-    if (buscarEspecialidades.isError) {
-      const { error } = buscarEspecialidades
+    if (buscar.isError) {
+      const { error } = buscar
       return <tr>
         <td className="bg-danger text-light text-center" colSpan={100}>
           {(error as AxiosError).response?.data?.message || (error as AxiosError).message}
         </td>
       </tr>
     }
-    const records = buscarEspecialidades.data!.data.records
+    const records = buscar.data!.data.records
     if(records.length == 0){
       return  <tr>
         <td className="bg-light text-center" colSpan={100}>
@@ -66,9 +73,15 @@ export const EspecialidadesIndex = ()=>{
             />
 
             <Dropdown.Menu>
+              <Dropdown.Item as={Link} replace to={{
+                pathname: `/clinica/configuracion/especialidades/${especialidad.id}/editar`,
+                state: {
+                  especialidad
+                }
+              }} ><FaEdit /><span className="ml-2 align-middle">Editar</span></Dropdown.Item>
               <Dropdown.Item className="text-danger" href="#" onClick={() => {
                 if (window.confirm("¿Está seguro?")) {
-                  // quitarEmpleadorEnMora.mutate(item.empleadorId)
+                  eliminar.mutate(especialidad.id)
                 }
               }}>Eliminar</Dropdown.Item>
             </Dropdown.Menu>
@@ -80,18 +93,24 @@ export const EspecialidadesIndex = ()=>{
 
   return <div className="px-1">
     <h2 style={{fontSize: "1.75rem"}}>Especialidades</h2>
-    <div className="d-flex mb-2">
-      <Dropdown className="ml-auto" as={ButtonGroup}>
-        <Button>Nuevo</Button>
-        <Dropdown.Toggle split id="especialidades-dropdown" />
-        <Dropdown.Menu>
-          <Dropdown.Item href="#" onClick={()=>{
-            importModalRef.current && importModalRef.current.show(true)
-          }}
-          >Importar</Dropdown.Item>
-        </Dropdown.Menu>
-      </Dropdown>
-    </div>
+    <Row className="mb-2">
+      <Col className="ml-auto pr-0" xs="auto" >
+        <Button onClick={()=>buscar.refetch()}><FaSync /></Button>
+      </Col>
+      <Col xs="auto">
+        <Dropdown as={ButtonGroup}>
+          <Button as={Link} replace to={"/clinica/configuracion/especialidades/registrar"}>Nuevo</Button>
+          <Dropdown.Toggle split id="especialidades-dropdown" />
+          <Dropdown.Menu>
+            <Dropdown.Item onClick={()=>{
+              console.log(importModalRef)
+              importModalRef.current && importModalRef.current.show(true)
+            }}
+            >Importar</Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown>
+      </Col>
+    </Row>
     <Row>
       <Col className="mb-2">
         <EspecialidadesFilter onSearch={(filter)=>{
@@ -130,18 +149,14 @@ export const EspecialidadesIndex = ()=>{
         {renderRows()}
       </tbody>
     </Table>
-    <div className="row">
-      <Col>
+    {buscar.status === "success" ? <div className="d-flex flex-row">
         <span className="mr-auto">{`Se encontraron ${total} resultados`}</span>
-      </Col>
-      <Col>
         <Pagination
           current={page.current}
           total={Math.ceil((total - page.size) / page.size) + 1}
           onChange={(current) => setPage((page) => ({ ...page, current }))}
         />
-      </Col>
-    </div>
+      </div> : null}
     <ImportarForm modalRef={importModalRef} />
   </div>
 }

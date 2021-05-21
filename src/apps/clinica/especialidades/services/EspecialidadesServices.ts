@@ -11,8 +11,12 @@ export type Especialidad = {
 interface EspecialidadesService {
   buscar(filter: string): AxiosPromise<Especialidad[]>
   buscar(filter: string, page: Page): AxiosPromise<PaginatedResponse<Especialidad>>
-  // buscar(filter: string, page?: Page): AxiosPromise<PaginatedResponse<Especialidad>|Especialidad[]>
+  ver: (id: number) => AxiosPromise<Especialidad>
+  registrar: (nombre: string) => AxiosPromise<Especialidad>
+  actualizar: (id: number, nombre: string) => AxiosPromise<Especialidad>
+  eliminar: (id: number) => AxiosPromise<Especialidad>
   importar(archivo: File, separador: string, formato: string): AxiosPromise
+
 }
 
 export const EspecialidadesService: EspecialidadesService = {
@@ -33,6 +37,22 @@ export const EspecialidadesService: EspecialidadesService = {
       source.cancel('Query was cancelled by React Query')
     }
     return promise
+  },
+  ver: (id: number) => {
+    return apiClient.get<Especialidad>(`especialidades/${id}`)
+  },
+  registrar: (nombre: string) => {
+    return apiClient.post<Especialidad>("especialidades", {
+      nombre
+    })
+  },
+  actualizar: (id: number, nombre: string) => {
+    return apiClient.put<Especialidad>(`especialidades/${id}`, {
+      nombre
+    })
+  },
+  eliminar: (id: number) => {
+    return apiClient.delete(`especialidades/${id}`)
   },
   importar: (archivo: File, separador: string, formato: string) =>{
     const formData = new FormData()

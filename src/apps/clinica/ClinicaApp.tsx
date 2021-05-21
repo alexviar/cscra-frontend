@@ -9,7 +9,7 @@ import { FcDebt } from '../../commons/components/icons/FcDebt';
 import { SolicitudAtencionExternaIndex } from './solicitud_atencion_externa/components/SolicitudAtencionExternaIndex';
 import { SolicitudAtencionExternaForm } from './solicitud_atencion_externa/components/SolicitudAtencionExternaForm';
 import { SolicitudATPolicy } from './solicitud_atencion_externa/policies';
-import { EspecialidadesIndex } from './especialidades/components/EspecialidadesIndex';
+import { EspecialidadesIndex, EspecialidadForm } from './especialidades/components';
 import { PrestacionesIndex, PrestacionForm } from './prestaciones/componentes';
 import { MedicosIndex, MedicosForm, MedicoPolicy } from './medicos';
 import { 
@@ -147,7 +147,7 @@ export const ClinicaApp = ()=>{
       >
         <ContratoForm />
       </ProtectedRoute>
-      <Route exact path={`${url}/configuracion/especialidades`}>
+      <Route path={`${url}/configuracion/especialidades`}>
         <EspecialidadesIndex />
       </Route>
       <Route path={`${url}/configuracion/prestaciones`}>
@@ -156,8 +156,11 @@ export const ClinicaApp = ()=>{
     </Switch>
     
     <Route exact path={[`${url}/configuracion/prestaciones/registrar`, `${url}/configuracion/prestaciones/:id/editar`]}>
-        <PrestacionForm />
-      </Route>
+      <PrestacionForm />
+    </Route>
+    <Route exact path={[`${url}/configuracion/especialidades/registrar`, `${url}/configuracion/especialidades/:id/editar`]}>
+      <EspecialidadForm />
+    </Route>
   </SidebarLayout>
 }
 

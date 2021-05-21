@@ -11,8 +11,6 @@ import VerticalEllipsisDropdownToggle from "../../../../commons/components/Verti
 import { Page } from "../../../../commons/services/Page"
 import { PrestacionesService } from "../services"
 import { PrestacionesFilterForm } from "./PrestacionesFilterForm"
-// import { EspecialidadesFilter } from "./EspecialidadesFilter"
-// import { ImportarPrestaciones } from "./ImportarPrestaciones"
 
 export const PrestacionesIndex = ()=>{
   const [total, setTotal] = useState(0)
