@@ -64,27 +64,27 @@ const schema = yup.object().shape({
       yup.mixed()),
     fechaValidezSeguro: validezSchema
   }),
-  "titular": yup.lazy(value => value?.id ? yup.object().shape({
-    "matricula": yup.string().label("matricula").required(),
-    "estado": estadoAfiSchema,
-    "fechaValidezSeguro": validezSchema
+  titular: yup.lazy(value => value?.id ? yup.object().shape({
+    matricula: yup.string().label("matricula").required(),
+    estado: estadoAfiSchema,
+    fechaValidezSeguro: validezSchema
   }): yup.object() ),
-  "empleador": yup.object().shape({
-    "numeroPatronal": yup.string().label("numero patronal").required(),
-    "estado": yup.string().label("estado").oneOf(Object.values(EstadosEmp), "Estado desconocido")
+  empleador: yup.object().shape({
+    numeroPatronal: yup.string().label("numero patronal").required(),
+    estado: yup.string().label("estado").oneOf(Object.values(EstadosEmp), "Estado desconocido")
     .test("estado-incoherente", "El empleador figura como activo, pero tiene fecha de baja", function(value, context) {
       return value != EstadosEmp[1] || !context.parent.fechaBaja
     }),
-    "fechaBaja": yup.mixed().when("estado", {
+    fechaBaja: yup.mixed().when("estado", {
       is: (estado: string) => estado == EstadosEmp[2] || estado == EstadosEmp[3],
       then: yup.date().required("Fecha sin especificar, se asume que el seguro ya no tiene validez")
                .min(hoy.subtract(2, "months").toDate())
     }),
-    "aportes": yup.lazy(value => value ? yup.string().oneOf(["No"], "El empleador esta en mora") : yup.string())
+    aportes: yup.lazy(value => value ? yup.string().oneOf(["No"], "El empleador esta en mora") : yup.string())
   }),
-  "regional": yup.array().length(1, "Debe seleccionar una regional"),
-  "medico": yup.array().length(1, "Debe seleccionar un medico"),
-  "proveedor": yup.array().length(1, "Debe seleccionar un proveedor"),
+  regional: yup.array().length(1, "Debe seleccionar una regional"),
+  medico: yup.array().length(1, "Debe seleccionar un medico"),
+  proveedor: yup.array().length(1, "Debe seleccionar un proveedor"),
   prestacionesSolicitadas: yup.array().of(yup.object().shape({
     prestacion: yup.array().length(1, "Debe seleccionar una prestacion"),
     nota: yup.string().label("nota").nullable().notRequired().max(150)
@@ -144,7 +144,7 @@ export const SolicitudAtencionExternaForm = ()=>{
         Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA_REGISTRADO_POR
       ]) || (loggedUser.can(Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL) && regionalId == loggedUser.regionalId)){
         dm11Viewer.open({url: urlDm11})
-        //reset()
+        reset()
       }
     }
   })

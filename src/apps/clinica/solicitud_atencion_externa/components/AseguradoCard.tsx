@@ -38,8 +38,8 @@ export type AseguradoInputs = {
     fechaValidezSeguro?: string | null
   },
   empleador: {
-    id: string, 
-    numeroPatronal: string, 
+    id: string,
+    numeroPatronal: string,
     nombre: string,
     estado: string,
     aportes: string,
@@ -47,7 +47,7 @@ export type AseguradoInputs = {
   }
 }
 
-export const AseguradoCard = ()=>{
+export const AseguradoCard = () => {
 
   const {
     register,
@@ -70,17 +70,17 @@ export const AseguradoCard = ()=>{
   const empleador = useWatch({
     control,
     name: 'empleador', // without supply name will watch the entire form, or ['firstName', 'lastName'] to watch both
-  }); 
+  });
 
-  const aseguradoChooserRef = useRef<ImperativeModalRef|null>(null)
+  const aseguradoChooserRef = useRef<ImperativeModalRef | null>(null)
 
   const matricula = asegurado.matricula
-  const buscar = useQuery(["asegurados.buscar", matricula], ()=>{
+  const buscar = useQuery(["asegurados.buscar", matricula], () => {
     return AseguradosService.buscarPorMatricula(matricula)
   }, {
     enabled: false,
-    onSuccess: ({data: {records}}) =>{
-      if(records.length == 1){
+    onSuccess: ({ data: { records } }) => {
+      if (records.length == 1) {
         const asegurado = records[0]
         onChange(asegurado)
       }
@@ -90,7 +90,7 @@ export const AseguradoCard = ()=>{
     }
   })
 
-  const onChange = ({empleador, titular, ...asegurado}: any) => {
+  const onChange = ({ empleador, titular, ...asegurado }: any) => {
     setValue("asegurado.id", asegurado.id)
     setValue("asegurado.apellidoPaterno", asegurado.apellidoPaterno || "")
     setValue("asegurado.apellidoMaterno", asegurado.apellidoMaterno || "")
@@ -101,7 +101,7 @@ export const AseguradoCard = ()=>{
     setValue("asegurado.fechaRegBaja", asegurado.baja?.regDate)
     setValue("asegurado.fechaValidezSeguro", asegurado.baja?.fechaValidezSeguro)
     setValue("asegurado.fechaExtincion", asegurado.fechaExtincion)
-    
+
     setValue("titular.id", titular?.id)
     setValue("titular.matricula", titular?.matricula)
     setValue("titular.apellidoPaterno", titular?.apellidoPaterno)
@@ -120,8 +120,8 @@ export const AseguradoCard = ()=>{
     setValue("empleador.aportes", empleador?.aportes == 2 ? "Sí" : empleador?.aportes == 1 ? "No" : "")
   }
 
-  useEffect(()=>{
-    if(asegurado.id && formState.dirtyFields.asegurado?.matricula){
+  useEffect(() => {
+    if (asegurado.id && formState.dirtyFields.asegurado?.matricula) {
       setValue("asegurado.id", "")
       setValue("asegurado.apellidoPaterno", "")
       setValue("asegurado.apellidoMaterno", "")
@@ -171,26 +171,29 @@ export const AseguradoCard = ()=>{
                 isInvalid={!!formErrors.asegurado?.matricula || !!formErrors.asegurado?.id}
                 className="text-uppercase" {...register("asegurado.matricula")} />
               <InputGroup.Append >
-                <Button variant="outline-secondary" onClick={()=>{
+                <Button variant="outline-secondary" onClick={() => {
                   trigger("asegurado.matricula")
-                  if(!formErrors.asegurado?.matricula){
-                    if(formState.dirtyFields.asegurado?.matricula)
-                      delete formState.dirtyFields.asegurado.matricula
-                    clearErrors(["asegurado", "titular", "empleador"])
-                    if(!buscar.data){
-                      buscar.refetch()
-                    }
-                    else{
-                      const {data: {records}} = buscar.data
-                      if(records.length == 1){
-                        // const asegurado = records[0]
-                        // onChange(asegurado)
+                    .then((validation) => {
+                      console.log("Matricula validation", validation)
+                      if (!formErrors.asegurado?.matricula) {
+                        if (formState.dirtyFields.asegurado?.matricula)
+                          delete formState.dirtyFields.asegurado.matricula
+                        clearErrors(["asegurado", "titular", "empleador"])
+                        if (!buscar.data) {
+                          buscar.refetch()
+                        }
+                        else {
+                          const { data: { records } } = buscar.data
+                          if (records.length == 1) {
+                            const asegurado = records[0]
+                            onChange(asegurado)
+                          }
+                          else {
+                            aseguradoChooserRef.current?.show(true)
+                          }
+                        }
                       }
-                      else {
-                        aseguradoChooserRef.current?.show(true)
-                      }
-                    }
-                  }
+                    })
                 }}>
                   {buscar.isFetching ? <Spinner animation="border" size="sm" /> : <FaSearch />}
                 </Button>
@@ -200,21 +203,21 @@ export const AseguradoCard = ()=>{
           </Col>
           <Form.Group as={Col} lg={3} md={6}>
             <Form.Label>Apellido Paterno</Form.Label>
-            <Form.Control 
+            <Form.Control
               readOnly
               {...register("asegurado.apellidoPaterno")}
             />
           </Form.Group>
           <Form.Group as={Col} lg={3} md={6}>
             <Form.Label>Apellido Materno</Form.Label>
-            <Form.Control 
+            <Form.Control
               readOnly
               {...register("asegurado.apellidoMaterno")}
             />
           </Form.Group>
           <Form.Group as={Col} lg={3} md={6}>
             <Form.Label>Nombre</Form.Label>
-            <Form.Control 
+            <Form.Control
               readOnly
               {...register("asegurado.nombres")}
             />
@@ -223,7 +226,7 @@ export const AseguradoCard = ()=>{
         <Form.Row>
           <Form.Group as={Col} sm={4}>
             <Form.Label>Estado</Form.Label>
-            <Form.Control 
+            <Form.Control
               readOnly
               isInvalid={!!formErrors.asegurado?.estado}
               {...register("asegurado.estado")}
@@ -233,7 +236,7 @@ export const AseguradoCard = ()=>{
           </Form.Group>
           <Form.Group as={Col} sm={4}>
             <Form.Label>Validez del seguro</Form.Label>
-            <Form.Control 
+            <Form.Control
               readOnly
               type="date"
               isInvalid={!!formErrors.asegurado?.fechaValidezSeguro}
@@ -245,7 +248,7 @@ export const AseguradoCard = ()=>{
           </Form.Group>
           {asegurado.tipo == 2 ? <Form.Group as={Col} sm={4}>
             <Form.Label>Fecha extinsion</Form.Label>
-            <Form.Control 
+            <Form.Control
               readOnly
               type="date"
               isInvalid={!!formErrors.asegurado?.fechaExtincion}
@@ -253,9 +256,9 @@ export const AseguradoCard = ()=>{
                 validate: {
                   afterDate: (value) => {
                     const now = moment()
-                    if(value && moment(value, "DD/MM/YYYY").isSameOrBefore(now)){
+                    if (value && moment(value, "DD/MM/YYYY").isSameOrBefore(now)) {
                       return "Se ha cumplido la fecha de extincion"
-                    } 
+                    }
                   }
                 }
               })}
@@ -263,34 +266,34 @@ export const AseguradoCard = ()=>{
             <Form.Control.Feedback type="invalid">{formErrors.asegurado?.fechaExtincion?.message}</Form.Control.Feedback>
           </Form.Group> : null}
         </Form.Row>
-        { asegurado.tipo == 2 ? <div /*className={asegurado.tipo == 2 ? "" : "d-none"}*/ >
+        {asegurado.tipo == 2 ? <div /*className={asegurado.tipo == 2 ? "" : "d-none"}*/ >
           {/* {watch("titular.id") ? <> */}
-          <h2 style={{fontSize: "1.25rem"}}>Titular</h2>
+          <h2 style={{ fontSize: "1.25rem" }}>Titular</h2>
           <Form.Row>
             <Form.Group as={Col} lg={3} md={6}>
               <Form.Label>Matricula</Form.Label>
-              <Form.Control 
+              <Form.Control
                 readOnly
                 {...register("titular.matricula")}
               />
             </Form.Group>
             <Form.Group as={Col} lg={3} md={6}>
               <Form.Label>Apellido Paterno</Form.Label>
-              <Form.Control 
+              <Form.Control
                 readOnly
                 {...register("titular.apellidoPaterno")}
               />
             </Form.Group>
             <Form.Group as={Col} lg={3} md={6}>
               <Form.Label>Apellido Materno</Form.Label>
-              <Form.Control 
+              <Form.Control
                 readOnly
                 {...register("titular.apellidoMaterno")}
               />
             </Form.Group>
             <Form.Group as={Col} lg={3} md={6}>
               <Form.Label>Nombre</Form.Label>
-              <Form.Control 
+              <Form.Control
                 readOnly
                 {...register("titular.nombres")}
               />
@@ -299,7 +302,7 @@ export const AseguradoCard = ()=>{
           <Form.Row>
             <Form.Group as={Col} sm={4}>
               <Form.Label>Estado</Form.Label>
-              <Form.Control 
+              <Form.Control
                 readOnly
                 isInvalid={!!formErrors.titular?.estado}
                 {...register("titular.estado")}
@@ -309,7 +312,7 @@ export const AseguradoCard = ()=>{
             </Form.Group>
             <Form.Group as={Col} sm={4}>
               <Form.Label>Fecha de baja</Form.Label>
-              <Form.Control 
+              <Form.Control
                 readOnly
                 type="date"
                 isInvalid={!!formErrors.titular?.fechaValidezSeguro}
@@ -320,8 +323,8 @@ export const AseguradoCard = ()=>{
           </Form.Row>
           {/* </> : null} */}
         </div>
-        : null}
-        <h2 style={{fontSize: "1.25rem"}}>Empleador</h2>
+          : null}
+        <h2 style={{ fontSize: "1.25rem" }}>Empleador</h2>
         <Form.Row>
           <Form.Group as={Col} md={4}>
             <Form.Label>Nº Patronal</Form.Label>
@@ -331,10 +334,10 @@ export const AseguradoCard = ()=>{
               {...register("empleador.numeroPatronal")}
             />
             <Form.Control.Feedback type="invalid">{formErrors.empleador?.numeroPatronal?.message}</Form.Control.Feedback>
-          </Form.Group> 
+          </Form.Group>
           <Form.Group as={Col} md={8}>
             <Form.Label>Nombre</Form.Label>
-            <Form.Control 
+            <Form.Control
               readOnly
               {...register("empleador.nombre")}
             />
@@ -352,7 +355,7 @@ export const AseguradoCard = ()=>{
           </Form.Group>
           <Form.Group as={Col} sm={4}>
             <Form.Label>Fecha de baja</Form.Label>
-            <Form.Control 
+            <Form.Control
               readOnly
               type="date"
               isInvalid={!!formErrors.empleador?.fechaBaja}
@@ -373,7 +376,7 @@ export const AseguradoCard = ()=>{
         <AseguradoChooser ref={aseguradoChooserRef}
           title="Resultados"
           asegurados={buscar.data?.data.records || []}
-          onSelect={(asegurado: Asegurado)=>{
+          onSelect={(asegurado: Asegurado) => {
             // asegurado.matricula = watch("asegurado.matricula")
             onChange(asegurado)
             aseguradoChooserRef.current!.show(false)

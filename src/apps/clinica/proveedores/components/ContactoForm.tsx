@@ -71,6 +71,8 @@ export const ContactoForm = (props: Props)=>{
 
   const formErrors = formState.errors
 
+  console.log("Errors", formErrors, watch())
+
   const cargar = useQuery(["proveedor.cargar", id], ()=>{
     return ProveedoresService.cargar(parseInt(id))
   }, {
@@ -170,8 +172,6 @@ export const ContactoForm = (props: Props)=>{
     }
     return null
   }
-
-  console.log("Errors", formErrors, watch())
 
   return <Form id="proveedor-contacto-form" onSubmit={handleSubmit(props.onSubmit || ((data) => {
     guardar.mutate(data)

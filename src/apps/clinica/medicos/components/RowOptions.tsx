@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 import { Dropdown } from "react-bootstrap"
 // import { FaEdit } from "react-icons/fa"
-import { useMutation, useQueryClient } from "react-query"
+import { QueryKey, useMutation, useQueryClient } from "react-query"
 import { Link } from "react-router-dom"
 import { VerticalEllipsisDropdownToggle } from "../../../../commons/components"
 import { useModal } from "../../../../commons/reusable-modal"
@@ -10,9 +10,10 @@ import { Medico, MedicosService } from "../services"
 import { MedicoPolicy } from "../policies"
 
 type Props = {
-  medico: Medico
+  medico: Medico,
+  queryKey: QueryKey
 }
-export const RowOptions = ({medico}: Props) => {
+export const RowOptions = ({medico, queryKey}: Props) => {
 
   const modal = useModal<{
     state: "loading" | "error"
@@ -26,7 +27,7 @@ export const RowOptions = ({medico}: Props) => {
   }, {
     onSuccess: ()=>{
       modal.close()
-      queryClient.setQueryData("listaMora.buscar", (oldData: any) => {
+      queryClient.setQueryData(queryKey, (oldData: any) => {
         console.log(oldData)
         return {
           ...oldData,

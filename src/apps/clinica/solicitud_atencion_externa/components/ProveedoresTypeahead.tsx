@@ -1,5 +1,5 @@
 
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { Button, Form, InputGroup } from "react-bootstrap"
 import { FaSync } from "react-icons/fa"
 import { Typeahead, TypeaheadProps } from 'react-bootstrap-typeahead'
@@ -28,17 +28,27 @@ export const ProveedoresTypeahead = ({isInvalid, feedback, filterBy, ...props}: 
     }
   }, [buscar.data])
 
+  const options = useMemo(()=>{
+    if(Array.isArray(buscar.data?.data)){
+        return buscar.data?.data!
+    }
+    else if(buscar.data?.data){
+        console.error(buscar.data?.data)
+    }
+    return []
+  }, [buscar.data?.data])
+
   return <InputGroup hasValidation>
     <Typeahead
-      className={buscar.isError || isInvalid ? "is-invalid" : ""}
-      isInvalid={buscar.isError || isInvalid}
       {...props}
+      className={(buscar.isError || isInvalid) ? "is-invalid" : ""}
+      isInvalid={buscar.isError || isInvalid}
       filterBy={(proveedor, props)=>{
         return  (!props.text || (proveedor.medico ? isMatch(proveedor.medico.nombreCompleto, props) : isMatch(proveedor.nombre, props)))
           && (!filterBy || (typeof filterBy === "function" && filterBy(proveedor, props)))
       }}
       isLoading={buscar.isFetching}
-      options={buscar.data?.data || []}
+      options={options}
       labelKey={(proveedor: Proveedor)=>{
         if(proveedor.medico){
           const medico = proveedor.medico

@@ -52,7 +52,7 @@ export default ()=>{
     // apiClient.get('/user')
   }, [])
 
-  return <Router>
+  return <Router >
     <Navbar className="shadow-sm border-bottom" bg="white" variant="light" style={{zIndex: 1}}>
       <ToggleSidebar />
       <Navbar.Brand href="#home" className="ml-4">Galeno - DM11</Navbar.Brand>

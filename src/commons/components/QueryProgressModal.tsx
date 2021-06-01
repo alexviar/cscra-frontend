@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react"
 import { AxiosError } from "axios"
 import { Alert, Modal as BSModal, Spinner } from "react-bootstrap"
-import { useSelector } from "react-redux"
+import { useModal } from "../reusable-modal"
 
 export const QueryProgressModal = ()=>{
   //@ts-ignore
-  const modal = useSelector((state)=>state.modals.queryLoader)
+  const modal = useModal("queryLoader")
 
   const renderModalHeader = ()=>{
     if(modal.state == "loading"){

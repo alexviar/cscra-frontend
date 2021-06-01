@@ -26,7 +26,7 @@ export const ProveedorForm = (props: { onSubmit?: (data: PEInputs | ProveedorMed
 
   const loader = useModal("queryLoader")
 
-  const cargar = useQuery(["proveedor",id], ()=>{
+  const cargar = useQuery(["proveedor.cargar", id], ()=>{
     return ProveedoresService.cargar(parseInt(id!))
   }, {
     enabled: !!id && !history.location.state?.proveedor,

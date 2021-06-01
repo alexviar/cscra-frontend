@@ -2,7 +2,7 @@ import { AxiosError, AxiosResponse } from 'axios'
 import { useEffect, useState, useRef } from 'react'
 import { Alert, Button, Col, Form, InputGroup, Modal, Spinner } from 'react-bootstrap'
 import { Controller, useForm } from 'react-hook-form'
-import { useMutation, useQuery } from 'react-query'
+import { useMutation, useQueryClient } from 'react-query'
 import { useHistory, useParams } from 'react-router'
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from 'yup'
@@ -92,6 +92,8 @@ export const ProveedorMedicoForm = ({proveedor, onSubmit}: Props)=>{
 
   const formErrors = formState.errors
 
+  const queryClient = useQueryClient()
+
   const guardar = useMutation((inputs: Inputs)=>{
     return ProveedoresService.actualizar(parseInt(id!), {
       tipoId: 1,
@@ -106,6 +108,7 @@ export const ProveedorMedicoForm = ({proveedor, onSubmit}: Props)=>{
     })
   }, {
     onSuccess: ({data})=>{
+      queryClient.invalidateQueries("proveedor.buscar")
       history.replace(`/clinica/proveedores/${data.id}`)
     }
   })

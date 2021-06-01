@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 import { Dropdown } from "react-bootstrap"
 // import { FaEdit } from "react-icons/fa"
-import { useMutation, useQueryClient } from "react-query"
+import { useMutation, useQueryClient, QueryKey } from "react-query"
 import { Link } from "react-router-dom"
 import { VerticalEllipsisDropdownToggle } from "../../../../commons/components"
 import { useModal } from "../../../../commons/reusable-modal"
@@ -11,6 +11,7 @@ import { ProveedorPolicy } from "../policies"
 
 type Props = {
   proveedor: Proveedor
+  queryKey: QueryKey
 }
 export const RowOptions = ({proveedor}: Props) => {
 

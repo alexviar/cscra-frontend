@@ -2,7 +2,7 @@ import { AxiosError } from 'axios'
 import { useEffect, useState, useRef } from 'react'
 import { Alert, Button, Col, Form, Spinner } from 'react-bootstrap'
 import { Controller, useForm } from 'react-hook-form'
-import { useMutation, useQuery } from 'react-query'
+import { useMutation, useQuery, useQueryClient } from 'react-query'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from "yup"
 import { Medico, MedicosService } from '../services'
@@ -23,8 +23,11 @@ type Inputs = {
 }
 
 const schema = yup.object().shape({
-  ci: yup.number().label("número de carnet").typeError("El ${path}No es un numero valido"),
-  ciComplemento: yup.string().transform(value => value === "" ? null : value).trim().uppercase().nullable().notRequired().length(2).matches(/[0-1A-Z]/),
+  ci: yup.number().label("número de carnet").typeError("El ${path} no es un numero valido"),
+  ciComplemento: yup.string().label("número complemento").transform(value => value === "" ? null : value).trim()
+    .uppercase().nullable().notRequired()
+    .length(2)
+    .matches(/(?=.*[A-Z])(?=.*[0-9])/, "El complemento del carnet esta conformado por un numero y una letra. (No confundir con el expedido)"),
   apellidoPaterno: yup.string().label("apellido paterno").trim().when("apellidoMaterno", {
     is: (apellidoMaterno: string) => !apellidoMaterno,
     then: yup.string().required("Debe proporcionar al menos un apellido")
@@ -33,7 +36,7 @@ const schema = yup.object().shape({
     is: (apellidoPaterno: string) => !apellidoPaterno,
     then: yup.string().required("Debe proporcionar al menos un apellido")
   }),
-  nombres: yup.string().label("nombres").trim().required().label("'Nombres'"),
+  nombres: yup.string().label("nombres").trim().required(),
   especialidad: yup.array().length(1, "Debe indicar una especialidad"),
   regional: yup.array().length(1, "Debe indicar una regional")
 }, [["apellidoMaterno", "apellidoPaterno"]])
@@ -74,6 +77,10 @@ export const MedicosForm = ()=>{
     }
   })
 
+  console.log("Errors", formState.errors)
+
+  const queryClient = useQueryClient()
+
   const guardar = useMutation((inputs: Inputs)=>{
     return id ? MedicosService.actualizar(parseInt(id), {
         raiz: parseInt(inputs.ci),
@@ -96,6 +103,7 @@ export const MedicosForm = ()=>{
     )
   }, {
     onSuccess: ()=>{
+      queryClient.invalidateQueries("medicos.buscar")
       if(!continueRef.current)
         history.replace("/clinica/medicos", {
           ignoreAuthorization: true
@@ -194,7 +202,7 @@ export const MedicosForm = ()=>{
       <Form.Group as={Col} md={4}>
         <Form.Label>Apellido Paterno</Form.Label>
         <Form.Control
-          isInvalid={!!formState.errors.ci}
+          isInvalid={!!formState.errors.apellidoPaterno}
           {...register("apellidoPaterno")}
         />
         <Form.Control.Feedback type="invalid">{formState.errors.apellidoPaterno?.message}</Form.Control.Feedback>
@@ -202,7 +210,7 @@ export const MedicosForm = ()=>{
       <Form.Group as={Col} md={4}>
         <Form.Label>Apellido Materno</Form.Label>
         <Form.Control
-          isInvalid={!!formState.errors.ci}
+          isInvalid={!!formState.errors.apellidoMaterno}
           {...register("apellidoMaterno")}
         />
         <Form.Control.Feedback type="invalid">{formState.errors.apellidoMaterno?.message}</Form.Control.Feedback>
@@ -210,7 +218,7 @@ export const MedicosForm = ()=>{
       <Form.Group as={Col} md={4}>
         <Form.Label>Nombres</Form.Label>
         <Form.Control
-          isInvalid={!!formState.errors.ci}
+          isInvalid={!!formState.errors.nombres}
           {...register("nombres")}
         />
         <Form.Control.Feedback type="invalid">{formState.errors.nombres?.message}</Form.Control.Feedback>
@@ -228,7 +236,6 @@ export const MedicosForm = ()=>{
                 id="medicos-form/especialidades-typeahead"
                 onLoad={(especialidades)=>setEspecialidades(especialidades)}
                 feedback={fieldState.error?.message}
-                className={fieldState.error ? "is-invalid" : ""}
                 isInvalid={!!fieldState.error}
                 selected={field.value}
                 onChange={field.onChange}
@@ -265,7 +272,6 @@ export const MedicosForm = ()=>{
       {!id ? <Button 
         className="m-1"
         type="submit"
-        form="prestacion-form"
         onClick={()=>{
           continueRef.current = true
         }}
@@ -276,7 +282,6 @@ export const MedicosForm = ()=>{
       <Button
         className="m-1"
         type="submit"
-        form="prestacion-form"
         onClick={()=>{
           continueRef.current = false
         }}

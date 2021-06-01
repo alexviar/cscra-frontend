@@ -1,5 +1,5 @@
 
-import { forwardRef, MutableRefObject, useEffect, useRef, useState } from "react"
+import { useEffect, useMemo } from "react"
 import { Button, Form, InputGroup } from "react-bootstrap"
 import { Typeahead, TypeaheadProps } from 'react-bootstrap-typeahead'
 import { FaSync } from 'react-icons/fa'
@@ -30,19 +30,28 @@ export const MunicipiosTypeahead = ({isInvalid, feedback, filterBy, ...props}: {
     }
   }, [buscar.data])
 
+  const options = useMemo(()=>{
+    if(Array.isArray(buscar.data?.data)){
+        return buscar.data?.data!
+    }
+    else if(buscar.data?.data){
+        console.error(buscar.data?.data)
+    }
+    return []
+  }, [buscar.data?.data])
+
   return <InputGroup hasValidation>
     <Typeahead
-      className={buscar.isError || isInvalid ? "is-invalid" : ""}
-      isInvalid={buscar.isError || isInvalid}
       {...props}
+      className={(buscar.isError || isInvalid) ? "is-invalid" : ""}
+      isInvalid={buscar.isError || isInvalid}
       filterBy={(municipio, props)=>{
         return (!props.text || isMatch(municipio.nombre, props)) 
           && (!filterBy || (typeof filterBy === "function" && filterBy(municipio, props)))
       }}
       isLoading={buscar.isFetching}
-      options={buscar.data?.data||[]}
+      options={options}
       labelKey="nombre"
-      minLength={0}
     />
 
     {buscar.isError ? <>

@@ -34,7 +34,7 @@ export const MedicosIndex = () => {
   
   const [filterFormVisible, showFilterForm] = useState(false)
 
-  const queryKey = "medicos.buscar";
+  const queryKey = ["medicos.buscar", filter, page];
   const buscar = useQuery(queryKey, () => {
     return MedicosService.buscar(filter, page) as AxiosPromise<PaginatedResponse<Medico>>
   }, {
@@ -46,14 +46,14 @@ export const MedicosIndex = () => {
 
   const total = buscar.data?.data?.meta?.total || 0
 
-  const didMountRef = useRef(false)
-  useEffect(()=>{
-    if(!didMountRef.current) {
-      didMountRef.current = true
-      return
-    }
-    if(MedicoPolicy.view(loggedUser)) buscar.refetch()
-  }, [page, filter, loggedUser])
+//   const didMountRef = useRef(false)
+//   useEffect(()=>{
+//     if(!didMountRef.current) {
+//       didMountRef.current = true
+//       return
+//     }
+//     if(MedicoPolicy.view(loggedUser)) buscar.refetch()
+//   }, [page, filter, loggedUser])
 
   const renderRows = () => {
     if (buscar.isFetching) {
@@ -99,7 +99,7 @@ export const MedicosIndex = () => {
             {medico.estadoText}
           </td>
           <td>
-            <RowOptions medico={medico} />
+            <RowOptions queryKey={queryKey} medico={medico} />
           </td>
         </tr>
       })

@@ -1,5 +1,5 @@
 
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { AxiosPromise } from "axios"
 import { Button, Form, InputGroup } from "react-bootstrap"
 import { FaSync } from "react-icons/fa"
@@ -26,18 +26,28 @@ export const MedicosTypeahead = ({isInvalid, feedback, filterBy, ...props}: {fee
       props.onLoad && props.onLoad(buscar.data?.data)
     }
   }, [buscar.data])
+  
+  const options = useMemo(()=>{
+    if(Array.isArray(buscar.data?.data)){
+        return buscar.data?.data!
+    }
+    else if(buscar.data?.data){
+        console.error(buscar.data?.data)
+    }
+    return []
+  }, [buscar.data?.data])
 
   return <InputGroup hasValidation>
     <Typeahead
-      className={buscar.isError || isInvalid ? "is-invalid" : ""}
-      isInvalid={buscar.isError || isInvalid}
       {...props}
+      className={(buscar.isError || isInvalid) ? "is-invalid" : ""}
+      isInvalid={buscar.isError || isInvalid}
       filterBy={(medico, props)=>{
-        return (isMatch(medico.nombreCompleto, props) || isMatch(medico.especialidad, props)) 
-          && !!(typeof filterBy === "function" && filterBy(medico, props))
+        return (!props.text || isMatch(medico.nombreCompleto, props) || isMatch(medico.especialidad, props))
+          && (!filterBy || typeof filterBy === "function" && filterBy(medico, props))
       }}
       isLoading={buscar.isFetching}
-      options={buscar.data?.data || []}
+      options={options}
       labelKey="nombreCompleto"
       minLength={0}
       renderMenuItemChildren={(medico) => {

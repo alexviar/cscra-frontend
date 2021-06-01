@@ -1,5 +1,7 @@
-import React from 'react';
+import { useEffect } from 'react';
 import ReactDOM from 'react-dom';
+import { ErrorBoundary, FallbackProps } from 'react-error-boundary'
+import { Alert, Button } from 'react-bootstrap'
 import Routes from "./bootstrap/components/App"
 import reportWebVitals from './reportWebVitals';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -37,13 +39,26 @@ const queryClient = new QueryClient({
   }
 })
 
+const ErrorFallback = ({error, resetErrorBoundary}: FallbackProps) => {
+  return (
+    <Alert>
+      <p>Algo salió mal:</p>
+      <pre>{error.message}</pre>
+      <Button onClick={resetErrorBoundary}>Intentar de nuevo</Button>
+    </Alert>
+  )
+}
 
 ReactDOM.render(
-  <QueryClientProvider client={queryClient}>
-    <Provider store={configureStore()}>
-      <Routes />
-    </Provider>
-  </QueryClientProvider>,
+  <ErrorBoundary
+    FallbackComponent={ErrorFallback}
+  >
+    <QueryClientProvider client={queryClient}>
+      <Provider store={configureStore()}>
+        <Routes />
+      </Provider>
+    </QueryClientProvider>
+  </ErrorBoundary>,
   document.getElementById('root')
 );
 

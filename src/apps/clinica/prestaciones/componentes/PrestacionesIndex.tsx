@@ -23,9 +23,10 @@ export const PrestacionesIndex = ()=>{
 
   const importModalRef = useRef<ImperativeModalRef>(null)
 
-  const buscarPrestaciones = useQuery(["buscarPrestaciones", page, filter], ()=>{
+  const buscar = useQuery(["prestaciones.buscar", page, filter], ()=>{
     return PrestacionesService.buscar(page, filter)
   }, {
+    refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
     onSuccess: ({data: {meta}}) => {
@@ -38,7 +39,7 @@ export const PrestacionesIndex = ()=>{
   })
 
   const renderRows = ()=>{
-    if (buscarPrestaciones.isFetching) {
+    if (buscar.isFetching) {
       return <tr>
         <td className="bg-light text-center" colSpan={100}>
           <Spinner className="mr-2" variant="primary" animation="border" size="sm" />
@@ -46,15 +47,15 @@ export const PrestacionesIndex = ()=>{
         </td>
       </tr>
     }
-    if (buscarPrestaciones.isError) {
-      const { error } = buscarPrestaciones
+    if (buscar.isError) {
+      const { error } = buscar
       return <tr>
         <td className="bg-danger text-light text-center" colSpan={100}>
           {(error as AxiosError).response?.data?.message || (error as AxiosError).message}
         </td>
       </tr>
     }
-    const records = buscarPrestaciones.data!.data.records
+    const records = buscar.data!.data.records
     if(records.length == 0){
       return  <tr>
         <td className="bg-light text-center" colSpan={100}>
@@ -94,7 +95,7 @@ export const PrestacionesIndex = ()=>{
     <h2 style={{fontSize: "1.75rem"}}>Servicios subrogados</h2>
     <Row className="mb-2">
       <Col className="ml-auto pr-0" xs="auto" >
-        <Button onClick={()=>buscarPrestaciones.refetch()}><FaSync /></Button>
+        <Button onClick={()=>buscar.refetch()}><FaSync /></Button>
       </Col>
       <Col xs="auto">
         <Dropdown as={ButtonGroup}>

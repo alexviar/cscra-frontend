@@ -4,7 +4,7 @@ import { Controller, useForm } from "react-hook-form"
 import { useParams, useHistory } from "react-router"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
-import { useMutation } from "react-query"
+import { useMutation, useQueryClient } from "react-query"
 import { Regional, RegionalesTypeahead } from '../../../../commons/components'
 import { Permisos, useLoggedUser } from '../../../../commons/auth'
 import { Proveedor, ProveedoresService } from '../services'
@@ -62,6 +62,8 @@ export const ProveedorEmpresaForm = ({proveedor, onSubmit}: Props)=>{
 
   const [ regionales, setRegionales ] = useState<Regional[]>([])
 
+  const queryClient = useQueryClient()
+
   const guardar = useMutation((values: Inputs)=>{
     return ProveedoresService.actualizar(parseInt(id!), {
       tipoId: values.tipo!,
@@ -71,6 +73,7 @@ export const ProveedorEmpresaForm = ({proveedor, onSubmit}: Props)=>{
     })
   }, {
     onSuccess: ({data}) => {
+      queryClient.invalidateQueries("proveedor.buscar")
       history.replace(`/clinica/proveedores/${data.id}`)
     }
   })

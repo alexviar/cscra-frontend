@@ -123,15 +123,15 @@ export const ClinicaApp = ()=>{
       >
         <ProveedoresIndex />
       </ProtectedRoute>
+      <ProtectedRoute exact path={`${url}/proveedores/registrar`}
+        authorize={ProveedorPolicy.register}
+      >
+        <ProveedorWizard />
+      </ProtectedRoute>
       <ProtectedRoute exact path={`${url}/proveedores/:id`}
         authorize={ProveedorPolicy.view}
       >
         <ProveedorView />
-      </ProtectedRoute>
-      <ProtectedRoute exact path={[`${url}/proveedores/registrar`, ]}
-        authorize={ProveedorPolicy.register}
-      >
-        <ProveedorWizard />
       </ProtectedRoute>
       <ProtectedRoute exact path={`${url}/proveedores/:id/editar`}
         authorize={ProveedorPolicy.edit}>

@@ -35,7 +35,8 @@ export const ProveedoresIndex = () => {
   const [filter, setFilter] = useState<Filter>(getDefaultFilter)
   const [filterFormVisible, showFilterForm] = useState(false)
 
-  const buscar = useQuery(["proveedores.buscar"], () => {
+  const queryKey =  ["proveedores.buscar", filter, page]
+  const buscar = useQuery(queryKey, () => {
     return ProveedoresService.buscar(filter, page)
   }, {
     enabled: ProveedorPolicy.view(loggedUser),
@@ -93,7 +94,7 @@ export const ProveedoresIndex = () => {
             {item.tipo}
           </td>
           <td>
-            <RowOptions proveedor={item} />
+            <RowOptions proveedor={item} queryKey={queryKey} />
           </td>
         </tr>
       })
