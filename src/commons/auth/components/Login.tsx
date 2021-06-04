@@ -4,10 +4,11 @@ import { useForm } from "react-hook-form"
 import { useMutation } from "react-query"
 import { useDispatch, useSelector } from "react-redux"
 import { Redirect, useLocation } from "react-router"
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from "yup"
 import {authClient} from "../../../commons/services"
 import { getIsAuthenticated } from "../selectors/inputSelectors"
 import { AuthService } from "../services/AuthService"
-import * as rules from "../../../commons/components/rules"
 import "./auth.css"
 
 type Credentials = {
@@ -19,12 +20,18 @@ type Inputs = Credentials & {
   remember_me: boolean
 }
 
+const schema = yup.object().shape({
+  username: yup.string().required(),
+  password: yup.string().required()
+})
+
 export const Login = () => {
   const dispatch = useDispatch()
   const {state} = useLocation<{from: string}>()
   const isAuthenticated = useSelector(getIsAuthenticated)
 
   const {handleSubmit, register, formState} = useForm<Inputs>({
+    resolver: yupResolver(schema),
     defaultValues: {
       username:"",
       password: "",
@@ -58,9 +65,7 @@ export const Login = () => {
             <Form.Label>Usuario</Form.Label>
             <Form.Control
               isInvalid={!!formState.errors.username}
-              {...register("username", {
-                required: rules.required()
-              })}
+              {...register("username")}
             />
             <Form.Control.Feedback type="invalid" >{formState.errors.username?.message}</Form.Control.Feedback>
           </Form.Group>
@@ -68,9 +73,7 @@ export const Login = () => {
             <Form.Label>Contraseña</Form.Label>
             <Form.Control type="password"
               isInvalid={!!formState.errors.password}              
-              {...register("password", {
-                required: rules.required()
-              })}
+              {...register("password")}
             />
             <Form.Control.Feedback type="invalid" >{formState.errors.password?.message}</Form.Control.Feedback>
           </Form.Group>

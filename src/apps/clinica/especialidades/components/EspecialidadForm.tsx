@@ -3,13 +3,18 @@ import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap"
 import { useParams, useHistory } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { useMutation, useQuery} from "react-query"
-import * as rules from "../../../../commons/components/rules"
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from "yup"
 import { Especialidad, EspecialidadesService } from "../services"
 import { AxiosError } from "axios"
 
 export type Inputs = {
   nombre: string
 }
+
+const schema = yup.object().shape({
+  nombre: yup.string().required().min(4).max(100)
+})
 
 export const EspecialidadForm = ()=>{
   const {id} = useParams<{
@@ -19,8 +24,6 @@ export const EspecialidadForm = ()=>{
   const history = useHistory<{
     especialidad: Especialidad
   }>()
-  
-  const { state} = history.location
 
   const continueRef = useRef<boolean>(false)
 
@@ -29,14 +32,16 @@ export const EspecialidadForm = ()=>{
     register,
     setValue,
     formState,
-  } = useForm<Inputs>()
+  } = useForm<Inputs>({
+    resolver: yupResolver(schema)
+  })
 
   const guardar = useMutation(({nombre}: Inputs)=>{
     return id ? EspecialidadesService.actualizar(parseInt(id), nombre) : EspecialidadesService.registrar(nombre)
   }, {
     onSuccess: ()=>{
       if(!continueRef.current)
-        history.replace("/clinica/configuracion/especialidades")
+        history.replace("/clinica/especialidades")
     }
   })
 
@@ -79,21 +84,18 @@ export const EspecialidadForm = ()=>{
         <Form.Label>Nombre</Form.Label>
         <Form.Control
           isInvalid={!!formState.errors.nombre}
-          {...register("nombre", {
-            required: rules.required()
-          })}
+          {...register("nombre")}
         />
         <Form.Control.Feedback type="invalid">{formState.errors.nombre?.message}</Form.Control.Feedback>
       </Form.Group>
     </Form>
   }
 
-
   return <Modal
     show
     centered
     onHide={()=>{
-      history.replace("/clinica/configuracion/especialidades")
+      history.replace("/clinica/especialidades")
     }}
   >
     <Modal.Header>

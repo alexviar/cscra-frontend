@@ -5,7 +5,6 @@ import { FaPlus } from "react-icons/fa"
 import { PrestacionesTypeahead } from "../../solicitud_atencion_externa/components/PrestacionesTypeahead"
 import { Prestacion } from "../../prestaciones/services"
 import { ArancelesControl } from "./ArancelesControl"
-import * as rules from "../../../../commons/components/rules"
 
 export type Inputs = {
   prestaciones: {
@@ -37,7 +36,7 @@ export const PrestacionesContratadasControl = ()=>{
   })
 
   return <div>
-    <h2 style={{fontSize: "1.25rem"}}>Servicios subrogados</h2>
+    <h2 style={{fontSize: "1.25rem"}}>Prestaciones contratadas</h2>
     <div className={formErrors.prestaciones ? "is-invalid" : ""}>
       {fields.map((field,index)=>{
         return <Form.Row key={field.id} className="py-2 border-bottom">
@@ -48,9 +47,6 @@ export const PrestacionesContratadasControl = ()=>{
               <Controller
                 name={`prestaciones.${index}.prestacion` as const}
                 control={control}
-                rules={{
-                  required: rules.required(),
-                }}
                 render={({ field, fieldState }) => {
                   return <>
                   <Form.Row>

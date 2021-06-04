@@ -3,8 +3,7 @@ import { Card, Accordion, Form, Table, Button } from "react-bootstrap"
 import { useFormContext, useFieldArray, Controller, useController } from "react-hook-form"
 import { FaPlus, FaMinus } from "react-icons/fa"
 import { Prestacion, PrestacionesTypeahead } from "./PrestacionesTypeahead"
-import { Proveedor } from "../services/ProveedoresService"
-import { ProveedoresTypeahead } from "./ProveedoresTypeahead"
+import { Proveedor, ProveedoresTypeahead } from "./ProveedoresTypeahead"
 import { Regional } from "../../../../commons/services"
 
 export type PrestacionesSolicitadasInputs = {

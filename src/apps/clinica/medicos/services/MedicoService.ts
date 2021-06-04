@@ -25,6 +25,7 @@ export type MedicoFilter = {
   nombre?: string,
   especialidadId?: number
   regionalId?: number
+  estado?: number
   tipo?: number
 }
 

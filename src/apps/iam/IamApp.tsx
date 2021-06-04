@@ -8,6 +8,7 @@ import {UserIndex, UserView, UserForm, CambiarContrasenaForm } from './usuarios/
 import {RolIndex, RolView, RolForm} from './roles/components'
 import { UsuarioPolicy } from './usuarios/policies'
 import { RolPolicy } from './roles/policies'
+import { Image } from 'react-bootstrap'
 
 export const IamApp = ()=>{
   const { url } = useRouteMatch()
@@ -36,9 +37,12 @@ export const IamApp = ()=>{
     return items
   }, [loggedUser])
 
-  return <SidebarLayout sidebar={{
-    items: sidebarItems
-  }}>
+  return <SidebarLayout 
+    sidebar={{
+        header: <div className="d-flex justify-content-center"><Image src="/logo-lg.png" /></div>,
+        items: sidebarItems
+    }}
+  >
     <Switch>
       {/* <Route exact path={`${url}`}>
         <Redirect to={`${url}/usuarios`} />

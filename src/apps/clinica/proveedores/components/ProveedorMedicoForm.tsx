@@ -80,11 +80,11 @@ export const ProveedorMedicoForm = ({proveedor, onSubmit}: Props)=>{
     defaultValues: {
       tipo: 1,
       nit: proveedor?.nit as number,
-      ci: proveedor?.medico?.ci?.raiz,
-      ciComplemento: proveedor?.medico?.ci.complemento,
-      apellidoPaterno: proveedor?.medico?.apellidoPaterno||"",
-      apellidoMaterno: proveedor?.medico?.apellidoMaterno||"",
-      nombres: proveedor?.medico?.nombres||"",
+      ci: proveedor?.ci,
+      ciComplemento: proveedor?.ciComplemento,
+      apellidoPaterno: proveedor?.apellidoPaterno||"",
+      apellidoMaterno: proveedor?.apellidoMaterno||"",
+      nombres: proveedor?.nombres||"",
       especialidad: [],
       regional: [],
     }
@@ -115,7 +115,7 @@ export const ProveedorMedicoForm = ({proveedor, onSubmit}: Props)=>{
 
   useEffect(()=>{
     if(proveedor && especialidades.length){
-      setValue("especialidad", especialidades.filter(r=>r.id == proveedor.medico?.especialidadId))
+      setValue("especialidad", especialidades.filter(r=>r.id == proveedor.especialidadId))
     }
   }, [proveedor, especialidades])
 

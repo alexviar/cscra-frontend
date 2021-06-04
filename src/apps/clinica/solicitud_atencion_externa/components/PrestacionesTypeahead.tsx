@@ -5,7 +5,7 @@ import { Button, Form, InputGroup } from "react-bootstrap"
 import { FaSync } from "react-icons/fa"
 import { Typeahead, TypeaheadProps } from 'react-bootstrap-typeahead'
 import { useQuery } from 'react-query'
-import { Prestacion, PrestacionesService } from "../services/PrestacionesService";
+import { Prestacion, PrestacionesService } from "../services";
 import { isMatch } from "../../../../commons/utils";
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 
@@ -40,6 +40,7 @@ export const PrestacionesTypeahead = ({isInvalid, feedback, filterBy, ...props}:
 
   return <InputGroup hasValidation>
     <Typeahead
+      clearButton
       {...props}
       className={(buscar.isError || isInvalid) ? "is-invalid" : ""}
       isInvalid={buscar.isError || isInvalid}

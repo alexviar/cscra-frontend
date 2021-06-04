@@ -1,8 +1,4 @@
-import { useMemo, useEffect } from "react"
-import { Button, Pagination as BSPagination } from "react-bootstrap"
-import { useDispatch, useSelector } from "react-redux"
-import { Link, useLocation } from "react-router-dom"
-import Qs from 'qs'
+import { Pagination as BSPagination } from "react-bootstrap"
 
 type Props = {
   // current: number,

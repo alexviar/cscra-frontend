@@ -77,15 +77,15 @@ export const ProveedorView = ()=>{
         </tr>
         <tr>
           <th scope="row" style={{width: '1px'}}>Carnet de identidad</th>
-          <td>{proveedor?.medico?.ciText}</td>
+          <td>{proveedor?.ciText}</td>
         </tr>
         <tr>
           <th scope="row" style={{width: '1px'}}>Nombre</th>
-          <td>{proveedor?.medico?.nombreCompleto}</td>
+          <td>{proveedor?.nombreCompleto}</td>
         </tr>
         <tr>
           <th scope="row">Especialidad</th>
-          <td>{proveedor?.medico?.especialidad}</td>
+          <td>{proveedor?.especialidad?.nombre}</td>
         </tr>
       </tbody>
     }

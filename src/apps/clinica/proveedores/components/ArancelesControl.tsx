@@ -2,7 +2,6 @@ import { Button, Card, Col, Form, Table } from "react-bootstrap"
 import { BiMoveVertical, BiDuplicate } from "react-icons/bi"
 import { FaTrashAlt } from "react-icons/fa"
 import { Controller, useFieldArray, useFormContext } from "react-hook-form"
-import * as rules from "../../../../commons/components/rules"
 
 export const ArancelesControl = ({index}: {index: number})=>{
   const {

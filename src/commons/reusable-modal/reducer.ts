@@ -4,7 +4,7 @@ type State = {
 }
 
 const modalReducer = (state: State, action: any): State =>{
-  const { type, payload, meta } = action
+  const { type, payload } = action
   switch(type) {
     case "OPEN_MODAL":
       return {

@@ -1,5 +1,5 @@
 import React, { useEffect, Suspense } from 'react';
-import { Button, Col, Navbar, Nav, NavDropdown, Popover, OverlayTrigger, Row } from 'react-bootstrap'
+import { Button, Col, Image, Navbar, Nav, NavDropdown, Popover, OverlayTrigger, Row } from 'react-bootstrap'
 import {
   BrowserRouter as Router,
   Switch,
@@ -10,7 +10,6 @@ import { MdApps } from 'react-icons/md'
 import { FaBell, FaUserCircle, FaBars, FaClinicMedical } from 'react-icons/fa'
 import { useDispatch, useSelector } from 'react-redux'
 import { useQueryClient } from 'react-query'
-// import * as Apps from "../../apps";
 import { QueryProgressModal } from "../../commons/components"
 import { useModal } from "../../commons/reusable-modal"
 import {Login, ProtectedRoute} from "../../commons/auth/components"
@@ -29,7 +28,7 @@ export default ()=>{
   const dispatch = useDispatch()
   const user = useSelector(getUser)
 
-  const modal = useModal("queryProgress")
+  const modal = useModal("queryLoader")
 
   const queryClient = useQueryClient()
 
@@ -53,9 +52,12 @@ export default ()=>{
   }, [])
 
   return <Router >
-    <Navbar className="shadow-sm border-bottom" bg="white" variant="light" style={{zIndex: 1}}>
+    <Navbar className="shadow-sm border-bottom" bg="primary" variant="dark" style={{zIndex: 1}}>
       <ToggleSidebar />
-      <Navbar.Brand href="#home" className="ml-4">Galeno - DM11</Navbar.Brand>
+      <Navbar.Brand >
+        <Image className="mx-1" width={32} src="/logo-sm.png" />
+        Transferencias - DM11
+      </Navbar.Brand>
       <Nav className="ml-auto">
         <OverlayTrigger
           trigger="click"
@@ -99,7 +101,12 @@ export default ()=>{
             }}></div>
           </Nav.Link>
         </OverlayTrigger> : null} */}
-        {user ? <NavDropdown title={<><FaUserCircle /><span className="d-none d-sm-inline ml-1">{user.username}</span></>} id="collasible-nav-dropdown">
+        {user ? <NavDropdown 
+          menuAlign="right"
+          title={<>
+            <FaUserCircle />
+            <span className="d-none d-sm-inline ml-1">{user.username}</span>
+          </>} id="collasible-nav-dropdown">
           {/* <NavDropdown.Item href="#action/3.2">Cuenta</NavDropdown.Item>
           <NavDropdown.Item href="#action/3.3">Configuracion</NavDropdown.Item> */}
           <NavDropdown.Divider />

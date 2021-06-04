@@ -2,7 +2,6 @@ import React, { useState, useEffect, MutableRefObject } from "react"
 import { Form, Modal, Row, Col, Button } from "react-bootstrap"
 import { useForm } from "react-hook-form";
 import { useMutation } from "react-query";
-import * as rules from "../../../../commons/components/rules"
 import { EspecialidadesService } from "../services";
 
 type Inputs = {
@@ -55,7 +54,6 @@ export const ImportarForm = ({modalRef}: {modalRef: MutableRefObject<{show: (vis
             <Form.File
               isInvalid={!!formState.errors.archivo}
               {...register("archivo", {
-                required: rules.required(),
               })}
               feedback={formState.errors.archivo?.message}
             />
@@ -67,7 +65,6 @@ export const ImportarForm = ({modalRef}: {modalRef: MutableRefObject<{show: (vis
             <Form.Control className="text-center" maxLength={1} style={{width: "2.5rem"}}
               isInvalid={!!formState.errors.separador}
               {...register("separador", {
-                required: rules.required()
               })}
             ></Form.Control>
             <Form.Control.Feedback type={"invalid"}>{formState.errors.separador?.message}</Form.Control.Feedback>
@@ -83,9 +80,7 @@ export const ImportarForm = ({modalRef}: {modalRef: MutableRefObject<{show: (vis
         <Form.Check label="Entiendo los riesgos y he revisado cuidadosamente el contenido del archivo."
           isInvalid={!!formState.errors.aggrement}
           feedback={formState.errors.aggrement?.message}
-          {...register("aggrement", {
-            required: rules.required()
-          })}
+          {...register("aggrement")}
         ></Form.Check>
       </Form>
     </Modal.Body>

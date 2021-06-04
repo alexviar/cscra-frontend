@@ -3,13 +3,18 @@ import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap"
 import { useParams, useHistory } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { useMutation, useQuery} from "react-query"
-import * as rules from "../../../../commons/components/rules"
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from "yup"
 import { Prestacion, PrestacionesService } from "../services"
 import { AxiosError } from "axios"
 
 export type Inputs = {
   nombre: string
 }
+
+const schema = yup.object().shape({
+  nombre: yup.string().required().min(4).max(100)
+})
 
 export const PrestacionForm = ()=>{
   const {id} = useParams<{
@@ -31,14 +36,16 @@ export const PrestacionForm = ()=>{
     register,
     setValue,
     formState,
-  } = useForm<Inputs>()
+  } = useForm<Inputs>({
+    resolver: yupResolver(schema)
+  })
 
   const guardar = useMutation(({nombre}: Inputs)=>{
     return id ? PrestacionesService.actualizar(parseInt(id), nombre) : PrestacionesService.registrar(nombre)
   }, {
     onSuccess: ()=>{
       if(!continueRef.current)
-        history.replace("/clinica/configuracion/prestaciones")
+        history.replace("/clinica/prestaciones")
     }
   })
 
@@ -78,9 +85,7 @@ export const PrestacionForm = ()=>{
         <Form.Label>Nombre</Form.Label>
         <Form.Control
           isInvalid={!!formState.errors.nombre}
-          {...register("nombre", {
-            required: rules.required()
-          })}
+          {...register("nombre")}
         />
         <Form.Control.Feedback type="invalid">{formState.errors.nombre?.message}</Form.Control.Feedback>
       </Form.Group>
@@ -92,7 +97,7 @@ export const PrestacionForm = ()=>{
     show
     centered
     onHide={()=>{
-      history.replace("/clinica/configuracion/prestaciones")
+      history.replace("/clinica/prestaciones")
     }}
   >
     <Modal.Header>

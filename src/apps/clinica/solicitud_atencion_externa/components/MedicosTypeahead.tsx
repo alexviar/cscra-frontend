@@ -14,7 +14,9 @@ export const MedicosTypeahead = ({isInvalid, feedback, filterBy, ...props}: {fee
   const queryKey = "medicos.buscar"
 
   const buscar = useQuery(queryKey, ()=>{
-    return MedicosService.buscar() as AxiosPromise<Medico[]>
+    return MedicosService.buscar({
+      estado: 1
+    }) as AxiosPromise<Medico[]>
   }, {
     refetchOnMount: false,
     refetchOnReconnect: false,
@@ -39,6 +41,7 @@ export const MedicosTypeahead = ({isInvalid, feedback, filterBy, ...props}: {fee
 
   return <InputGroup hasValidation>
     <Typeahead
+      clearButton
       {...props}
       className={(buscar.isError || isInvalid) ? "is-invalid" : ""}
       isInvalid={buscar.isError || isInvalid}

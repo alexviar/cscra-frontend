@@ -10,12 +10,27 @@ export type Empresa = {
 
 export type Proveedor = {
   id: number
-  nit: number | null
-  nombre: string | null
-  medico: Medico | null
   tipoId: number
-  tipo: string
+  tipo: string  
+  nit: number | null
+
+  nombre: string | null
+
+  ci: number,
+  ciComplemento: string,
+  ciText: string,
+  apellidoPaterno: string,
+  apellidoMaterno: string,
+  nombres: string,
+  nombreCompleto: string,
+  
   regionalId: number
+  sexo: string,
+  especialidadId: number,
+  especialidad: {
+    id: number,
+    nombre: string
+  }
 
   municipioId: number
   municipio: { id: number, nombre: string}
@@ -42,6 +57,7 @@ export type Proveedor = {
 
 export type Filter = {
   regionalId?: number
+  activos?: number
 }
 
 

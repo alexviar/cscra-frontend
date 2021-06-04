@@ -12,7 +12,7 @@ import { ProveedoresFilterForm } from "./ProveedoresFilterForm"
 import { RowOptions } from "./RowOptions"
 
 export const ProveedoresIndex = () => {
-  const {pathname: path} = useLocation()
+  const { pathname: path } = useLocation()
   const [page, setPage] = useState({
     current: 1,
     size: 10
@@ -24,8 +24,8 @@ export const ProveedoresIndex = () => {
 
   const getDefaultFilter = () => {
     const filter: Filter = {}
-    if(!loggedUser.can(Permisos.VER_PROVEEDORES)){
-      if(loggedUser.can(Permisos.VER_PROVEEDORES_REGIONAL)){
+    if (!loggedUser.can(Permisos.VER_PROVEEDORES)) {
+      if (loggedUser.can(Permisos.VER_PROVEEDORES_REGIONAL)) {
         filter.regionalId = loggedUser.regionalId;
       }
     }
@@ -35,7 +35,7 @@ export const ProveedoresIndex = () => {
   const [filter, setFilter] = useState<Filter>(getDefaultFilter)
   const [filterFormVisible, showFilterForm] = useState(false)
 
-  const queryKey =  ["proveedores.buscar", filter, page]
+  const queryKey = ["proveedores.buscar", filter, page]
   const buscar = useQuery(queryKey, () => {
     return ProveedoresService.buscar(filter, page)
   }, {
@@ -48,12 +48,12 @@ export const ProveedoresIndex = () => {
   const total = buscar.data?.data?.meta?.total || 0
 
   const didMountRef = useRef(false)
-  useEffect(()=>{
-    if(!didMountRef.current) {
+  useEffect(() => {
+    if (!didMountRef.current) {
       didMountRef.current = true
       return
     }
-    if(ProveedorPolicy.view(loggedUser)) buscar.refetch()
+    if (ProveedorPolicy.view(loggedUser)) buscar.refetch()
   }, [page, filter, loggedUser])
 
   const renderRows = () => {
@@ -73,14 +73,14 @@ export const ProveedoresIndex = () => {
         </td>
       </tr>
     }
-    if(buscar.data){
+    if (buscar.data) {
       const records = buscar.data.data.records
-      if(records.length == 0){
-        return  <tr>
+      if (records.length == 0) {
+        return <tr>
           <td className="bg-light text-center" colSpan={100}>
             No se encontraron resultados
           </td>
-      </tr>
+        </tr>
       }
       return records.map((item, index) => {
         return <tr key={item.id}>
@@ -88,7 +88,7 @@ export const ProveedoresIndex = () => {
             {index + 1}
           </th>
           <td style={{ lineHeight: "26px" }}>
-            {(item.medico && item.medico.nombreCompleto) || item.nombre }
+            {item.nombre || item.nombreCompleto}
           </td>
           <td style={{ lineHeight: "26px" }}>
             {item.tipo}
@@ -102,20 +102,20 @@ export const ProveedoresIndex = () => {
   }
 
   return <div className="px-1">
-    <h1 style={{fontSize: "1.75rem"}}>Proveedores</h1>
+    <h1 style={{ fontSize: "1.75rem" }}>Proveedores</h1>
     <div className="d-flex my-2">
       <Form.Row className="ml-auto flex-nowrap" >
         <ProtectedContent
           authorize={ProveedorPolicy.view}
         >
           <Col className={"pr-0"} xs="auto" >
-            <Button onClick={()=>{
+            <Button onClick={() => {
               buscar.refetch()
             }}><FaSync /></Button>
           </Col>
           <Col className={"pr-0"} xs="auto" >
-            <Button onClick={()=>{
-              showFilterForm(visible=>!visible)
+            <Button onClick={() => {
+              showFilterForm(visible => !visible)
             }}><FaFilter /></Button>
           </Col>
         </ProtectedContent>
@@ -127,7 +127,7 @@ export const ProveedoresIndex = () => {
               as={Link}
               to={`${path}/registrar`}
               className="d-flex align-items-center">
-                <FaPlus /><span className="mr-2">Nuevo</span>
+              <FaPlus /><span className="mr-2">Nuevo</span>
             </Button>
           </Col>
         </ProtectedContent>
@@ -138,37 +138,37 @@ export const ProveedoresIndex = () => {
     >
       <Form.Row>
         <Col className="mb-2">
-          <ProveedoresFilterForm onFilter={(filter)=>{
+          <ProveedoresFilterForm onFilter={(filter) => {
             setFilter(filter)
           }} />
         </Col>
         <Col className="mb-2" xs={"auto"}>
           <div className="d-flex flex-row flex-nowrap align-items-center">
-              <span>Mostrar</span>
-              <Form.Control className="mx-2" as="select" value={page.size} onChange={(e) => {
-                const value = e.target.value
-                setPage((page) => ({
-                  ...page,
-                  size: parseInt(value)
-                }))
-              }}>
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={30}>30</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </Form.Control>
-              <span>filas</span>
+            <span>Mostrar</span>
+            <Form.Control className="mx-2" as="select" value={page.size} onChange={(e) => {
+              const value = e.target.value
+              setPage((page) => ({
+                ...page,
+                size: parseInt(value)
+              }))
+            }}>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={30}>30</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </Form.Control>
+            <span>filas</span>
           </div>
         </Col>
       </Form.Row>
       <Table responsive>
         <thead className="text-center">
           <tr>
-            <th style={{width: 1}}>#</th>
+            <th style={{ width: 1 }}>#</th>
             <th>Nombre</th>
-            <th style={{width: 1}}>Tipo</th>
-            <th style={{width: 1}}></th>
+            <th style={{ width: 1 }}>Tipo</th>
+            <th style={{ width: 1 }}></th>
           </tr>
         </thead>
         <tbody>

@@ -1,7 +1,8 @@
 import { useMemo } from "react"
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
 import SidebarLayout from '../../commons/components/layouts/SidebarLayout';
-import { FaCog, /*FaCoins,*/ FaHandshake, FaUserMd } from 'react-icons/fa';
+import { FaProcedures, /*FaCoins,*/ FaHandshake, FaUserMd } from 'react-icons/fa';  
+import { GiRodOfAsclepius } from 'react-icons/gi';  
 import { BiTransfer } from 'react-icons/bi';
 import ListaMoraIndex from './mora/components/ListaMoraIndex';
 import ListaMoraItemForm from './mora/components/ListaMoraItemForm';
@@ -22,6 +23,8 @@ import {
   ProveedorPolicy
 } from './proveedores';
 import { Permisos, ProtectedRoute, useLoggedUser } from '../../commons/auth';
+import { ListaMoraPolicy } from "./mora/policies";
+import { Image } from "react-bootstrap";
 
 export const ClinicaApp = ()=>{
   const { url } = useRouteMatch()
@@ -30,14 +33,16 @@ export const ClinicaApp = ()=>{
   const sidebarItems = useMemo(()=>{
     const items = [] as any[]
 
-    items.push(
-      {
-        id: "lista-mora",
-        path: `${url}/lista-mora`,
-        title: "Lista de mora",
-        icon: <FcDebt  />
-      }
-    )
+    if(ListaMoraPolicy.index(loggedUser)){
+        items.push(
+            {
+              id: "lista-mora",
+              path: `${url}/lista-mora`,
+              title: "Lista de mora",
+              icon: <FcDebt  />
+            }
+        )
+    }
 
     if(SolicitudATPolicy.index(loggedUser)) {
       items.push({
@@ -65,31 +70,24 @@ export const ClinicaApp = ()=>{
     }
 
     items.push(
-      {
-        id: "configuracion",
-        // path: `${url}/configuracion`,
-        title: "Configuración",
-        icon: <FaCog />,
-        items: [
           {
-            id: "configuracion/especialidades",
-            path: `${url}/configuracion/especialidades`,
+            id: "especialidades",
+            path: `${url}/especialidades`,
             title: "Especialidades",
-            icon: <FaCog />,
+            icon: <GiRodOfAsclepius />,
           },
           {
-            id: "configuracion/prestaciones",
-            path: `${url}/configuracion/prestaciones`,
-            title: "Servicios subrogados",
-            icon: <FaCog />,
+            id: "prestaciones",
+            path: `${url}/prestaciones`,
+            title: "Prestaciones",
+            icon: <FaProcedures />,
           }
-        ]
-      }
     )
     return items
   }, [loggedUser])
 
   return <SidebarLayout sidebar={{
+    header: <div className="d-flex justify-content-center"><Image src="/logo-lg.png" /></div>,
     items: sidebarItems
   }}>
     <Switch>
@@ -147,18 +145,18 @@ export const ClinicaApp = ()=>{
       >
         <ContratoForm />
       </ProtectedRoute>
-      <Route path={`${url}/configuracion/especialidades`}>
+      <Route path={`${url}/especialidades`}>
         <EspecialidadesIndex />
       </Route>
-      <Route path={`${url}/configuracion/prestaciones`}>
+      <Route path={`${url}/prestaciones`}>
         <PrestacionesIndex />
       </Route>
     </Switch>
     
-    <Route exact path={[`${url}/configuracion/prestaciones/registrar`, `${url}/configuracion/prestaciones/:id/editar`]}>
+    <Route exact path={[`${url}/prestaciones/registrar`, `${url}/prestaciones/:id/editar`]}>
       <PrestacionForm />
     </Route>
-    <Route exact path={[`${url}/configuracion/especialidades/registrar`, `${url}/configuracion/especialidades/:id/editar`]}>
+    <Route exact path={[`${url}/especialidades/registrar`, `${url}/especialidades/:id/editar`]}>
       <EspecialidadForm />
     </Route>
   </SidebarLayout>

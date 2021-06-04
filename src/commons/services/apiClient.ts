@@ -1,5 +1,5 @@
 import axios, { AxiosTransformer } from 'axios'
-import {apiEndpoint} from '../../configs/app.json'
+import {apiEndpoint} from '../../configs/app'
 import Qs from 'qs'
 import { keysToCamel } from '../utils'
 

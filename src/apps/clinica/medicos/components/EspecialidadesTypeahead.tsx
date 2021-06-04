@@ -39,6 +39,7 @@ export const EspecialidadesTypeahead = ({isInvalid, feedback, filterBy, ...props
 
   return <InputGroup hasValidation>
     <Typeahead
+      clearButton
       {...props}
       className={"is-invalid"}
       isInvalid={buscar.isError || isInvalid}

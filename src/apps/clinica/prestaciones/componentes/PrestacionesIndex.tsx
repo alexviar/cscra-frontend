@@ -74,7 +74,7 @@ export const PrestacionesIndex = ()=>{
             />
             <Dropdown.Menu>
               <Dropdown.Item as={Link} replace to={{
-                pathname: `/clinica/configuracion/prestaciones/${prestacion.id}/editar`,
+                pathname: `/clinica/prestaciones/${prestacion.id}/editar`,
                 state: {
                   prestacion
                 }
@@ -92,15 +92,15 @@ export const PrestacionesIndex = ()=>{
   }
 
   return <div className="px-1">
-    <h2 style={{fontSize: "1.75rem"}}>Servicios subrogados</h2>
+    <h2 style={{fontSize: "1.75rem"}}>Prestaciones</h2>
     <Row className="mb-2">
       <Col className="ml-auto pr-0" xs="auto" >
         <Button onClick={()=>buscar.refetch()}><FaSync /></Button>
       </Col>
       <Col xs="auto">
-        <Dropdown as={ButtonGroup}>
-          <Button as={Link} replace to={"/clinica/configuracion/prestaciones/registrar"}>Nuevo</Button>
-          <Dropdown.Toggle split id="especialidades-dropdown" />
+        {/* <Dropdown as={ButtonGroup}> */}
+          <Button as={Link} replace to={"/clinica/prestaciones/registrar"}>Nuevo</Button>
+          {/* <Dropdown.Toggle split id="especialidades-dropdown" />
           <Dropdown.Menu>
             <Dropdown.Item onClick={()=>{
               console.log(importModalRef)
@@ -108,7 +108,7 @@ export const PrestacionesIndex = ()=>{
             }}
             >Importar</Dropdown.Item>
           </Dropdown.Menu>
-        </Dropdown>
+        </Dropdown> */}
       </Col>
     </Row>
     <Row>

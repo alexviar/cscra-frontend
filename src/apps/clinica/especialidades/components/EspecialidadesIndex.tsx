@@ -74,7 +74,7 @@ export const EspecialidadesIndex = ()=>{
 
             <Dropdown.Menu>
               <Dropdown.Item as={Link} replace to={{
-                pathname: `/clinica/configuracion/especialidades/${especialidad.id}/editar`,
+                pathname: `/clinica/especialidades/${especialidad.id}/editar`,
                 state: {
                   especialidad
                 }
@@ -98,9 +98,9 @@ export const EspecialidadesIndex = ()=>{
         <Button onClick={()=>buscar.refetch()}><FaSync /></Button>
       </Col>
       <Col xs="auto">
-        <Dropdown as={ButtonGroup}>
-          <Button as={Link} replace to={"/clinica/configuracion/especialidades/registrar"}>Nuevo</Button>
-          <Dropdown.Toggle split id="especialidades-dropdown" />
+        {/* <Dropdown as={ButtonGroup}> */}
+          <Button as={Link} replace to={"/clinica/especialidades/registrar"}>Nuevo</Button>
+          {/* <Dropdown.Toggle split id="especialidades-dropdown" />
           <Dropdown.Menu>
             <Dropdown.Item onClick={()=>{
               console.log(importModalRef)
@@ -108,7 +108,7 @@ export const EspecialidadesIndex = ()=>{
             }}
             >Importar</Dropdown.Item>
           </Dropdown.Menu>
-        </Dropdown>
+        </Dropdown> */}
       </Col>
     </Row>
     <Row>

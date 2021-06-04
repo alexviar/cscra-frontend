@@ -4,16 +4,18 @@ import { Button, Form, InputGroup } from "react-bootstrap"
 import { FaSync } from "react-icons/fa"
 import { Typeahead, TypeaheadProps } from 'react-bootstrap-typeahead'
 import { useQuery } from 'react-query'
-import { Proveedor, Empresa, ProveedorService } from "../services/ProveedoresService"
+import { Proveedor, ProveedoresService } from "../services"
 import { isMatch } from "../../../../commons/utils"
 import 'react-bootstrap-typeahead/css/Typeahead.css'
+
+export type { Proveedor }
 
 
 export const ProveedoresTypeahead = ({isInvalid, feedback, filterBy, ...props}: {feedback?: string, onLoad?: (options: Proveedor[])=>void} &  Omit<TypeaheadProps<Proveedor>, "isLoading" | "options" | "onSearch">) => {
   const queryKey = "proveedores.buscar"
 
   const buscar = useQuery(queryKey, ()=>{
-    return ProveedorService.buscar({
+    return ProveedoresService.buscar({
       activos: 1
     })
   }, {
@@ -40,40 +42,24 @@ export const ProveedoresTypeahead = ({isInvalid, feedback, filterBy, ...props}: 
 
   return <InputGroup hasValidation>
     <Typeahead
+      clearButton
       {...props}
       className={(buscar.isError || isInvalid) ? "is-invalid" : ""}
       isInvalid={buscar.isError || isInvalid}
       filterBy={(proveedor, props)=>{
-        return  (!props.text || (proveedor.medico ? isMatch(proveedor.medico.nombreCompleto, props) : isMatch(proveedor.nombre, props)))
+        return  (!props.text || (proveedor.nombre ? isMatch(proveedor.nombre, props) : isMatch(proveedor.nombreCompleto, props)))
           && (!filterBy || (typeof filterBy === "function" && filterBy(proveedor, props)))
       }}
       isLoading={buscar.isFetching}
       options={options}
       labelKey={(proveedor: Proveedor)=>{
-        if(proveedor.medico){
-          const medico = proveedor.medico
-          const nombre_completo = medico.nombres + (medico.apellidoPaterno ? " " + medico.apellidoPaterno : "") + (medico.apellidoMaterno ? " " + medico.apellidoMaterno : "")
-          return nombre_completo
-        }
-        else {
-          return (proveedor as Empresa).nombre
-        }
+        return proveedor.nombre || proveedor.nombreCompleto
       }}
       minLength={0}
       renderMenuItemChildren={(proveedor) => {
-        let title, subtitle;
-        if(proveedor.medico){
-          const medico = proveedor.medico
-          title = medico.nombres + (medico.apellidoPaterno ? " " + medico.apellidoPaterno : "") + (medico.apellidoMaterno ? " " + medico.apellidoMaterno : "")
-          subtitle = medico.especialidad
-        }
-        else {
-          title = proveedor.nombre
-          subtitle = "Empresa"
-        }
         return <div>
-          <div>{title}</div>
-          <div className={"small text-secondary"}>{subtitle}</div> 
+          <div>{proveedor.nombre || proveedor.nombreCompleto}</div>
+          <div className={"small text-secondary"}>{proveedor.especialidad?.nombre || "Empresa"}</div> 
         </div>
       }}
     />
