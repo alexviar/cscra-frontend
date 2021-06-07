@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Button, Col, Form, Spinner } from "react-bootstrap"
 import StepWizard, { StepWizardChildProps } from "react-step-wizard"
 import { useHistory } from "react-router-dom"
-import { useMutation } from "react-query"
+import { useMutation, useQueryClient } from "react-query"
 import { Inputs as ProveedorInputs, ProveedorMedicoInput, ProveedorForm } from "./ProveedorForm"
 import { Inputs as ContactoInputs, ContactoForm } from "./ContactoForm"
 import { Inputs as ContratoInputs, ContratoForm } from "./ContratoForm"
@@ -103,6 +103,8 @@ const FinishStep = ({
 
   const history = useHistory()
 
+  const queryClient = useQueryClient()
+
   function isMedico(data: ProveedorInputs): data is ProveedorMedicoInput{
     return data.tipo == 1
   }
@@ -161,6 +163,7 @@ const FinishStep = ({
     })
   }, {
     onSuccess: ({data})=>{
+      queryClient.invalidateQueries("proveedores.buscar");
       history.push(`/clinica/proveedores/${data.id}`)
     }
   })

@@ -33,7 +33,7 @@ export default () => {
 
   const [filterFormVisible, showFilterForm] = useState(false)
 
-  const queryKey = "listaMora.buscar"
+  const queryKey = ["listaMora.buscar", filter, page]
   const buscar = useQuery(queryKey, () => {
     return ListaMoraService.buscar(filter, page)
   }, {
@@ -45,14 +45,14 @@ export default () => {
 
   const total = buscar.data?.data?.meta?.total || 0
   
-  const didMountRef = useRef(false)
-  useEffect(()=>{
-    if(!didMountRef.current) {
-      didMountRef.current = true
-      return
-    }
-    if(ListaMoraPolicy.view(loggedUser)) buscar.refetch()
-  }, [page, filter, loggedUser])
+  // const didMountRef = useRef(false)
+  // useEffect(()=>{
+  //   if(!didMountRef.current) {
+  //     didMountRef.current = true
+  //     return
+  //   }
+  //   if(ListaMoraPolicy.view(loggedUser)) buscar.refetch()
+  // }, [page, filter, loggedUser])
 
   const renderRows = () => {
     if (buscar.isFetching) {
@@ -70,27 +70,31 @@ export default () => {
           {(error as AxiosError).response?.data?.message || (error as AxiosError).message}
         </td>
       </tr>
+    }    
+    const records = buscar.data!.data.records
+    if(records.length == 0){
+      return  <tr>
+        <td className="bg-light text-center" colSpan={100}>
+          No se encontraron resultados
+        </td>
+    </tr>
     }
-    if(buscar.data){
-      const { records } = buscar.data.data
-      return records.map((item, index) => {
-        return <tr key={item.id}>
-          <td style={{ lineHeight: "26px" }}>
-            {index + 1}
-          </td>
-          <td style={{ lineHeight: "26px" }}>
-            {item.numeroPatronal}
-          </td>
-          <td style={{ lineHeight: "26px" }}>
-            {item.nombre}
-          </td>
-          <td>
-            <RowOptions item={item} />
-          </td>
-        </tr>
-      })
-    }
-    return null
+    return records.map((item, index) => {
+      return <tr key={item.id}>
+        <td style={{ lineHeight: "26px" }}>
+          {index + 1}
+        </td>
+        <td style={{ lineHeight: "26px" }}>
+          {item.numeroPatronal}
+        </td>
+        <td style={{ lineHeight: "26px" }}>
+          {item.nombre}
+        </td>
+        <td>
+          <RowOptions item={item} queryKey={queryKey} />
+        </td>
+      </tr>
+    })
   }
 
   return <div className="px-1">

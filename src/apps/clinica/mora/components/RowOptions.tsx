@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { Dropdown } from "react-bootstrap"
-import { useMutation, useQuery, useQueryClient } from "react-query"
+import { useMutation, useQuery, useQueryClient, QueryKey } from "react-query"
 import { VerticalEllipsisDropdownToggle } from "../../../../commons/components"
 import { useModal } from "../../../../commons/reusable-modal"
 import { ProtectedContent } from "../../../../commons/auth/components"
@@ -9,8 +9,9 @@ import { ListaMoraPolicy } from "../policies"
 
 type Props = {
   item: ListaMoraItem
+  queryKey: QueryKey
 }
-export const RowOptions = ({item}: Props) => {
+export const RowOptions = ({item, queryKey}: Props) => {
 
   const modal = useModal<{
     state: "loading" | "error"
@@ -24,7 +25,7 @@ export const RowOptions = ({item}: Props) => {
   }, {
     onSuccess: ()=>{
       modal.close()
-      queryClient.setQueryData("listaMora.buscar", (oldData: any) => {
+      queryClient.setQueryData(queryKey, (oldData: any) => {
         console.log(oldData)
         return {
           ...oldData,
