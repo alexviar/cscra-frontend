@@ -89,7 +89,8 @@ export const PrestacionesTypeahead = ({
         return (!props.text || isMatch(prestacion.nombre, props)) 
           && (!filterBy || (typeof filterBy === "function" && filterBy(prestacion, props)))
       }}
-      isLoading={buscar.isFetching}
+      disabled={!buscar.data || registrar.isLoading}
+      isLoading={buscar.isFetching || registrar.isLoading}
       options={options}
       labelKey="nombre"
     />

@@ -73,7 +73,7 @@ export const BAJA_PROVEEDOR = "Baja proveedores";
 export const BAJA_PROVEEDOR_REGIONAL = "Baja proveedores (regional)";
 
 export const VER_CONTRATOS_PROVEEDOR = "Ver contratos de proveedores";
-export const VER_CONTRATOS_PROVEEDOR_REGIONAL = "Ver contratos de proveedores";
+export const VER_CONTRATOS_PROVEEDOR_REGIONAL = "Ver contratos de proveedores (regional)";
 export const REGISTRAR_CONTRATOS_PROVEEDOR = "Registrar contratos de proveedores";
 export const REGISTRAR_CONTRATOS_PROVEEDOR_REGIONAL = "Registrar contratos de proveedores (regional)";
 export const CONSUMIR_CONTRATOS_PROVEEDOR = "Consumir contratos de proveedores";

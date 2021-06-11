@@ -35,8 +35,8 @@ export const ContratoPolicy = {
   },
   anular: function(user: ReturnType<typeof useLoggedUser>){
     return user.canAny([
-      // Permisos.ANULAR_CONTRATOS_PROVEEDOR,
-      // Permisos.ANULAR_CONTRATOS_PROVEEDOR_REGIONAL
+      Permisos.ANULAR_CONTRATOS_PROVEEDOR,
+      Permisos.ANULAR_CONTRATOS_PROVEEDOR_REGIONAL
     ])
   }
 }

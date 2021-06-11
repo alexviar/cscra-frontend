@@ -70,31 +70,34 @@ export default () => {
           {(error as AxiosError).response?.data?.message || (error as AxiosError).message}
         </td>
       </tr>
-    }    
-    const records = buscar.data!.data.records
-    if(records.length == 0){
-      return  <tr>
-        <td className="bg-light text-center" colSpan={100}>
-          No se encontraron resultados
-        </td>
-    </tr>
     }
-    return records.map((item, index) => {
-      return <tr key={item.id}>
-        <td style={{ lineHeight: "26px" }}>
-          {index + 1}
-        </td>
-        <td style={{ lineHeight: "26px" }}>
-          {item.numeroPatronal}
-        </td>
-        <td style={{ lineHeight: "26px" }}>
-          {item.nombre}
-        </td>
-        <td>
-          <RowOptions item={item} queryKey={queryKey} />
-        </td>
+    if(buscar.data)
+    {
+      const records = buscar.data!.data.records
+      if(records.length == 0){
+        return  <tr>
+          <td className="bg-light text-center" colSpan={100}>
+            No se encontraron resultados
+          </td>
       </tr>
-    })
+      }
+      return records.map((item, index) => {
+        return <tr key={item.id}>
+          <td style={{ lineHeight: "26px" }}>
+            {index + 1}
+          </td>
+          <td style={{ lineHeight: "26px" }}>
+            {item.numeroPatronal}
+          </td>
+          <td style={{ lineHeight: "26px" }}>
+            {item.nombre}
+          </td>
+          <td>
+            <RowOptions item={item} queryKey={queryKey} />
+          </td>
+        </tr>
+      })
+    }    
   }
 
   return <div className="px-1">
