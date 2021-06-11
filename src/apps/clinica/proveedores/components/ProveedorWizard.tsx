@@ -3,9 +3,9 @@ import { Button, Col, Form, Spinner } from "react-bootstrap"
 import StepWizard, { StepWizardChildProps } from "react-step-wizard"
 import { useHistory } from "react-router-dom"
 import { useMutation, useQueryClient } from "react-query"
+import { Inputs as ContratoInputs, ContratoForm } from "../../contratos/components/ContratoForm"
 import { Inputs as ProveedorInputs, ProveedorMedicoInput, ProveedorForm } from "./ProveedorForm"
 import { Inputs as ContactoInputs, ContactoForm } from "./ContactoForm"
-import { Inputs as ContratoInputs, ContratoForm } from "./ContratoForm"
 import { ProveedoresService } from "../services"
 
 
@@ -153,7 +153,7 @@ const FinishStep = ({
       inicio: (contractInfo.inicio! as any).toISOString().split("T")[0],
       fin: (contractInfo.fin as any)?.toISOString()?.split("T")[0],
       // regionalId: contractInfo.regional![0].id,
-      prestacionIds: contractInfo.prestaciones!.map(pc => pc.prestacion.id)
+      prestacionIds: []//contractInfo.prestaciones!.map(pc => pc.prestacion.id)
     }
 
 
@@ -169,7 +169,7 @@ const FinishStep = ({
   })
 
   return <div>
-    Fin.
+    <p>Fin.</p>
     <Button
       onClick={()=>{
         guardar.mutate()

@@ -26,7 +26,7 @@ export const PrestacionesIndex = ()=>{
   const buscar = useQuery(["prestaciones.buscar", page, filter], ()=>{
     return PrestacionesService.buscar(page, filter)
   }, {
-    refetchOnMount: false,
+    // refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
     onSuccess: ({data: {meta}}) => {

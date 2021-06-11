@@ -35,7 +35,7 @@ export const UserIndex = ()=>{
     return UserService.buscar(filter, page)
   }, {
     enabled: UsuarioPolicy.view(loggedUser),
-    refetchOnMount: false,
+    // refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false
   })

@@ -2,7 +2,8 @@ import { useEffect, useState } from "react"
 import { Alert, Button, Col, Form, Spinner } from "react-bootstrap"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useParams, useHistory } from "react-router"
-import { useMutation } from "react-query"
+import { useMutation, useQueryClient } from "react-query"
+import { AxiosError } from "axios"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
 import { PrestacionesContratadasControl, Inputs as PCInputs } from "./PrestacionesContratadasControl"
@@ -27,7 +28,9 @@ const schema = yup.object().shape({
     .min(yup.ref("inicio"), "La fecha de finalizacion debe ser mayor a la fecha de inicio")
     .nullable().notRequired(),
   // regional: yup.array().length(1, "Debe seleccionar una regional"),
-  prestaciones: yup.array().min(1, "Debe seleccionar al menos una prestación")
+  // prestaciones: yup.array().of(yup.object().shape({
+  //   prestacion: yup.object().required()//array().length(1, "Debe seleccionar una prestacion")
+  // })).min(1, "Debe seleccionar al menos una prestación")
 })
 
 export const ContratoForm = ({onSubmit}: Props)=>{
@@ -36,7 +39,7 @@ export const ContratoForm = ({onSubmit}: Props)=>{
   }>()
 
   const history = useHistory<{
-    proveedor: {id: number}
+    tab: string
   }>()
 
   const loggedUser = useLoggedUser()
@@ -58,31 +61,40 @@ export const ContratoForm = ({onSubmit}: Props)=>{
     handleSubmit,
     register,
     formState,
-    control
+    control,
+    watch
   } = methods
 
   const formErrors = formState.errors
 
   console.log("Errors", formErrors)
 
+  const queryClient = useQueryClient()
+
   const guardar = useMutation((values: Inputs)=>{
-    return ContratosService.registrar(parseInt(idProveedor) || history.location.state!.proveedor!.id, {
-      inicio: values.inicio!,
-      fin: values.fin!,
-      prestacion_ids: values.prestaciones.map(p=>p.prestacion.id)
+    return ContratosService.registrar(parseInt(idProveedor), {
+      inicio: (values.inicio! as any).toISOString().split("T")[0],
+      fin: (values.fin as any)?.toISOString().split("T")[0],
+      prestacionIds: []//values.prestaciones.map(p=>p.prestacion.id)
     })
   }, {
     onSuccess: ({data}) => {
-      history.replace(`/clinica/proveedores/${parseInt(idProveedor) || history.location.state!.proveedor!.id}`)
+      queryClient.invalidateQueries("contratos.buscar")
+      history.replace(`/clinica/proveedores/${parseInt(idProveedor)}`, {
+        tab: "contratos"
+      })
     }
   })
 
   return <FormProvider {...methods}>
     <Form id="proveedor-contrato-form" onSubmit={handleSubmit(onSubmit || ((values)=>{
-      console.log(values)
+      console.log("Values", values)
       guardar.mutate(values)
     }))}>
       <h1 style={{fontSize: "1.75rem"}}>Contrato</h1>
+      {guardar.status == "error" || guardar.status == "success"  ? <Alert variant={guardar.isError ? "danger" : "success"}>
+      {guardar.isError ? (guardar.error as AxiosError).response?.data?.message || (guardar.error as AxiosError).message : "Guardado"}
+      </Alert> : null}
       <Form.Row>
         <Form.Group as={Col} sm={6}>
           <Form.Label>Inicio</Form.Label>
@@ -134,11 +146,11 @@ export const ContratoForm = ({onSubmit}: Props)=>{
           />
         </Form.Group>
       </Form.Row> */}
-      <Form.Row>
+      {/* <Form.Row>
         <Col>
           <PrestacionesContratadasControl />
         </Col>
-      </Form.Row>
+      </Form.Row> */}
       {!onSubmit ? <Button type="submit">
         {guardar.isLoading ? <Spinner className="mr-1" animation="border" size="sm"/> : null}
         <span className="align-middle">Guardar</span>

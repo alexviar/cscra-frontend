@@ -62,7 +62,7 @@ export const UserService = {
   }) => {
     return apiClient.put(`/usuarios/${id}`, keysToUnderscore(data))
   },
-  cambiarContrasena: (id: number, data: {newPassword: string}) => {
+  cambiarContrasena: (id: number, data: {password: string}) => {
     return apiClient.put(`/usuarios/${id}/cambiar-contrasena`, keysToUnderscore(data))
   },
   bloquear: (id: number) => {

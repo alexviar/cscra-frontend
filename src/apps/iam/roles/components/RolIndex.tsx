@@ -32,7 +32,7 @@ export const RolIndex = ()=>{
     return RolService.buscar(filter, page) as AxiosPromise<PaginatedResponse<Rol>>
   }, {
     enabled: RolPolicy.view(loggedUser),
-    refetchOnMount: false,
+    // refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
     onSuccess: ({data: {meta}}) => {

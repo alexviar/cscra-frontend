@@ -19,7 +19,7 @@ export const ProveedoresTypeahead = ({isInvalid, feedback, filterBy, ...props}: 
       activos: 1
     })
   }, {
-    refetchOnMount: false,
+    // refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false
   })

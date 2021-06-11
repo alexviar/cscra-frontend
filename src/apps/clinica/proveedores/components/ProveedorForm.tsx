@@ -7,8 +7,6 @@ import { useModal } from "../../../../commons/reusable-modal"
 import { Inputs as PEInputs, ProveedorEmpresaForm } from "./ProveedorEmpresaForm"
 import { Inputs as ProveedorMedicoInput, ProveedorMedicoForm } from "./ProveedorMedicoForm"
 import { Proveedor, ProveedoresService } from "../services"
-import { ContactoForm } from "./ContactoForm"
-import { ContratoForm } from "./ContratoForm"
 
 export type { ProveedorMedicoInput }
 

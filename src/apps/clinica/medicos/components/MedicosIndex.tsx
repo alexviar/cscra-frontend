@@ -39,7 +39,7 @@ export const MedicosIndex = () => {
     return MedicosService.buscar(filter, page) as AxiosPromise<PaginatedResponse<Medico>>
   }, {
     enabled: MedicoPolicy.view(loggedUser),
-    refetchOnMount: false,
+    // refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false
   })

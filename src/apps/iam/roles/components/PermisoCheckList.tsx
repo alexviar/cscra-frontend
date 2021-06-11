@@ -16,7 +16,7 @@ export const PermisoCheckList = ({
   const buscar = useQuery("permisos.buscar", ()=>{
     return PermisoService.buscar()
   }, {
-    refetchOnMount: false,
+    // refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false
   })

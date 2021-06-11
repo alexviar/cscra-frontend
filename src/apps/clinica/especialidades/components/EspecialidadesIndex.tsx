@@ -25,7 +25,7 @@ export const EspecialidadesIndex = ()=>{
   const buscar = useQuery(["especialidades.buscar", page, filter], ()=>{
     return EspecialidadesService.buscar(filter, page)
   }, {
-    refetchOnMount: false,
+    // refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
     onSuccess: ({data: {meta}}) => {

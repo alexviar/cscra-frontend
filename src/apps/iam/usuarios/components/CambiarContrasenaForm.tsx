@@ -9,8 +9,8 @@ import { UserService } from '../services'
 
 type Inputs = {
   // oldPassword: string,
-  newPassword: string,
-  newPasswordRepeat: string
+  password: string,
+  passwordRepeat: string
 }
 
 export const CambiarContrasenaForm = ()=>{
@@ -24,14 +24,14 @@ export const CambiarContrasenaForm = ()=>{
   const schema = useMemo(()=>{
     return yup.object().shape({
       // oldPassword: yup.string().label("antigüa contraseña").trim().required(),
-      newPassword: yup.string().label("nueva contraseña").min(8).max(32).matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/,
+      password: yup.string().label("nueva contraseña").min(8).max(32).matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/,
         "La contraseña debe contener al menos un caracter en minuscula, uno en mayuscula, un número y uno de los siguientes caracter especial: !@#$%^&*")
         .required(),
       // newPasswordRepeat: yup.string().label("confirmar nueva contraseña").test("password-match", "Las contraseñas no coinciden", function (value) {
       //   const { parent: { newPassword: password } } = this
       //   return value === password
       // })
-      newPasswordRepeat: yup.string().label("repita la nueva contraseña").oneOf([yup.ref("newPassword")], "Las contraseñas no coinciden")
+      passwordRepeat: yup.string().label("repita la nueva contraseña").oneOf([yup.ref("newPassword")], "Las contraseñas no coinciden")
     })
   }, [])
 
@@ -44,14 +44,14 @@ export const CambiarContrasenaForm = ()=>{
     resolver: yupResolver(schema),
     defaultValues: {
       // oldPassword: "",
-      newPassword: "",
-      newPasswordRepeat: ""
+      password: "",
+      passwordRepeat: ""
     }
   })
 
   const guardar = useMutation((data: Inputs) =>{
     return UserService.cambiarContrasena(parseInt(id), {
-      newPassword: data.newPassword,
+      password: data.password,
       // oldPassword: data.oldPassword
     })
   }, {
@@ -82,19 +82,19 @@ export const CambiarContrasenaForm = ()=>{
       <Form.Label>Nueva contraseña</Form.Label>
       <Form.Control
         type="password"
-        isInvalid={!!formErrors.newPassword}
-        {...register("newPassword")}
+        isInvalid={!!formErrors.password}
+        {...register("password")}
       />
-      <Form.Control.Feedback type="invalid">{formErrors.newPassword?.message}</Form.Control.Feedback>
+      <Form.Control.Feedback type="invalid">{formErrors.password?.message}</Form.Control.Feedback>
     </Form.Group>
     <Form.Group>
       <Form.Label>Repita la nueva contraseña</Form.Label>
       <Form.Control
         type="password"
-        isInvalid={!!formErrors.newPasswordRepeat}
-        {...register("newPasswordRepeat")}
+        isInvalid={!!formErrors.passwordRepeat}
+        {...register("passwordRepeat")}
       />
-      <Form.Control.Feedback type="invalid">{formErrors.newPasswordRepeat?.message}</Form.Control.Feedback>
+      <Form.Control.Feedback type="invalid">{formErrors.passwordRepeat?.message}</Form.Control.Feedback>
     </Form.Group>
     <Button type="submit">
       {guardar.isLoading ? <Spinner animation="border" size="sm"/> : null}

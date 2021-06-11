@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Accordion, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap'
 import { useForm, Controller } from 'react-hook-form'
-import { useQuery, useMutation } from 'react-query'
+import { useQuery, useMutation, useQueryClient } from 'react-query'
 import { useParams, useHistory } from "react-router-dom"
 import { RegionalesTypeahead } from "../../../../commons/components"
 import { Regional, RegionalesService } from "../../../../commons/services"
@@ -56,7 +56,7 @@ export const UserForm = () => {
         roles: yup.array().label("roles").min(1, "Debe seleccionar al menos un rol")
       } : {
       username: yup.string().label("usuario").required().matches(/[a-zA-Z0-9]{4,}/).min(4).max(16),
-      password: yup.string().label("contraseña").min(8).max(32).matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/,
+      password: yup.string().label("contraseña").min(8).max(256).matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\/()=?\*])(?=.{8,})/,
         "La contraseña debe contener al menos un caracter en minuscula, uno en mayuscula, un número y uno de los siguientes caracter especial: !@#$%^&*")
         .required(),
       passwordRepeat: yup.string().label("confirmar contraseña").test("password-match", "Las contraseñas no coinciden", function (value) {
@@ -91,6 +91,8 @@ export const UserForm = () => {
     user: User
   }>()
 
+  const queryClient = useQueryClient()
+
   const queryKey = ["usuarios.cargar", id];
   const cargar = useQuery(queryKey, () => {
     return UserService.cargar(parseInt(id!))
@@ -120,6 +122,7 @@ export const UserForm = () => {
     })
   }, {
     onSuccess: ({data}) => {
+      queryClient.invalidateQueries("usuarios.buscar")
       history.replace(`/iam/usuarios/${data.id}`, {
         user: data
       })

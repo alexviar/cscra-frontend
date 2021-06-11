@@ -3,58 +3,44 @@ import { useEffect, useState, useRef } from "react"
 import { Button, Col, Form, Spinner, Table } from "react-bootstrap"
 import { FaFilter, FaSync, FaPlus } from "react-icons/fa"
 import { useQuery } from "react-query"
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useParams } from "react-router-dom"
 import { Pagination } from "../../../../commons/components"
 import { ProtectedContent, useLoggedUser, Permisos } from "../../../../commons/auth"
-import { ProveedorPolicy } from "../policies"
-import { ProveedoresService, Filter } from "../services"
-import { ProveedoresFilterForm } from "./ProveedoresFilterForm"
+import { ContratoPolicy } from "../policies"
+import { ContratosService, Filter } from "../services"
+// import { ProveedoresFilterForm } from "./ProveedoresFilterForm"
 import { RowOptions } from "./RowOptions"
 
-export const ProveedoresIndex = () => {
+export const ContratosIndex = () => {
+  const { id: idProveedor } = useParams<{
+    id: string
+  }>()
   const { pathname: path } = useLocation()
   const [page, setPage] = useState({
     current: 1,
     size: 10
   })
 
-  const loggedUser = useLoggedUser(
-
-  )
+  const loggedUser = useLoggedUser()
 
   const getDefaultFilter = () => {
     const filter: Filter = {}
-    if (!loggedUser.can(Permisos.VER_PROVEEDORES)) {
-      if (loggedUser.can(Permisos.VER_PROVEEDORES_REGIONAL)) {
-        filter.regionalId = loggedUser.regionalId;
-      }
-    }
     return filter
   }
 
   const [filter, setFilter] = useState<Filter>(getDefaultFilter)
   const [filterFormVisible, showFilterForm] = useState(false)
 
-  const queryKey = ["proveedores.buscar", filter, page]
+  const queryKey = ["contratos.buscar", idProveedor, filter, page]
   const buscar = useQuery(queryKey, () => {
-    return ProveedoresService.buscar(filter, page)
+    return ContratosService.buscar(parseInt(idProveedor), filter, page)
   }, {
-    enabled: ProveedorPolicy.view(loggedUser),
-    // refetchOnMount: false,
+    enabled: ContratoPolicy.view(loggedUser),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false
   })
 
   const total = buscar.data?.data?.meta?.total || 0
-
-  // const didMountRef = useRef(false)
-  // useEffect(() => {
-  //   if (!didMountRef.current) {
-  //     didMountRef.current = true
-  //     return
-  //   }
-  //   if (ProveedorPolicy.view(loggedUser)) buscar.refetch()
-  // }, [page, filter, loggedUser])
 
   const renderRows = () => {
     if (buscar.isFetching) {
@@ -84,29 +70,22 @@ export const ProveedoresIndex = () => {
       }
       return records.map((item, index) => {
         return <tr key={item.id}>
-          <th scope="row" style={{ width: 1, lineHeight: "26px" }}>
-            {index + 1}
-          </th>
-          <td style={{ lineHeight: "26px" }}>
-            {item.nombre || item.nombreCompleto}
-          </td>
-          <td style={{ lineHeight: "26px" }}>
-            {item.tipo}
-          </td>
-          <td>
-            <RowOptions proveedor={item} queryKey={queryKey} />
-          </td>
+          <th scope="row">{index + 1}</th>
+          <td>{item.inicio}</td>
+          <td>{item.fin || "Indefinido"}</td>
+          <td>{item.extension}</td>
+          <td>{item.estadoText}</td>
+          <td><RowOptions contrato={item} queryKey={queryKey} /></td>
         </tr>
       })
     }
   }
 
   return <div className="px-1">
-    <h1 style={{ fontSize: "1.75rem" }}>Proveedores</h1>
     <div className="d-flex my-2">
       <Form.Row className="ml-auto flex-nowrap" >
         <ProtectedContent
-          authorize={ProveedorPolicy.view}
+          authorize={ContratoPolicy.view}
         >
           <Col className={"pr-0"} xs="auto" >
             <Button onClick={() => {
@@ -120,27 +99,27 @@ export const ProveedoresIndex = () => {
           </Col>
         </ProtectedContent>
         <ProtectedContent
-          authorize={ProveedorPolicy.register}
+          authorize={ContratoPolicy.register}
         >
           <Col xs="auto">
             <Button
               as={Link}
-              to={`${path}/registrar`}
+              to={`/clinica/proveedores/${idProveedor}/contratos/registrar`}
               className="d-flex align-items-center">
-              <FaPlus /><span className="mr-2">Nuevo</span>
+              <FaPlus className="mr-2"/><span>Nuevo</span>
             </Button>
           </Col>
         </ProtectedContent>
       </Form.Row>
     </div>
     <ProtectedContent
-      authorize={ProveedorPolicy.view}
+      authorize={ContratoPolicy.view}
     >
       <Form.Row>
         <Col className="mb-2">
-          <ProveedoresFilterForm onFilter={(filter) => {
+          {/* <ContratosFilterForm onFilter={(filter) => {
             setFilter(filter)
-          }} />
+          }} /> */}
         </Col>
         <Col className="mb-2" xs={"auto"}>
           <div className="d-flex flex-row flex-nowrap align-items-center">
@@ -162,13 +141,15 @@ export const ProveedoresIndex = () => {
           </div>
         </Col>
       </Form.Row>
-      <Table responsive>
-        <thead className="text-center">
+      <Table>
+        <thead>
           <tr>
-            <th style={{ width: 1 }}>#</th>
-            <th>Nombre</th>
-            <th style={{ width: 1 }}>Tipo</th>
-            <th style={{ width: 1 }}></th>
+            <th style={{width: 1}}>#</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th>Extensión</th>
+            <th>Estado</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
