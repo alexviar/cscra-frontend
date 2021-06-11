@@ -252,16 +252,7 @@ export const AseguradoCard = () => {
               readOnly
               type="date"
               isInvalid={!!formErrors.asegurado?.fechaExtincion}
-              {...register("asegurado.fechaExtincion", {
-                validate: {
-                  afterDate: (value) => {
-                    const now = moment()
-                    if (value && moment(value, "DD/MM/YYYY").isSameOrBefore(now)) {
-                      return "Se ha cumplido la fecha de extincion"
-                    }
-                  }
-                }
-              })}
+              {...register("asegurado.fechaExtincion")}
             />
             <Form.Control.Feedback type="invalid">{formErrors.asegurado?.fechaExtincion?.message}</Form.Control.Feedback>
           </Form.Group> : null}

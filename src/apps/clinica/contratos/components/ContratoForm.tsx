@@ -28,9 +28,9 @@ const schema = yup.object().shape({
     .min(yup.ref("inicio"), "La fecha de finalizacion debe ser mayor a la fecha de inicio")
     .nullable().notRequired(),
   // regional: yup.array().length(1, "Debe seleccionar una regional"),
-  // prestaciones: yup.array().of(yup.object().shape({
-  //   prestacion: yup.object().required()//array().length(1, "Debe seleccionar una prestacion")
-  // })).min(1, "Debe seleccionar al menos una prestación")
+  prestaciones: yup.array().of(yup.object().shape({
+    prestacion: yup.object().required()//array().length(1, "Debe seleccionar una prestacion")
+  })).min(1, "Debe seleccionar al menos una prestación")
 })
 
 export const ContratoForm = ({onSubmit}: Props)=>{
@@ -146,11 +146,11 @@ export const ContratoForm = ({onSubmit}: Props)=>{
           />
         </Form.Group>
       </Form.Row> */}
-      {/* <Form.Row>
+      <Form.Row>
         <Col>
           <PrestacionesContratadasControl />
         </Col>
-      </Form.Row> */}
+      </Form.Row>
       {!onSubmit ? <Button type="submit">
         {guardar.isLoading ? <Spinner className="mr-1" animation="border" size="sm"/> : null}
         <span className="align-middle">Guardar</span>

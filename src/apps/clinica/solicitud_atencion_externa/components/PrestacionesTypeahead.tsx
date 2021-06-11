@@ -1,18 +1,26 @@
 
 import { useEffect, useMemo } from "react"
-import { AxiosPromise } from "axios"
+import { AxiosPromise, AxiosError } from "axios"
 import { Button, Form, InputGroup } from "react-bootstrap"
 import { FaSync } from "react-icons/fa"
 import { Typeahead, TypeaheadProps } from 'react-bootstrap-typeahead'
-import { useQuery } from 'react-query'
+import { useMutation, useQuery, useQueryClient } from 'react-query'
 import { Prestacion, PrestacionesService } from "../services";
 import { isMatch } from "../../../../commons/utils";
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 
 export type { Prestacion }
 
-export const PrestacionesTypeahead = ({isInvalid, feedback, filterBy, ...props}: {feedback?: string, onLoad?: (options: Prestacion[])=>void} & Omit<TypeaheadProps<Prestacion>, "isLoading" | "options">) => {
+export const PrestacionesTypeahead = ({
+  isInvalid,
+  feedback,
+  filterBy,
+  onChange,
+  ...props
+}: {feedback?: string, onLoad?: (options: Prestacion[])=>void} & Omit<TypeaheadProps<Prestacion>, "isLoading" | "options">) => {
   const queryKey = "prestaciones.buscar"
+
+  const queryClient = useQueryClient()
 
   const buscar = useQuery(queryKey, ()=>{
     return PrestacionesService.buscar({}) as AxiosPromise<Prestacion[]>
@@ -20,6 +28,24 @@ export const PrestacionesTypeahead = ({isInvalid, feedback, filterBy, ...props}:
     // refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false
+  })
+
+  const registrar = useMutation((nombre: string)=>{
+    return PrestacionesService.registrar(nombre)
+  }, {
+    onSuccess: ({data})=>{
+      queryClient.invalidateQueries("prestaciones.buscar", {inactive: true})
+      queryClient.setQueryData(queryKey, (oldData: any) => {
+        return {
+          ...oldData,
+          data: {
+            ...oldData.data,
+            records: [oldData.data.records, data]
+          }
+        }
+      })
+      onChange && onChange([data])
+    }
   })
 
   useEffect(()=>{
@@ -38,10 +64,25 @@ export const PrestacionesTypeahead = ({isInvalid, feedback, filterBy, ...props}:
     return []
   }, [buscar.data?.data])
 
+  const _onChange = (selected: Prestacion[])=>{
+    if(selected.length){
+      const option = selected[0] as any
+      if(option.customOption){
+        registrar.mutate(option.nombre)
+        return
+      }
+    }
+    onChange && onChange(selected)
+  }
+
   return <InputGroup hasValidation>
     <Typeahead
       clearButton
       {...props}
+      onChange={_onChange}
+      allowNew
+      //@ts-ignore
+      newSelectionPrefix={<i>Crear nueva: </i>}
       className={(buscar.isError || isInvalid) ? "is-invalid" : ""}
       isInvalid={buscar.isError || isInvalid}
       filterBy={(prestacion, props)=>{
@@ -52,13 +93,12 @@ export const PrestacionesTypeahead = ({isInvalid, feedback, filterBy, ...props}:
       options={options}
       labelKey="nombre"
     />
-    {buscar.isError ? <>
-      <InputGroup.Append>
-        <Button variant="outline-danger" onClick={()=>buscar.refetch()}><FaSync /></Button>
-      </InputGroup.Append>
-      <Form.Control.Feedback type="invalid">{buscar.error?.response?.message || buscar.error?.message}</Form.Control.Feedback>
-    </>
-    : null}
-    {feedback ? <Form.Control.Feedback type="invalid">{feedback}</Form.Control.Feedback> : null}
+    <InputGroup.Append>
+      <Button variant={buscar.isError ? "outline-danger" : "outline-secondary"} onClick={()=>buscar.refetch()}><FaSync /></Button>
+    </InputGroup.Append>
+    <Form.Control.Feedback type="invalid">{
+      (buscar.error as AxiosError)?.response?.data?.message || (buscar.error as AxiosError)?.message
+      || (registrar.error as AxiosError)?.response?.data?.message || (registrar.error as AxiosError)?.message 
+      || feedback}</Form.Control.Feedback>
   </InputGroup>
 }

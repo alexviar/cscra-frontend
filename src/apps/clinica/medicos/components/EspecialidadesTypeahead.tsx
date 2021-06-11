@@ -4,6 +4,7 @@ import { Button, Form, InputGroup } from "react-bootstrap"
 import { Typeahead, TypeaheadProps } from 'react-bootstrap-typeahead'
 import { FaSync } from 'react-icons/fa'
 import { useQuery, useMutation, useQueryClient } from 'react-query'
+import { AxiosError } from 'axios'
 import { Especialidad, EspecialidadesService } from "../../especialidades/services";
 import { isMatch } from "../../../../commons/utils";
 import 'react-bootstrap-typeahead/css/Typeahead.css';
@@ -33,6 +34,7 @@ export const EspecialidadesTypeahead = ({
     return EspecialidadesService.registrar(nombre)
   }, {
     onSuccess: ({data})=>{
+      queryClient.invalidateQueries("especialidades.buscar", {inactive: true})
       queryClient.setQueryData(queryKey, (oldData: any) => {
         return {
           ...oldData,
@@ -97,8 +99,8 @@ export const EspecialidadesTypeahead = ({
       <Button variant={buscar.isError ? "outline-danger" : "outline-secondary"} onClick={()=>buscar.refetch()}><FaSync /></Button>
     </InputGroup.Append>
     <Form.Control.Feedback type="invalid">{
-      buscar.error?.response?.message || buscar.error?.message
-      || registrar.error?.response?.message || registrar.error?.message 
+      (buscar.error as AxiosError)?.response?.data?.message || (buscar.error as AxiosError)?.message
+      || (registrar.error as AxiosError)?.response?.data?.message || (registrar.error as AxiosError)?.message 
       || feedback}</Form.Control.Feedback>
   </InputGroup>
 }

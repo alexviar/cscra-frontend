@@ -76,12 +76,12 @@ export const ClinicaApp = ()=>{
             title: "Especialidades",
             icon: <GiRodOfAsclepius />,
           },
-          // {
-          //   id: "prestaciones",
-          //   path: `${url}/prestaciones`,
-          //   title: "Prestaciones",
-          //   icon: <FaProcedures />,
-          // }
+          {
+            id: "prestaciones",
+            path: `${url}/prestaciones`,
+            title: "Prestaciones",
+            icon: <FaProcedures />,
+          }
     )
     return items
   }, [loggedUser])
@@ -148,9 +148,9 @@ export const ClinicaApp = ()=>{
       <Route path={`${url}/especialidades`}>
         <EspecialidadesIndex />
       </Route>
-      {/* <Route path={`${url}/prestaciones`}>
+      <Route path={`${url}/prestaciones`}>
         <PrestacionesIndex />
-      </Route> */}
+      </Route>
     </Switch>
     
     <Route exact path={[`${url}/prestaciones/registrar`, `${url}/prestaciones/:id/editar`]}>
