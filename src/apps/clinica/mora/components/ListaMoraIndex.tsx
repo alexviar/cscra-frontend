@@ -38,7 +38,7 @@ export default () => {
     return ListaMoraService.buscar(filter, page)
   }, {
     enabled: ListaMoraPolicy.view(loggedUser),
-    refetchOnMount: false,
+    // refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false
   })

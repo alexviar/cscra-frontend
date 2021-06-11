@@ -69,10 +69,19 @@ export const REGISTRAR_PROVEEDORES = "Registrar proveedores";
 export const REGISTRAR_PROVEEDORES_REGIONAL = "Registrar proveedores (regional)";
 export const EDITAR_PROVEEDORES = "Editar proveedores";
 export const EDITAR_PROVEEDORES_REGIONAL = "Editar proveedores (regional)";
-export const REGISTRAR_CONTRATO_PROVEEDOR = "Registrar contratos de preveedores";
-export const REGISTRAR_CONTRATO_PROVEEDOR_REGIONAL = "Registrar contratos de preveedores (regional)";
-export const BAJA_PROVEEDORES = "Baja proveedores";
-export const BAJA_PROVEEDORES_REGIONAL = "Baja proveedores (regional)";
+export const BAJA_PROVEEDOR = "Baja proveedores";
+export const BAJA_PROVEEDOR_REGIONAL = "Baja proveedores (regional)";
+
+export const VER_CONTRATOS_PROVEEDOR = "Ver contratos de proveedores";
+export const VER_CONTRATOS_PROVEEDOR_REGIONAL = "Ver contratos de proveedores";
+export const REGISTRAR_CONTRATOS_PROVEEDOR = "Registrar contratos de proveedores";
+export const REGISTRAR_CONTRATOS_PROVEEDOR_REGIONAL = "Registrar contratos de proveedores (regional)";
+export const CONSUMIR_CONTRATOS_PROVEEDOR = "Consumir contratos de proveedores";
+export const CONSUMIR_CONTRATOS_PROVEEDOR_REGIONAL = "Consumir contratos de proveedores (regional)";
+export const EXTENDER_CONTRATOS_PROVEEDOR = "Extender contratos de proveedores";
+export const EXTENDER_CONTRATOS_PROVEEDOR_REGIONAL = "Extender contratos de proveedores (regional)";
+export const ANULAR_CONTRATOS_PROVEEDOR = "Anular contratos de proveedores";
+export const ANULAR_CONTRATOS_PROVEEDOR_REGIONAL = "Anular contratos de proveedores (regional)";
 
 /**
 * Especialidades

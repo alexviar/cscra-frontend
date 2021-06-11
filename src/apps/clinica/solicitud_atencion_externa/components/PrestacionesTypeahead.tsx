@@ -17,7 +17,7 @@ export const PrestacionesTypeahead = ({isInvalid, feedback, filterBy, ...props}:
   const buscar = useQuery(queryKey, ()=>{
     return PrestacionesService.buscar({}) as AxiosPromise<Prestacion[]>
   }, {
-    refetchOnMount: false,
+    // refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false
   })

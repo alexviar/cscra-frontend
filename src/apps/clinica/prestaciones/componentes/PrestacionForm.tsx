@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react"
 import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap"
 import { useParams, useHistory } from "react-router-dom"
 import { useForm } from "react-hook-form"
-import { useMutation, useQuery} from "react-query"
+import { useMutation, useQuery, useQueryClient } from "react-query"
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from "yup"
 import { Prestacion, PrestacionesService } from "../services"
@@ -40,10 +40,13 @@ export const PrestacionForm = ()=>{
     resolver: yupResolver(schema)
   })
 
+  const queryClient = useQueryClient();
+
   const guardar = useMutation(({nombre}: Inputs)=>{
     return id ? PrestacionesService.actualizar(parseInt(id), nombre) : PrestacionesService.registrar(nombre)
   }, {
     onSuccess: ()=>{
+      queryClient.invalidateQueries("prestaciones.buscar")
       if(!continueRef.current)
         history.replace("/clinica/prestaciones")
     }

@@ -25,6 +25,10 @@ export type Proveedor = {
   nombreCompleto: string,
   
   regionalId: number
+  regional: {
+    id: number
+    nombre: string
+  }
   sexo: string,
   especialidadId: number,
   especialidad: {
@@ -33,9 +37,18 @@ export type Proveedor = {
   }
 
   municipioId: number
-  municipio: { id: number, nombre: string}
-  provincia: { id: number, nombre: string}
-  departamento: { id: number, nombre: string}
+  municipio: { 
+    id: number
+    nombre: string
+    provincia: { 
+      id: number
+      nombre: string
+      departamento: { 
+        id: number
+        nombre: string
+      }
+    }
+  }
   direccion: string
   ubicacion: {
     latitud: number,
@@ -47,12 +60,24 @@ export type Proveedor = {
   contrato: {
     inicio: string
     fin: string
-    regionalId: number
+    extension: string
+    estadoText: string
     prestaciones: {
       id: number
       nombre: string
     }[]
   }
+}
+
+export type Contrato = {
+  inicio: string
+  fin: string
+  extension: string
+  estadoText: string
+  prestaciones: {
+    id: number
+    nombre: string
+  }[]  
 }
 
 export type Filter = {
@@ -61,10 +86,20 @@ export type Filter = {
 }
 
 
-interface IProveedorService {
-  buscar(filter: Filter): AxiosPromise<Proveedor[]>
-  buscar(filter: Filter, page: Page): AxiosPromise<PaginatedResponse<Proveedor>>
-  cargar(id: number): AxiosPromise<Proveedor>
+class ProveedorService {
+  buscar(filter: Filter): AxiosPromise<Proveedor[]>;
+  buscar(filter: Filter, page: Page): AxiosPromise<PaginatedResponse<Proveedor>>;
+  buscar(filter: Filter, page?: Page) {
+    return apiClient.get("proveedores", {
+      params: {
+        filter,
+        page
+      }
+    })
+  }
+  cargar(id: number): AxiosPromise<Proveedor>{
+    return apiClient.get(`proveedores/${id}`)
+  }
   registrar(fields: {
     general: {
       tipoId: 1,
@@ -95,7 +130,9 @@ interface IProveedorService {
       fin: string,
       prestacionIds: number[] 
     }
-  }): AxiosPromise<Proveedor>
+  }): AxiosPromise<Proveedor> {
+    return apiClient.post("proveedores", keysToUnderscore(fields))
+  }
   actualizar(id: number, fields: {
     tipoId: 1,
     nit?: number,
@@ -111,8 +148,9 @@ interface IProveedorService {
     nit?: number,
     nombre: string,
     regionalId: number
-  }): AxiosPromise<Proveedor>
-  eliminar(id: number): AxiosPromise
+  }): AxiosPromise<Proveedor>{
+    return apiClient.put(`proveedores/${id}`, keysToUnderscore(fields))
+  }
   actualizarInformacionDeContacto(id: number, infoContacto: {
     municipioId: number,
     direccion: string,
@@ -122,32 +160,9 @@ interface IProveedorService {
     },
     telefono1: number,
     telefono2?: number
-  }): AxiosPromise<Proveedor>
-}
-
-export const ProveedoresService: IProveedorService = {
-  buscar: (filter: Filter, page?: Page) => {
-    return apiClient.get("proveedores", {
-      params: {
-        filter,
-        page
-      }
-    })
-  },
-  cargar: (id) => {
-    return apiClient.get(`proveedores/${id}`)
-  },
-  registrar: (fields) => {
-    return apiClient.post("proveedores", keysToUnderscore(fields))
-  },
-  actualizar: (id, fields) =>{
-    return apiClient.put(`proveedores/${id}`, keysToUnderscore(fields))
-  },
-  eliminar: (id: number) => {
-    return apiClient.get(`proveedores/${id}`)
-  },
-  actualizarInformacionDeContacto: (id, infoContacto) => {
+  }): AxiosPromise<Proveedor>{
     return apiClient.put(`proveedores/${id}/contacto`, keysToUnderscore(infoContacto))
   }
-
 }
+
+export const ProveedoresService = new ProveedorService()

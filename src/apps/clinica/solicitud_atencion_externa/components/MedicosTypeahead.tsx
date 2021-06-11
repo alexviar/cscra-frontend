@@ -18,7 +18,7 @@ export const MedicosTypeahead = ({isInvalid, feedback, filterBy, ...props}: {fee
       estado: 1
     }) as AxiosPromise<Medico[]>
   }, {
-    refetchOnMount: false,
+    // refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false
   })

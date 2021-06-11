@@ -19,9 +19,8 @@ export const RolesCheckList = React.memo(({
   const buscar = useQuery("roles.buscar", ()=>{
     return RolService.buscar()
   }, {
-    enabled: true,
     refetchOnReconnect: false,
-    refetchOnMount: false,
+    // refetchOnMount: false,
     refetchOnWindowFocus: false
   })
 

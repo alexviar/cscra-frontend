@@ -2,7 +2,7 @@ import { useMemo, useEffect, useRef } from 'react'
 import { Alert, Modal, Button, Form, Col, Spinner } from 'react-bootstrap'
 import { Controller, useForm } from 'react-hook-form'
 import { AxiosError } from 'axios'
-import { useMutation, useQuery } from 'react-query'
+import { useMutation, useQuery, useQueryClient } from 'react-query'
 import { useHistory, useParams } from 'react-router-dom'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
@@ -52,6 +52,8 @@ export const RolForm = () => {
 
   const modalRef = useRef<ImperativeModalRef>(null)
 
+  const queryClient = useQueryClient()
+
   const cargar = useQuery(["fetchRole", id], ()=>{
     return RolService.cargar(parseInt(id))
   }, {
@@ -77,6 +79,7 @@ export const RolForm = () => {
     }
   }, {
     onSuccess: ({data}) => {
+      queryClient.invalidateQueries("roles.buscar")
       history.replace(`/iam/roles/${data.id}`, {
         rol: data,
         ignoreAuthorization: true

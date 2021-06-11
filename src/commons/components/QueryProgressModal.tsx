@@ -36,7 +36,7 @@ export const QueryProgressModal = ()=>{
     const status = modal.error?.response?.status
     switch(status){
       case 403: return "No tiene los permisos para realizar esta accion"
-      default: return "Ocurrio un error mientras se procesaba su solicitud"
+      default: return modal.error?.response?.data?.message || "Ocurrio un error mientras se procesaba su solicitud"
     }
   }
 

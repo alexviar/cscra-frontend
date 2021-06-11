@@ -1,18 +1,32 @@
 import { useEffect, useRef } from 'react'
-import { AxiosError } from 'axios'
-import { Alert, Button, Col, Form, Modal, Spinner, Tab, Table } from 'react-bootstrap'
+import { Button, Col, Form, Row, Tab, Tabs, Table } from 'react-bootstrap'
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet"
+import L, { LatLngExpression } from "leaflet"
 import { Proveedor, ProveedoresService } from '../services'
 import { useQuery, useMutation } from 'react-query'
 import { FaEdit } from 'react-icons/fa'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { useLoggedUser, ProtectedContent } from "../../../../commons/auth"
 import { useModal } from "../../../../commons/reusable-modal"
+import { ContratosIndex } from "../../contratos/components"
 import { ProveedorPolicy } from "../policies"
 
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+
+let DefaultIcon = L.icon({
+    iconUrl: icon,
+    shadowUrl: iconShadow,
+    iconSize: [25,41],
+    iconAnchor: [12,41]
+});
+
+L.Marker.prototype.options.icon = DefaultIcon;
 
 export const ProveedorView = ()=>{
   const { pathname, state: locationState } = useLocation<{
-    proveedor?: Proveedor
+    proveedor?: Proveedor,
+    tab?: string
   }>()
   const { id } = useParams<{
     id: string
@@ -40,20 +54,6 @@ export const ProveedorView = ()=>{
     }
   })
 
-  // const eliminar = useMutation(()=>{
-  //   return ProveedorService.eliminar(parseInt(id))
-  // }, {
-  //   onSuccess: () => {
-  //     loader.close()
-  //   },
-  //   onError: (error) =>{
-  //     loader.open({
-  //       state: "error",
-  //       error
-  //     })
-  //   }
-  // })
-
   const proveedor = cargar.data?.data || locationState?.proveedor
 
   useEffect(()=>{
@@ -62,50 +62,91 @@ export const ProveedorView = ()=>{
     }
   }, [cargar.isFetching])
 
-  // useEffect(()=>{
-  //   if(eliminar.isLoading){
-  //     loader.open({state: "loading"})
-  //   }
-  // }, [eliminar.isLoading])
 
   const renderGeneralInfo = ()=>{
-    if(proveedor?.tipoId == 1){
-      return <tbody>
+    return <tbody>
+      <tr>
+        <th scope="row">Tipo</th>
+        <td >{proveedor?.tipoId == 1 ? "Médico" : proveedor?.tipoId == 2 ? "Empresa" : null}</td>
+      </tr>
+      <tr>
+        <th scope="row" style={{width: '1px'}}>NIT</th>
+        <td>{proveedor?.nit}</td>
+      </tr>
+      {proveedor?.tipoId == 1 ? 
+        <>
+          <tr>
+            <th scope="row" style={{width: 1}}>Carnet de identidad</th>
+            <td>{proveedor?.ciText}</td>
+          </tr>
+          <tr>
+            <th scope="row" style={{width: 1}}>Nombre</th>
+            <td>{proveedor?.nombreCompleto}</td>
+          </tr>
+          <tr>
+            <th scope="row">Especialidad</th>
+            <td>{proveedor?.especialidad?.nombre}</td>
+          </tr>
+        </> : (proveedor?.tipoId == 2 ?
         <tr>
-          <th scope="row">Tipo</th>
-          <td >Médico especialista</td>
-        </tr>
-        <tr>
-          <th scope="row" style={{width: '1px'}}>Carnet de identidad</th>
-          <td>{proveedor?.ciText}</td>
-        </tr>
-        <tr>
-          <th scope="row" style={{width: '1px'}}>Nombre</th>
-          <td>{proveedor?.nombreCompleto}</td>
-        </tr>
-        <tr>
-          <th scope="row">Especialidad</th>
-          <td>{proveedor?.especialidad?.nombre}</td>
-        </tr>
-      </tbody>
-    }
-    else if(proveedor?.tipoId == 2){
-      return <tbody>
-        <tr>
-          <th scope="row">Tipo</th>
-          <td >Empresa</td>
-        </tr>
-        <tr>
-          <th scope="row" style={{width: '1px'}}>NIT</th>
-          <td>{proveedor?.nit}</td>
-        </tr>
-        <tr>
-          <th scope="row" style={{width: '1px'}}>Nombre</th>
+          <th scope="row" style={{width: 1}}>Nombre</th>
           <td>{proveedor?.nombre}</td>
-        </tr>
-      </tbody>
-    }
-    return null
+        </tr> : null)}
+      <tr>
+        <th scope="row">Regional</th>
+        <td>{proveedor?.regional?.nombre}</td>
+      </tr>
+    </tbody>
+  }
+
+  const renderContactInfo = ()=>{
+    if(!proveedor) return null
+    const position: LatLngExpression = proveedor.ubicacion && [proveedor.ubicacion.latitud, proveedor.ubicacion.longitud]
+    return <Row className="py-3">
+      <Col>
+        <Table>
+          <tbody>
+            <tr>
+              <th scope="row">Departamento</th>
+              <td >{proveedor.municipio?.provincia?.departamento?.nombre}</td>
+            </tr>
+            <tr>
+              <th scope="row">Provincia</th>
+              <td>{proveedor.municipio?.provincia?.nombre}</td>
+            </tr>
+            <tr>
+              <th scope="row">Municipio</th>
+              <td>{proveedor.municipio?.nombre}</td>
+            </tr>
+            <tr>
+              <th scope="row">Dirección</th>
+              <td>{proveedor.direccion}</td>
+            </tr>
+            <tr>
+              <th scope="row">Teléfono 1</th>
+              <td>{proveedor.telefono1}</td>
+            </tr>
+            <tr>
+              <th scope="row">Teléfono 2</th>
+              <td>{proveedor.telefono2}</td>
+            </tr>
+          </tbody>
+        </Table>
+      </Col>
+      <Col>
+        <MapContainer center={position} zoom={14} dragging={false} style={{height: "100%"}}>
+          <TileLayer
+            attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          {position ? <Marker position={position}>
+            <Popup>
+              <a href={`geo:${position.join(",")}`}>Abrir con</a>
+            </Popup>
+          </Marker> : null}
+        </MapContainer>
+      </Col>
+    </Row>
   }
   
   return <>
@@ -114,6 +155,7 @@ export const ProveedorView = ()=>{
       <Table>
         {renderGeneralInfo()}
       </Table>
+      
       {proveedor ? <Form.Row>
         <ProtectedContent
           authorize={ProveedorPolicy.edit}
@@ -138,5 +180,14 @@ export const ProveedorView = ()=>{
         </Col> */}
       </Form.Row> : null}
     </div>
+    
+    <Tabs className={"my-2"} defaultActiveKey={locationState?.tab}>
+      <Tab eventKey="informacion-contacto" title="Informacion de Contacto">
+        {renderContactInfo()}
+      </Tab>
+      <Tab eventKey="contratos" title="Contratos">
+        <ContratosIndex />
+      </Tab>
+    </Tabs>
   </>
 }
