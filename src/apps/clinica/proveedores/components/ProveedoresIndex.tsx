@@ -47,15 +47,6 @@ export const ProveedoresIndex = () => {
 
   const total = buscar.data?.data?.meta?.total || 0
 
-  // const didMountRef = useRef(false)
-  // useEffect(() => {
-  //   if (!didMountRef.current) {
-  //     didMountRef.current = true
-  //     return
-  //   }
-  //   if (ProveedorPolicy.view(loggedUser)) buscar.refetch()
-  // }, [page, filter, loggedUser])
-
   const renderRows = () => {
     if (buscar.isFetching) {
       return <tr>

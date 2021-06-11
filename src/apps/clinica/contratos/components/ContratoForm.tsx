@@ -50,10 +50,7 @@ export const ContratoForm = ({onSubmit}: Props)=>{
     mode: "onBlur",
     resolver: yupResolver(schema),
     defaultValues: {
-      prestaciones: [{
-        // aranceles: [{}]
-      }],
-      // regional: []
+      prestaciones: [],
     }
   })
 
@@ -75,7 +72,7 @@ export const ContratoForm = ({onSubmit}: Props)=>{
     return ContratosService.registrar(parseInt(idProveedor), {
       inicio: (values.inicio! as any).toISOString().split("T")[0],
       fin: (values.fin as any)?.toISOString().split("T")[0],
-      prestacionIds: []//values.prestaciones.map(p=>p.prestacion.id)
+      prestacionIds: values.prestaciones.map(p=>p.prestacion.id)
     })
   }, {
     onSuccess: ({data}) => {

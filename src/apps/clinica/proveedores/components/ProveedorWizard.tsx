@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Button, Col, Form, Spinner } from "react-bootstrap"
+import { Button, Col, Form, Spinner, Table } from "react-bootstrap"
 import StepWizard, { StepWizardChildProps } from "react-step-wizard"
 import { useHistory } from "react-router-dom"
 import { useMutation, useQueryClient } from "react-query"
@@ -92,7 +92,8 @@ const ContractInfoStep = (props: Partial<StepWizardChildProps> & {
 const FinishStep = ({
   generalInfo,
   contactInfo,
-  contractInfo
+  contractInfo,
+  ...props
 }: Partial<StepWizardChildProps> & {
   generalInfo: ProveedorInputs
   contactInfo?: ContactoInputs
@@ -153,7 +154,7 @@ const FinishStep = ({
       inicio: (contractInfo.inicio! as any).toISOString().split("T")[0],
       fin: (contractInfo.fin as any)?.toISOString()?.split("T")[0],
       // regionalId: contractInfo.regional![0].id,
-      prestacionIds: []//contractInfo.prestaciones!.map(pc => pc.prestacion.id)
+      prestacionIds: contractInfo.prestaciones!.map(pc => pc.prestacion.id)
     }
 
 
@@ -169,15 +170,113 @@ const FinishStep = ({
   })
 
   return <div>
-    <p>Fin.</p>
-    <Button
-      onClick={()=>{
-        guardar.mutate()
-      }}
-    >
-      {guardar.isLoading ? <Spinner animation="border" size="sm" />: null}
-      Guardar
-    </Button>
+    <div>
+      <h2>Informacion general</h2>
+      <Table>
+        <tbody>
+          <tr>
+            <th scope="row">Tipo de proveedor</th>
+            <td >{generalInfo.tipo == 1 ? "Médico" : generalInfo.tipo == 2 ? "Empresa" : null}</td>
+          </tr>
+          <tr>
+            <th scope="row" style={{width: '1px'}}>NIT</th>
+            <td>{generalInfo.nit}</td>
+          </tr>
+          {generalInfo.tipo == 1 ? 
+            <>
+              <tr>
+                <th scope="row" style={{width: 1}}>Carnet de identidad</th>
+                <td>{generalInfo.ci + (generalInfo.ciComplemento ? `-${generalInfo.ciComplemento}` : '')}</td>
+              </tr>
+              <tr>
+                <th scope="row" style={{width: 1}}>Nombre</th>
+                <td>{(generalInfo.apellidoPaterno ? generalInfo.apellidoPaterno + ' ' : '') + (generalInfo.apellidoMaterno ? generalInfo.apellidoMaterno + ' ' : '') + generalInfo.nombres}</td>
+              </tr>
+              <tr>
+                <th scope="row">Especialidad</th>
+                <td>{generalInfo?.especialidad![0].nombre}</td>
+              </tr>
+            </> :
+            (generalInfo?.tipo == 2 ?
+            <tr>
+              <th scope="row" style={{width: 1}}>Nombre</th>
+              <td>{generalInfo?.nombre}</td>
+            </tr> : null)}
+          <tr>
+            <th scope="row">Regional</th>
+            <td>{generalInfo.regional![0].nombre}</td>
+          </tr>
+        </tbody>
+      </Table>
+      <h2>Informacion de contacto</h2>
+      {contactInfo ? <Table>
+        <tbody>
+          <tr>
+            <th scope="row">Municipio</th>
+            <td>{contactInfo.municipio![0].nombre}</td>
+          </tr>
+          <tr>
+            <th scope="row">Direccion</th>
+            <td>{contactInfo.direccion}</td>
+          </tr>
+          <tr>
+            <th scope="row">Ubicación</th>
+            <td>{Array.isArray(contactInfo.ubicacion) ?
+              `${contactInfo.ubicacion[0]}, ${contactInfo.ubicacion[1]}` :
+              `${contactInfo.ubicacion!.lat}, ${contactInfo.ubicacion!.lng}` }</td>
+          </tr>
+          <tr>
+            <th>Teléfono 1</th>
+            <td>{contactInfo.telefono1}</td>
+          </tr>
+          <tr>
+            <th>Telefono 2</th>
+            <td>{contactInfo.telefono2}</td>
+          </tr>
+        </tbody>
+      </Table> : "Omitida"}
+      <h2>Contrato</h2>
+      <Table>
+        <tbody>
+          <tr>
+            <th scope="row">Inicio</th>
+            <td>{contractInfo.inicio}</td>
+          </tr>
+          <tr>
+            <th scope="row">Fin</th>
+            <td>{contractInfo.fin}</td>
+          </tr>
+          <tr>
+            <th scope="row">Prestaciones</th>
+            <td>
+              <ul>
+                {contractInfo.prestaciones.map((element)=>{
+                  return <li>{element.prestacion.nombre}</li>
+                })}
+              </ul>
+            </td>
+          </tr>
+        </tbody>
+      </Table>
+    </div>
+    
+    <Form.Row>
+      <Col xs="auto">
+        <Button onClick={props.previousStep}>
+          Anterior
+        </Button>
+      </Col>
+      <Col className="ml-auto" xs="auto">
+        <Button
+          onClick={()=>{
+            guardar.mutate()
+          }}
+        >
+          {guardar.isLoading ? <Spinner animation="border" size="sm" />: null}
+          Guardar
+        </Button>
+      </Col>
+    </Form.Row>
   </div>
 }
 
