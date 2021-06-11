@@ -26,8 +26,12 @@ export const RowOptions = ({contrato, queryKey}: Props) => {
     return ContratosService.extender(parseInt(idProveedor), contrato.id)
   }, {
     onSuccess: () => {
+<<<<<<< HEAD
       queryClient.invalidateQueries(queryKey)
       queryLoader.close()
+=======
+      queryClient.invalidateQueries("contratos.buscar")
+>>>>>>> ba5db77e6bdb2c8d1489a6de94a517c81d1c40a9
     },
     onError: (error) => {
       queryLoader.open({
@@ -41,8 +45,12 @@ export const RowOptions = ({contrato, queryKey}: Props) => {
     return ContratosService.consumir(parseInt(idProveedor), contrato.id)
   }, {
     onSuccess: () => {
+<<<<<<< HEAD
       queryClient.invalidateQueries(queryKey)
       queryLoader.close()
+=======
+      queryClient.invalidateQueries("contratos.buscar")
+>>>>>>> ba5db77e6bdb2c8d1489a6de94a517c81d1c40a9
     },
     onError: (error) => {
       queryLoader.open({
@@ -56,7 +64,11 @@ export const RowOptions = ({contrato, queryKey}: Props) => {
     return ContratosService.anular(parseInt(idProveedor), contrato.id)
   }, {
     onSuccess: () => {
+<<<<<<< HEAD
       queryClient.invalidateQueries(queryKey)
+=======
+      queryClient.invalidateQueries("contratos.buscar")
+>>>>>>> ba5db77e6bdb2c8d1489a6de94a517c81d1c40a9
       queryLoader.close()
     },
     onError: (error) => {
