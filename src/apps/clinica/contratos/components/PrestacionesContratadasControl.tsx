@@ -64,8 +64,8 @@ export const PrestacionesContratadasControl = ()=>{
                           field.onChange(prestacion.length ? prestacion[0] : 0)
                         }}
                         onBlur={field.onBlur}
+                        feedback={fieldState.error?.message}
                       />
-                      <Form.Control.Feedback type="invalid">{fieldState.error?.message}</Form.Control.Feedback>
                     </Col>
                     <Col xs="auto">
                         <Button variant="danger" onClick={()=>{

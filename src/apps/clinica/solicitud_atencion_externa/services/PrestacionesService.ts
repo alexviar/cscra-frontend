@@ -7,6 +7,11 @@ export type Prestacion = {
 }
 
 export const PrestacionesService = {
+  registrar: (nombre: string) => {
+    return apiClient.post<Prestacion>("prestaciones", {
+      nombre
+    })
+  },
   buscarPorNombre: (nombre: string) => {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source()
