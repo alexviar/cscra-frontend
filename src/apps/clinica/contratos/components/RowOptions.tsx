@@ -12,7 +12,7 @@ type Props = {
   contrato: Contrato
   queryKey: QueryKey
 }
-export const RowOptions = ({contrato}: Props) => {
+export const RowOptions = ({contrato, queryKey}: Props) => {
 
   const { id: idProveedor } = useParams<{
     id: string
