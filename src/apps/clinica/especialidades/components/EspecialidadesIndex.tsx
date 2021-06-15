@@ -93,11 +93,11 @@ export const EspecialidadesIndex = ()=>{
 
   return <div className="px-1">
     <h2 style={{fontSize: "1.75rem"}}>Especialidades</h2>
-    <Row className="mb-2">
-      <Col className="ml-auto pr-0" xs="auto" >
+    <Form.Row className="mb-2">
+      {/* <Col className="ml-auto pr-0" xs="auto" >
         <Button onClick={()=>buscar.refetch()}><FaSync /></Button>
-      </Col>
-      <Col xs="auto">
+      </Col> */}
+      <Col className="ml-auto" xs="auto">
         {/* <Dropdown as={ButtonGroup}> */}
           <Button as={Link} replace to={"/clinica/especialidades/registrar"}>Nuevo</Button>
           {/* <Dropdown.Toggle split id="especialidades-dropdown" />
@@ -110,7 +110,7 @@ export const EspecialidadesIndex = ()=>{
           </Dropdown.Menu>
         </Dropdown> */}
       </Col>
-    </Row>
+    </Form.Row>
     <Row>
       <Col className="mb-2">
         <EspecialidadesFilter onSearch={(filter)=>{

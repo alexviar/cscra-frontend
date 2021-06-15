@@ -169,6 +169,8 @@ const FinishStep = ({
     }
   })
 
+  if(!generalInfo || !contractInfo) return null
+
   return <div>
     <div>
       <h2>Informacion general</h2>
@@ -240,11 +242,11 @@ const FinishStep = ({
         <tbody>
           <tr>
             <th scope="row">Inicio</th>
-            <td>{contractInfo.inicio}</td>
+            <td>{(contractInfo.inicio as any).toISOString().split("T")[0]}</td>
           </tr>
           <tr>
             <th scope="row">Fin</th>
-            <td>{contractInfo.fin}</td>
+            <td>{(contractInfo.fin as any)?.toISOString().split("T")[0]}</td>
           </tr>
           <tr>
             <th scope="row">Prestaciones</th>

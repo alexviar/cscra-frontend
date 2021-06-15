@@ -81,8 +81,11 @@ export type Contrato = {
 }
 
 export type Filter = {
+  tipos?: number[]
+  nombre?: string
   regionalId?: number
   activos?: number
+  prestacionesId?: number[]
 }
 
 
@@ -91,10 +94,10 @@ class ProveedorService {
   buscar(filter: Filter, page: Page): AxiosPromise<PaginatedResponse<Proveedor>>;
   buscar(filter: Filter, page?: Page) {
     return apiClient.get("proveedores", {
-      params: {
+      params: keysToUnderscore({
         filter,
         page
-      }
+      })
     })
   }
   cargar(id: number): AxiosPromise<Proveedor>{

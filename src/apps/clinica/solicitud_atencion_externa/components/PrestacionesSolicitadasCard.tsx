@@ -82,6 +82,9 @@ export const PrestacionesSolicitadasCard = () => {
                     id={`solicitud-atencion-externa/proveedor`}
                     className={proveedoresTypeaheadController.fieldState?.error ? "is-invalid" : ""}
                     isInvalid={!!proveedoresTypeaheadController.fieldState?.error}
+                    filter={{
+                      activos: 1
+                    }}
                     filterBy={(proveedor)=> !!(
                       proveedor.regionalId == watch("regional.0.id") &&
                       watch("prestacionesSolicitadas").every(ps=> proveedor.contrato.prestaciones.some(pc=>pc.id == (ps.prestacion.length && ps.prestacion[0].id)))
@@ -100,14 +103,15 @@ export const PrestacionesSolicitadasCard = () => {
                   <Form.Control.Feedback type="invalid">{formState.errors.prestacionesSolicitadas && formState.errors.prestacionesSolicitadas[index]?.nota?.message}</Form.Control.Feedback>
                 </td>
                 <td>
-                  <Button variant="link" onClick={() => {
+                  {/* <Button variant="link" onClick={() => {
                     console.log("Remove", index)
                     remove(index)
-                  }} className="btn-icon"><FaMinus /></Button>
+                  }} className="btn-icon"><FaMinus /></Button> */}
                 </td>
               </tr>
             })}
-            <tr>
+            {/* <tr>
+              <td></td>
               <td></td>
               <td></td>
               <td></td>
@@ -120,7 +124,7 @@ export const PrestacionesSolicitadasCard = () => {
                   setCount(count => count+1)
                 }} className="btn-icon"><FaPlus /></Button>
               </td>
-            </tr>
+            </tr> */}
           </tbody>
         </Table>
         <Form.Control.Feedback type="invalid">{

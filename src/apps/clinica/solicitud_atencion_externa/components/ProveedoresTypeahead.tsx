@@ -4,20 +4,24 @@ import { Button, Form, InputGroup } from "react-bootstrap"
 import { FaSync } from "react-icons/fa"
 import { Typeahead, TypeaheadProps } from 'react-bootstrap-typeahead'
 import { useQuery } from 'react-query'
-import { Proveedor, ProveedoresService } from "../services"
+import { AxiosError } from 'axios'
+import { Proveedor, Filter as ProveedorFilter, ProveedoresService } from "../services"
 import { isMatch } from "../../../../commons/utils"
 import 'react-bootstrap-typeahead/css/Typeahead.css'
 
 export type { Proveedor }
 
+type Props = {
+  feedback?: string,
+  filter?: ProveedorFilter
+  onLoad?: (options: Proveedor[])=>void
+} & Omit<TypeaheadProps<Proveedor>, "isLoading" | "options">
 
-export const ProveedoresTypeahead = ({isInvalid, feedback, filterBy, ...props}: {feedback?: string, onLoad?: (options: Proveedor[])=>void} &  Omit<TypeaheadProps<Proveedor>, "isLoading" | "options" | "onSearch">) => {
-  const queryKey = "proveedores.buscar"
+export const ProveedoresTypeahead = ({isInvalid, feedback, filter={}, filterBy, ...props}: Props) => {
+  const queryKey = ["proveedores.buscar", filter]
 
   const buscar = useQuery(queryKey, ()=>{
-    return ProveedoresService.buscar({
-      activos: 1
-    })
+    return ProveedoresService.buscar(filter)
   }, {
     // refetchOnMount: false,
     refetchOnReconnect: false,
@@ -44,6 +48,7 @@ export const ProveedoresTypeahead = ({isInvalid, feedback, filterBy, ...props}: 
     <Typeahead
       clearButton
       {...props}
+      disabled={!buscar.data}
       className={(buscar.isError || isInvalid) ? "is-invalid" : ""}
       isInvalid={buscar.isError || isInvalid}
       filterBy={(proveedor, props)=>{
@@ -63,13 +68,11 @@ export const ProveedoresTypeahead = ({isInvalid, feedback, filterBy, ...props}: 
         </div>
       }}
     />
-    {buscar.isError ? <>
-      <InputGroup.Append>
-        <Button variant="outline-danger" onClick={()=>buscar.refetch()}><FaSync /></Button>
-      </InputGroup.Append>
-      <Form.Control.Feedback type="invalid">{buscar.error?.response?.message || buscar.error?.message}</Form.Control.Feedback>
-    </>
-    : null}
-    {feedback ? <Form.Control.Feedback type="invalid">{feedback}</Form.Control.Feedback> : null}
+    <InputGroup.Append>
+      <Button disabled={buscar.isFetching} variant={buscar.isError ? "outline-danger" : "outline-secondary"} onClick={()=>buscar.refetch()}><FaSync /></Button>
+    </InputGroup.Append>
+    <Form.Control.Feedback type="invalid">{
+      (buscar.error as AxiosError)?.response?.data?.message || (buscar.error as AxiosError)?.message
+      || feedback}</Form.Control.Feedback>
   </InputGroup>
 }

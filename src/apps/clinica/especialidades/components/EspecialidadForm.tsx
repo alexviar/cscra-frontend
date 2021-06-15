@@ -30,6 +30,7 @@ export const EspecialidadForm = ()=>{
   const {
     handleSubmit,
     register,
+    reset,
     setValue,
     formState,
   } = useForm<Inputs>({
@@ -42,6 +43,7 @@ export const EspecialidadForm = ()=>{
     return id ? EspecialidadesService.actualizar(parseInt(id), nombre) : EspecialidadesService.registrar(nombre)
   }, {
     onSuccess: ()=>{
+      reset()
       queryClient.invalidateQueries("especialidades.buscar")
       if(!continueRef.current)
         history.replace("/clinica/especialidades")

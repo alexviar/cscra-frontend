@@ -240,6 +240,9 @@ export const SolicitudAtencionExternaForm = ()=>{
                     render={({field, fieldState})=>{
                       return <><MedicosTypeahead
                         id="solicitud-atencion-externa-form/medicos"
+                        filter={{
+                          estado: 1
+                        }}
                         filterBy={(medico) => medico.regionalId == watch("regional.0.id")}
                         className={fieldState.error ? "is-invalid" : ""}
                         isInvalid={!!formState.errors.medico}

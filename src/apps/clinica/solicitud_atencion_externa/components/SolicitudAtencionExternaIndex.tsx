@@ -1,5 +1,5 @@
-import { AxiosError } from "axios"
 import { useRef, useState} from "react"
+import { AxiosError } from "axios"
 import { Button, Col, Dropdown, Form, Spinner, Table } from "react-bootstrap"
 import {FaFilter, FaPlus, FaSync} from "react-icons/fa"
 import { Link, useLocation } from "react-router-dom"
@@ -25,6 +25,8 @@ export const SolicitudAtencionExternaIndex = ()=>{
 
   const loggedUser = useLoggedUser();
 
+  const [filterFormVisible, showFilterForm] = useState(false)
+
   const getDefaultFilter = ()=>{
     const filter: Filter = {}
     if(!loggedUser.can(Permisos.VER_SOLICITUDES_DE_ATENCION_EXTERNA)){
@@ -41,6 +43,7 @@ export const SolicitudAtencionExternaIndex = ()=>{
   const [filter, setFilter] = useState<Filter>(getDefaultFilter)
 
   const buscar = useQuery(["solicitudesAtencionExterna.buscar", page, filter], ()=>{
+    console.log({...filter, ...getDefaultFilter()})
     return SolicitudesAtencionExternaService.buscar({...filter, ...getDefaultFilter()}, page)
   }, {
     enabled: loggedUser.canAny([
@@ -112,7 +115,7 @@ export const SolicitudAtencionExternaIndex = ()=>{
           </Col>
           <Col xs="auto" >
             <Button onClick={()=>{
-              // showUsersFilter(visible=>!visible)
+              showFilterForm(visible=>!visible)
             }}><FaFilter /></Button>
           </Col>
         </ProtectedContent>
@@ -134,12 +137,12 @@ export const SolicitudAtencionExternaIndex = ()=>{
       authorize={SolicitudATPolicy.view}
     >
       <Form.Row className="mb-2">
-        <Col>
-          <SolicitudAtencionExternaFilterForm onFilter={(filter)=>{
+        <Col xs={12}>
+          {filterFormVisible && <SolicitudAtencionExternaFilterForm onFilter={(filter)=>{
             setFilter(filter)
-          }} />
+          }} />}
         </Col>
-        <Col xs={"auto"}>
+        <Col className="ml-auto" xs={"auto"}>
           <div className="d-flex flex-row flex-nowrap align-items-center">
               <span>Mostrar</span>
               <Form.Control className="mx-2" as="select" value={page.size} onChange={(e) => {

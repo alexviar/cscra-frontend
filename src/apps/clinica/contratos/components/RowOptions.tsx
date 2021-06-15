@@ -72,7 +72,7 @@ export const RowOptions = ({contrato, queryKey}: Props) => {
       variant="link" id={`dropdown-contratos-proveedor-${contrato.id}`}
     />
     <Dropdown.Menu>
-      {/* <ProtectedContent
+      <ProtectedContent
         authorize={ContratoPolicy.view}
       >
         <Dropdown.Item as={Link} to={{
@@ -81,7 +81,7 @@ export const RowOptions = ({contrato, queryKey}: Props) => {
             contrato
           }
         }} ><span className="align-middle">Ver</span></Dropdown.Item>
-      </ProtectedContent> */}
+      </ProtectedContent>
       <ProtectedContent
         authorize={ContratoPolicy.extender}
       >

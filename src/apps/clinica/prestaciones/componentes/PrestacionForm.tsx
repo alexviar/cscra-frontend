@@ -33,6 +33,7 @@ export const PrestacionForm = ()=>{
 
   const {
     handleSubmit,
+    reset,
     register,
     setValue,
     formState,
@@ -46,6 +47,7 @@ export const PrestacionForm = ()=>{
     return id ? PrestacionesService.actualizar(parseInt(id), nombre) : PrestacionesService.registrar(nombre)
   }, {
     onSuccess: ()=>{
+      reset()
       queryClient.invalidateQueries("prestaciones.buscar")
       if(!continueRef.current)
         history.replace("/clinica/prestaciones")

@@ -127,13 +127,13 @@ export const ProveedoresIndex = () => {
     <ProtectedContent
       authorize={ProveedorPolicy.view}
     >
-      <Form.Row>
-        <Col className="mb-2">
-          <ProveedoresFilterForm onFilter={(filter) => {
-            setFilter(filter)
-          }} />
-        </Col>
-        <Col className="mb-2" xs={"auto"}>
+      <div className="mb-2">
+        {filterFormVisible && <ProveedoresFilterForm onFilter={(filter) => {
+          setFilter(filter)
+        }} />}
+      </div>
+      <div className="d-flex">
+        <div className="ml-auto mb-2">
           <div className="d-flex flex-row flex-nowrap align-items-center">
             <span>Mostrar</span>
             <Form.Control className="mx-2" as="select" value={page.size} onChange={(e) => {
@@ -151,8 +151,8 @@ export const ProveedoresIndex = () => {
             </Form.Control>
             <span>filas</span>
           </div>
-        </Col>
-      </Form.Row>
+        </div>
+      </div>
       <Table responsive>
         <thead className="text-center">
           <tr>

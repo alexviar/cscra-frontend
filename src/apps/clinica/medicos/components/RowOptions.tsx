@@ -27,6 +27,7 @@ export const RowOptions = ({medico, queryKey}: Props) => {
   }, {
     onSuccess: ()=>{
       modal.close()
+      queryClient.invalidateQueries("medicos.buscar", { inactive: true })
       queryClient.setQueryData(queryKey, (oldData: any) => {
         console.log(oldData)
         return {
@@ -36,7 +37,8 @@ export const RowOptions = ({medico, queryKey}: Props) => {
             records: oldData.data.records.map((i: any)=>{
               return i == medico ? {
                 ...i,
-                estado: 2
+                estado: medico.estado == 1 ? 2 : 1,
+                estadoText: medico.estado == 1 ? "Baja" : "Alta"
               } : i
             })
           }
@@ -87,23 +89,3 @@ export const RowOptions = ({medico, queryKey}: Props) => {
     </Dropdown.Menu>
   </Dropdown>  
 }
-
-{/* <Dropdown>
-<Dropdown.Toggle as={VerticalEllipsisDropdownToggle}
-  variant="link" id={`dropdown-${medico.id}`}
-/>
-
-<Dropdown.Menu>
-  <Dropdown.Item as={Link} to={{
-    pathname: `/clinica/medicos/${medico.id}/editar`,
-    state: {
-      medico: medico
-    }
-  }} ><FaEdit /><span className="ml-2 align-middle">Editar</span></Dropdown.Item>
-  <Dropdown.Item className="text-danger" href="#" onClick={() => {
-    if (window.confirm("¿Está seguro?")) {
-      eliminar.mutate(medico.id)
-    }
-  }}><FaTrash /><span className="ml-2 align-middle" >Eliminar</span></Dropdown.Item>
-</Dropdown.Menu>
-</Dropdown> */}

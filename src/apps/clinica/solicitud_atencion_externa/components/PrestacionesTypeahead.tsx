@@ -72,6 +72,7 @@ export const PrestacionesTypeahead = ({
         return
       }
     }
+    console.log("Prestaciones", selected)
     onChange && onChange(selected)
   }
 

@@ -19,9 +19,13 @@ import {
   ProveedorWizard,
   ProveedorForm,
   ContactoForm,
-  ContratoForm,
   ProveedorPolicy
 } from './proveedores';
+import {
+  ContratoForm,
+  ContratoView,
+  ContratoPolicy
+} from './contratos'
 import { Permisos, ProtectedRoute, useLoggedUser } from '../../commons/auth';
 import { ListaMoraPolicy } from "./mora/policies";
 import { Image } from "react-bootstrap";
@@ -91,9 +95,10 @@ export const ClinicaApp = ()=>{
     items: sidebarItems
   }}>
     <Switch>
-      <Route exact path={`${url}/lista-mora/agregar`}>
+      <ProtectedRoute exact path={`${url}/lista-mora/agregar`}
+        authorize={ListaMoraPolicy.index}>
         <ListaMoraItemForm />
-      </Route>
+      </ProtectedRoute>
       <Route path={`${url}/lista-mora`}>
         <ListaMoraIndex />
       </Route>
@@ -141,9 +146,14 @@ export const ClinicaApp = ()=>{
         <ContactoForm />
       </ProtectedRoute>
       <ProtectedRoute exact path={`${url}/proveedores/:idProveedor/contratos/registrar`}
-        authorize={(user)=>ProveedorPolicy.register(user) || ProveedorPolicy.edit(user)}
+        authorize={ContratoPolicy.register}
       >
         <ContratoForm />
+      </ProtectedRoute>
+      <ProtectedRoute exact path={`${url}/proveedores/:idProveedor/contratos/:id`}
+        authorize={ProveedorPolicy.view}
+      >
+        <ContratoView />
       </ProtectedRoute>
       <Route path={`${url}/especialidades`}>
         <EspecialidadesIndex />

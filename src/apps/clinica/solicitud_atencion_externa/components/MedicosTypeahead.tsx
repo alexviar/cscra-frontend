@@ -1,24 +1,28 @@
 
 import { useEffect, useMemo } from "react"
-import { AxiosPromise } from "axios"
+import { AxiosPromise, AxiosError } from "axios"
 import { Button, Form, InputGroup } from "react-bootstrap"
 import { FaSync } from "react-icons/fa"
 import { Typeahead, TypeaheadProps } from 'react-bootstrap-typeahead'
 import { useQuery } from 'react-query'
-import { Medico, MedicosService } from "../services"
+import { Medico, MedicoFilter, MedicosService } from "../services"
 import { isMatch } from "../../../../commons/utils"
 import 'react-bootstrap-typeahead/css/Typeahead.css'
 
+export type { Medico }
 
-export const MedicosTypeahead = ({isInvalid, feedback, filterBy, ...props}: {feedback?: string, onLoad?: (options: Medico[])=>void} & Omit<TypeaheadProps<Medico>, "isLoading" | "options" | "onSearch">) => {
-  const queryKey = "medicos.buscar"
+type Props = {
+  feedback?: string,
+  filter?: MedicoFilter
+  onLoad?: (options: Medico[])=>void
+} & Omit<TypeaheadProps<Medico>, "isLoading" | "options">
+
+export const MedicosTypeahead = ({isInvalid, feedback, filter, filterBy, ...props}: Props) => {
+  const queryKey = ["medicos.buscar", filter]
 
   const buscar = useQuery(queryKey, ()=>{
-    return MedicosService.buscar({
-      estado: 1
-    }) as AxiosPromise<Medico[]>
+    return MedicosService.buscar(filter) as AxiosPromise<Medico[]>
   }, {
-    // refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false
   })
@@ -43,6 +47,7 @@ export const MedicosTypeahead = ({isInvalid, feedback, filterBy, ...props}: {fee
     <Typeahead
       clearButton
       {...props}
+      disabled={!buscar.data}
       className={(buscar.isError || isInvalid) ? "is-invalid" : ""}
       isInvalid={buscar.isError || isInvalid}
       filterBy={(medico, props)=>{
@@ -60,13 +65,11 @@ export const MedicosTypeahead = ({isInvalid, feedback, filterBy, ...props}: {fee
         </div>
       }}
     />
-    {buscar.isError ? <>
-      <InputGroup.Append>
-        <Button variant="outline-danger" onClick={()=>buscar.refetch()}><FaSync /></Button>
-      </InputGroup.Append>
-      <Form.Control.Feedback type="invalid">{buscar.error?.response?.message || buscar.error?.message}</Form.Control.Feedback>
-    </>
-    : null}
-    {feedback ? <Form.Control.Feedback type="invalid">{feedback}</Form.Control.Feedback> : null}
+    <InputGroup.Append>
+      <Button disabled={buscar.isFetching} variant={buscar.isError ? "outline-danger" : "outline-secondary"} onClick={()=>buscar.refetch()}><FaSync /></Button>
+    </InputGroup.Append>
+    <Form.Control.Feedback type="invalid">{
+      (buscar.error as AxiosError)?.response?.data?.message || (buscar.error as AxiosError)?.message
+      || feedback}</Form.Control.Feedback>
   </InputGroup>
 }

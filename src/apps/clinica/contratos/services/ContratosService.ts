@@ -27,7 +27,7 @@ class ContratoService {
       params: keysToUnderscore({filter, page})
     })
   }
-  ver(idProveedor: number, idContrato: number): AxiosPromise<Contrato>{
+  cargar(idProveedor: number, idContrato: number): AxiosPromise<Contrato>{
     return apiClient.get(`proveedores/${idProveedor}/contratos/${idContrato}`)
   }
   registrar(idProveedor: number, contrato: {

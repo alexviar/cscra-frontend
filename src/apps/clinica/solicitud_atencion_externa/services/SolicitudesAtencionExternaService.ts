@@ -2,12 +2,13 @@ import { apiClient, PaginatedResponse, Page } from "../../../../commons/services
 import { keysToUnderscore } from "../../../../commons/utils"
 
 export type SolicitudesAtencionExternaFilter = {
-  id?: number,
-  desde?: string,
-  hasta?: string,
-  matricula_asegurado?: string,
-  doctor_id?: number,
-  proveedor_id?: number
+  numero?: number
+  desde?: string
+  hasta?: string
+  numeroPatronal?: string
+  matriculaAsegurado?: string
+  medicoId?: number
+  proveedorId?: number
   regionalId?: number
   registradoPor?: number
 }
@@ -27,7 +28,7 @@ export type SolicitudAtencionExterna = {
 export const SolicitudesAtencionExternaService = {
   buscar: (filter: SolicitudesAtencionExternaFilter, page: Page)=>{
     return apiClient.get<PaginatedResponse<SolicitudAtencionExterna>>("solicitudes-atencion-externa", {
-      params: {filter: keysToUnderscore(filter), page}
+      params: keysToUnderscore({filter, page})
     })
   },
   generarDm11: (solicitud_id: number) => {
