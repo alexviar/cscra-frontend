@@ -1,6 +1,6 @@
 import { AxiosError } from "axios"
-import { useEffect, useState, useRef } from "react"
-import { Button, Col, Form, Spinner, Table } from "react-bootstrap"
+import { useState } from "react"
+import { Button, Col, Collapse, Form, Spinner, Table } from "react-bootstrap"
 import { FaFilter, FaSync, FaPlus } from "react-icons/fa"
 import { useQuery } from "react-query"
 import { Link, useLocation } from "react-router-dom"
@@ -99,12 +99,12 @@ export const ProveedoresIndex = () => {
         <ProtectedContent
           authorize={ProveedorPolicy.view}
         >
-          <Col className={"pr-0"} xs="auto" >
+          <Col xs="auto" >
             <Button onClick={() => {
               buscar.refetch()
             }}><FaSync /></Button>
           </Col>
-          <Col className={"pr-0"} xs="auto" >
+          <Col xs="auto" >
             <Button onClick={() => {
               showFilterForm(visible => !visible)
             }}><FaFilter /></Button>
@@ -118,7 +118,7 @@ export const ProveedoresIndex = () => {
               as={Link}
               to={`${path}/registrar`}
               className="d-flex align-items-center">
-              <FaPlus /><span className="mr-2">Nuevo</span>
+              <FaPlus className="mr-1" /><span>Nuevo</span>
             </Button>
           </Col>
         </ProtectedContent>
@@ -128,9 +128,14 @@ export const ProveedoresIndex = () => {
       authorize={ProveedorPolicy.view}
     >
       <div className="mb-2">
-        {filterFormVisible && <ProveedoresFilterForm onFilter={(filter) => {
-          setFilter(filter)
-        }} />}
+        <Collapse in={filterFormVisible}>
+          <div>
+            <ProveedoresFilterForm onFilter={(filter) => {
+              setFilter({...getDefaultFilter(), ...filter})
+              setPage(page=>({ ...page, current: 1 }))
+            }} />
+          </div>
+        </Collapse>
       </div>
       <div className="d-flex">
         <div className="ml-auto mb-2">

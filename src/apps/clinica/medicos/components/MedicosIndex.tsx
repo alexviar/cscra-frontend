@@ -1,6 +1,6 @@
 import { AxiosError, AxiosPromise } from "axios"
 import { useEffect, useRef, useState } from "react"
-import { Button, Col, Form, Row, Spinner, Table } from "react-bootstrap"
+import { Button, Col, Collapse, Form, Row, Spinner, Table } from "react-bootstrap"
 import { FaFilter, FaSync, FaPlus } from "react-icons/fa"
 import { useQuery } from "react-query"
 import { Link, useLocation } from "react-router-dom"
@@ -22,7 +22,7 @@ export const MedicosIndex = () => {
   const loggedUser = useLoggedUser();
   
   const getDefaultFilter = ()=>{
-    const filter: Filter = { tipo: 1 }
+    const filter: Filter = {  }
     if(!loggedUser.can(Permisos.VER_MEDICOS)){
       if(loggedUser.can(Permisos.VER_MEDICOS_REGIONAL)){
         filter.regionalId = loggedUser.regionalId;
@@ -45,15 +45,6 @@ export const MedicosIndex = () => {
   })
 
   const total = buscar.data?.data?.meta?.total || 0
-
-//   const didMountRef = useRef(false)
-//   useEffect(()=>{
-//     if(!didMountRef.current) {
-//       didMountRef.current = true
-//       return
-//     }
-//     if(MedicoPolicy.view(loggedUser)) buscar.refetch()
-//   }, [page, filter, loggedUser])
 
   const renderRows = () => {
     if (buscar.isFetching) {
@@ -119,7 +110,7 @@ export const MedicosIndex = () => {
               buscar.refetch()
             }}><FaSync /></Button>
           </Col>
-          <Col className={"pr-0"} xs="auto" >
+          <Col xs="auto" >
             <Button onClick={()=>{
               showFilterForm(visible=>!visible)
             }}><FaFilter /></Button>
@@ -142,32 +133,35 @@ export const MedicosIndex = () => {
     <ProtectedContent
       authorize={MedicoPolicy.view}
     >
-      <Row>
-        <Col className="mb-2">
+      <Collapse in={filterFormVisible}>
+        <div>
           <MedicosFilterForm onFilter={(filter)=>{
             setFilter(filter)
+            setPage(page => ({...page, current: 1}))
           }} />
-        </Col>
-        <Col className="mb-2" xs={"auto"}>
+        </div>
+      </Collapse>
+      <div className="d-flex">
+        <div className="ml-auto mb-2">          
           <div className="d-flex flex-row flex-nowrap align-items-center">
-              <span>Mostrar</span>
-              <Form.Control className="mx-2" as="select" value={page.size} onChange={(e) => {
-                const value = e.target.value
-                setPage((page) => ({
-                  ...page,
-                  size: parseInt(value)
-                }))
-              }}>
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={30}>30</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </Form.Control>
-              <span>filas</span>
+            <span>Mostrar</span>
+            <Form.Control className="mx-2" as="select" value={page.size} onChange={(e) => {
+              const value = e.target.value
+              setPage((page) => ({
+                ...page,
+                size: parseInt(value)
+              }))
+            }}>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={30}>30</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </Form.Control>
+            <span>filas</span>
           </div>
-        </Col>
-      </Row>
+        </div>
+      </div>
       <Table responsive>
         <thead>
           <tr>

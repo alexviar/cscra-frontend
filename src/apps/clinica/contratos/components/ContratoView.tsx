@@ -50,11 +50,11 @@ export const ContratoView = ()=>{
           </tr>
           <tr>
             <th scope="row" style={{width:1}}>Fin</th>
-            <td>{(contrato?.fin as any) || contrato ? "Indefinido" : ""}</td>
+            <td>{contrato && (contrato.fin || "Indefinido")}</td>
           </tr>
           <tr>
             <th scope="row" style={{width:1}}>Extensión</th>
-            <td>{(contrato?.extension as any) || contrato ? "Sin extensión" : ""}</td>
+            <td>{contrato && (contrato.extension || "Sin extension")}</td>
           </tr>
           <tr>
             <th scope="row" style={{width: 1}}>Estado</th>
@@ -72,24 +72,5 @@ export const ContratoView = ()=>{
           </tr>
         </tbody>
       </Table>
-    {/* {contrato ? <Form.Row>
-      <Col xs="auto">
-        <Button as={Link} to={{
-          pathname: `/iam/contratoes/${contrato.id}/editar`,
-          state: {
-            contrato
-          }
-        }} >Editar</Button>
-      </Col>
-      <Col xs="auto">
-        <Button variant="danger" onClick={()=>{
-          modalRef.current?.show(true)
-          eliminar.mutate()
-        }}>
-          {eliminar.isLoading ? <Spinner className="mr-2" animation="border" size="sm" /> : null}
-          Eliminar
-        </Button>
-      </Col>
-    </Form.Row> : null} */}
   </>
 }

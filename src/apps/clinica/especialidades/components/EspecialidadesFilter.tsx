@@ -14,7 +14,7 @@ export const EspecialidadesFilter = (props: Props) =>{
     <Form.Row className="flex-nowrap">
       <Col>
         <Form.Label htmlFor="nombre" srOnly>Nombre</Form.Label>
-        <Form.Control id="nombre" style={{minWidth: "10rem"}} {...register("nombre")}></Form.Control>
+        <Form.Control type="search" id="nombre" style={{minWidth: "10rem"}} {...register("nombre")}></Form.Control>
       </Col>
       <Col xs={"auto"}>
         <Button className="ml-2" type="submit"><FaSearch /></Button>

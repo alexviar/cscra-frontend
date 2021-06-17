@@ -35,7 +35,7 @@ export const ProvinciasTypeahead = ({
     if(buscar.data){
       props.onLoad && props.onLoad(buscar.data?.data)
     }
-  }, [buscar.data])
+  }, [buscar.data, props.onLoad])
 
   const options = useMemo(()=>{
     if(Array.isArray(buscar.data?.data)){
@@ -49,6 +49,7 @@ export const ProvinciasTypeahead = ({
 
   return <InputGroup hasValidation>
     <Typeahead
+      clearButton
       {...props}
       className={(buscar.isError || isInvalid) ? "is-invalid" : ""}
       isInvalid={buscar.isError || isInvalid}

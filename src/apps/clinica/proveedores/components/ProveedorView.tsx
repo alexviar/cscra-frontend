@@ -134,7 +134,7 @@ export const ProveedorView = ()=>{
         </Table>
       </Col>
       <Col>
-        <MapContainer center={position} zoom={14} dragging={false} style={{height: "100%"}}>
+        <MapContainer center={position} zoom={14} dragging={false} scrollWheelZoom={false} doubleClickZoom={false} style={{height: "100%"}}>
           <TileLayer
             attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -184,6 +184,20 @@ export const ProveedorView = ()=>{
     <Tabs className={"my-2"} defaultActiveKey={locationState?.tab}>
       <Tab eventKey="informacion-contacto" title="Informacion de Contacto">
         {renderContactInfo()}
+        {proveedor ? <Form.Row>
+          <ProtectedContent
+            authorize={ProveedorPolicy.edit}
+          >
+            <Col xs="auto">
+              <Button as={Link} to={{
+                pathname: `/clinica/proveedores/${proveedor.id}/editar-contacto`,
+                state: {
+                  proveedor
+                }
+              }} >Editar</Button>
+            </Col>
+          </ProtectedContent>
+        </Form.Row> : null}
       </Tab>
       <Tab eventKey="contratos" title="Contratos">
         <ContratosIndex />

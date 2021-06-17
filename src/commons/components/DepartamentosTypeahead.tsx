@@ -10,7 +10,6 @@ import 'react-bootstrap-typeahead/css/Typeahead.css';
 
 export type { Departamento }
 
-let count = 0
 export const DepartamentosTypeahead = ({isInvalid, feedback, filterBy, ...props}: {feedback?: string, onLoad?: (options: Departamento[])=>void} & Omit<TypeaheadProps<Departamento>, "isLoading" | "options" | "onSearch">) => {
 
 
@@ -28,7 +27,7 @@ export const DepartamentosTypeahead = ({isInvalid, feedback, filterBy, ...props}
     if(buscar.data){
       props.onLoad && props.onLoad(buscar.data?.data)
     }
-  }, [buscar.data])
+  }, [buscar.data, props.onLoad])
   
   const options = useMemo(()=>{
     if(Array.isArray(buscar.data?.data)){

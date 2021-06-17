@@ -13,7 +13,7 @@ export const RowOptions = ({solicitud}: Props) => {
 
   const modal = useModal("dm11Viewer")
 
-  return   <Dropdown>
+  return   <Dropdown style={{position: "initial"}}>
     <Dropdown.Toggle as={VerticalEllipsisDropdownToggle}
       variant="link" id={`dropdown-solicitud-${solicitud.id}`}
     />

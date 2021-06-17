@@ -15,7 +15,7 @@ type Props = {
 }
 export const RowOptions = ({proveedor}: Props) => {
 
-  return <Dropdown>
+  return <Dropdown style={{position: "initial"}}>
     <Dropdown.Toggle as={VerticalEllipsisDropdownToggle}
       variant="link" id={`dropdown-proveedores-${proveedor.id}`}
     />

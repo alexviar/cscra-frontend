@@ -23,7 +23,8 @@ export const SolicitudAtencionExternaFilterForm = (props: Props)=>{
     control,
     formState,
     handleSubmit,
-    register
+    register,
+    reset
   } = useForm<Inputs>({
     defaultValues: {
       medico: [],
@@ -33,6 +34,7 @@ export const SolicitudAtencionExternaFilterForm = (props: Props)=>{
   console.log(formState)
   return <Form className={"mb-2"} onSubmit={handleSubmit((input)=>{
     const filter: SolicitudesAtencionExternaFilter = {}
+    console.log(input)
     props.onFilter({
       numero: parseInt(input.numero),
       numeroPatronal: input.numeroPatronal,
@@ -110,7 +112,7 @@ export const SolicitudAtencionExternaFilterForm = (props: Props)=>{
         <Button type="submit">Aplicar</Button>
       </Col>
       <Col xs="auto">
-        <Button type="reset" variant="secondary">Limpiar</Button>
+        <Button variant="secondary" onClick={()=>reset()}>Limpiar</Button>
       </Col>
     </Form.Row>
   </Form>

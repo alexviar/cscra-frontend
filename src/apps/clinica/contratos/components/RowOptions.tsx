@@ -67,7 +67,7 @@ export const RowOptions = ({contrato, queryKey}: Props) => {
     }
   })
 
-  return <Dropdown>
+  return <Dropdown style={{position: "initial"}}>
     <Dropdown.Toggle as={VerticalEllipsisDropdownToggle}
       variant="link" id={`dropdown-contratos-proveedor-${contrato.id}`}
     />

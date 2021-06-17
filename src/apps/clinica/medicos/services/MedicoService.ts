@@ -3,6 +3,7 @@ import { keysToUnderscore } from "../../../../commons/utils"
 
 export type Medico = {
   id: number,
+  tipo: number
   ci: {
     raiz: number,
     complemento: string,
@@ -22,6 +23,7 @@ export type Medico = {
 
 export type MedicoFilter = {
   ci?: string,
+  ciComplemento?: string
   nombre?: string,
   especialidadId?: number
   regionalId?: number
@@ -41,11 +43,13 @@ export const MedicosService = {
   load: (id: number) => {
     return apiClient.get<Medico>(`medicos/${id!}`);
   },
-  registrar: (ci: {
-    raiz: number,
-    complemento: string,
-  }, apellido_paterno: string, apellido_materno: string, nombres: string, especialidad_id: number, regional_id: number) => {
+  registrar: (tipo: number,
+    ci: {
+      raiz: number,
+      complemento: string,
+    }, apellido_paterno: string, apellido_materno: string, nombres: string, especialidad_id: number, regional_id: number) => {
     return apiClient.post<Medico>("medicos", {
+      tipo,
       ci: ci.raiz,
       ci_complemento: ci.complemento,
       apellido_paterno,
@@ -55,11 +59,13 @@ export const MedicosService = {
       regional_id
     })
   },
-  actualizar: (id: number, ci: {
-    raiz: number,
-    complemento: string,
-  }, apellido_paterno: string, apellido_materno: string, nombres: string, especialidad_id: number, regional_id: number) => {
+  actualizar: (id: number, tipo: number,
+    ci: {
+      raiz: number,
+      complemento: string,
+    }, apellido_paterno: string, apellido_materno: string, nombres: string, especialidad_id: number, regional_id: number) => {
     return apiClient.put<Medico>(`medicos/${id}`, {
+      tipo,
       ci: ci.raiz,
       ci_complemento: ci.complemento,
       apellido_paterno,

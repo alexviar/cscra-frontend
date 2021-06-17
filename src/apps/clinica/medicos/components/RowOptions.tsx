@@ -61,7 +61,7 @@ export const RowOptions = ({medico, queryKey}: Props) => {
     }
   }, [cambiarEstado.status])
 
-  return <Dropdown>
+  return <Dropdown style={{position: "initial"}}>
     <Dropdown.Toggle as={VerticalEllipsisDropdownToggle}
       variant="link" id={`dropdown-medicos-${medico.id}`}
     />
@@ -81,9 +81,9 @@ export const RowOptions = ({medico, queryKey}: Props) => {
         authorize={MedicoPolicy.baja}
       >
         <Dropdown.Item className="text-danger" href="#" onClick={() => {
-          if (window.confirm("¿Está seguro?")) {
+          // if (window.confirm("¿Está seguro?")) {
             cambiarEstado.mutate()
-          }
+          // }
         }}>{medico.estado == 1 ? "Baja" : "Alta"}</Dropdown.Item>
       </ProtectedContent>
     </Dropdown.Menu>

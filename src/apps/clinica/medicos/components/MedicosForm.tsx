@@ -13,6 +13,7 @@ import { useModal } from '../../../../commons/reusable-modal'
 import { Especialidad, EspecialidadesTypeahead } from './EspecialidadesTypeahead'
 
 type Inputs = {
+  tipo: string
   ci: string
   ciComplemento: string
   apellidoPaterno: string
@@ -23,6 +24,7 @@ type Inputs = {
 }
 
 const schema = yup.object().shape({
+  tipo: yup.number().label("tipo").oneOf([1, 2]),
   ci: yup.number().label("número de carnet").typeError("El ${path} no es un numero valido"),
   ciComplemento: yup.string().label("número complemento").transform(value => value === "" ? null : value).trim()
     .uppercase().nullable().notRequired()
@@ -30,11 +32,13 @@ const schema = yup.object().shape({
     .matches(/(?=.*[A-Z])(?=.*[0-9])/, "El complemento del carnet esta conformado por un numero y una letra. (No confundir con el expedido)"),
   apellidoPaterno: yup.string().label("apellido paterno").trim().when("apellidoMaterno", {
     is: (apellidoMaterno: string) => !apellidoMaterno,
-    then: yup.string().required("Debe proporcionar al menos un apellido")
+    then: yup.string().required("Debe proporcionar al menos un apellido"),
+    otherwise: yup.string().nullable().notRequired()
   }),
-  apellidoMaterno: yup.string().label("apellido materno").trim().when("apellidoPaterno", {
+  apellidoMaterno: yup.string().label("apellido materno").trim().emptyStringToNull().when("apellidoPaterno", {
     is: (apellidoPaterno: string) => !apellidoPaterno,
-    then: yup.string().required("Debe proporcionar al menos un apellido")
+    then: yup.string().required("Debe proporcionar al menos un apellido"),
+    otherwise: yup.string().emptyStringToNull().notRequired()
   }),
   nombres: yup.string().label("nombres").trim().required(),
   especialidad: yup.array().length(1, "Debe indicar una especialidad"),
@@ -66,6 +70,7 @@ export const MedicosForm = ()=>{
     clearErrors,
     setError,
     setValue,
+    watch,
     control,
     formState,
   } = useForm<Inputs>({
@@ -77,12 +82,15 @@ export const MedicosForm = ()=>{
     }
   })
 
-  console.log("Errors", formState.errors)
+  console.log("Errors", watch())
 
   const queryClient = useQueryClient()
 
-  const guardar = useMutation((inputs: Inputs)=>{
-    return id ? MedicosService.actualizar(parseInt(id), {
+  const guardar = useMutation((inputs: Inputs)=>{    
+    console.log(inputs)
+    return id ? MedicosService.actualizar(parseInt(id), 
+      parseInt(inputs.tipo),
+      {
         raiz: parseInt(inputs.ci),
         complemento: inputs.ciComplemento
       },
@@ -91,7 +99,9 @@ export const MedicosForm = ()=>{
       inputs.nombres,
       inputs.especialidad![0].id,
       inputs.regional![0].id
-    ) : MedicosService.registrar({
+    ) : MedicosService.registrar(
+      parseInt(inputs.tipo),
+      {
         raiz: parseInt(inputs.ci),
         complemento: inputs.ciComplemento
       },
@@ -114,7 +124,6 @@ export const MedicosForm = ()=>{
         const {errors} = error.response?.data
         Object.keys(errors).forEach((key: any)=>{
           let localKey = key
-          // if(key == "asegurado.id") localKey = "asegurado.matricula"
           setError(localKey, {type: "serverError", message: errors[key]})
         })
       }
@@ -143,6 +152,7 @@ export const MedicosForm = ()=>{
 
   useEffect(()=>{
     if(medico){
+      setValue("tipo", String(medico.tipo))
       setValue("ci", String(medico.ci.raiz))
       setValue("ciComplemento", medico.ci.complemento)
       setValue("apellidoPaterno", medico.apellidoPaterno)
@@ -180,6 +190,15 @@ export const MedicosForm = ()=>{
     {guardar.status == "error" || guardar.status == "success"  ? <Alert variant={guardar.isError ? "danger" : "success"}>
       {guardar.isError ? (guardar.error as AxiosError).response?.data?.message || (guardar.error as AxiosError).message : "Guardado"}
     </Alert> : null}
+    <Form.Row>
+      <Form.Group as={Col}>
+        <Form.Label>Tipo</Form.Label>
+        <div>
+          <Form.Check inline type="radio" value="1" label="Empleado" {...register("tipo")} />
+          <Form.Check inline type="radio" value="2" label="Proveedor" {...register("tipo")} />
+        </div>
+      </Form.Group>
+    </Form.Row>
     <Form.Row>
       <Form.Group as={Col} md={4} xs={8}>
         <Form.Label>Carnet de identidad</Form.Label>

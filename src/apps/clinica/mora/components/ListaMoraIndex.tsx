@@ -1,6 +1,6 @@
 import { AxiosError } from "axios"
 import { useEffect, useRef, useState } from "react"
-import { Button, Col, Form, Spinner, Table } from "react-bootstrap"
+import { Button, Col, Collapse, Form, Spinner, Table } from "react-bootstrap"
 import { FaFilter, FaSync, FaPlus } from "react-icons/fa"
 import { useQuery } from "react-query"
 import { Link } from "react-router-dom"
@@ -44,15 +44,6 @@ export default () => {
   })
 
   const total = buscar.data?.data?.meta?.total || 0
-  
-  // const didMountRef = useRef(false)
-  // useEffect(()=>{
-  //   if(!didMountRef.current) {
-  //     didMountRef.current = true
-  //     return
-  //   }
-  //   if(ListaMoraPolicy.view(loggedUser)) buscar.refetch()
-  // }, [page, filter, loggedUser])
 
   const renderRows = () => {
     if (buscar.isFetching) {
@@ -136,55 +127,56 @@ export default () => {
     <ProtectedContent
       authorize={ListaMoraPolicy.view}
     >
-    <Form.Row className="mb-2">
-      <Col>
+      <Collapse in={filterFormVisible}>
         <ListaMoraFilterForm
           onApply={(filter) => {
             setFilter(filter)
+            setPage(page => ({...page, current: 1}))
           }}
         />
-      </Col>
-      <Col xs="auto">
-        <div className="d-flex flex-row flex-nowrap align-items-center">
-          <span>Mostrar</span>
-          <Form.Control className="mx-2" as="select" value={page.size} onChange={(e) => {
-            const value = e.target.value
-            setPage((page) => ({
-              ...page,
-              size: parseInt(value)
-            }))
-          }}>
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={30}>30</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </Form.Control>
-          <span>filas</span>
+      </Collapse>
+      <div className="d-flex">
+        <div className="ml-auto mb-2">
+          <div className="d-flex flex-row flex-nowrap align-items-center">
+            <span>Mostrar</span>
+            <Form.Control className="mx-2" as="select" value={page.size} onChange={(e) => {
+              const value = e.target.value
+              setPage((page) => ({
+                ...page,
+                size: parseInt(value)
+              }))
+            }}>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={30}>30</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </Form.Control>
+            <span>filas</span>
+          </div>
         </div>
-      </Col>
-    </Form.Row>
-    <Table responsive className="text-nowrap">
-      <thead>
-        <tr>
-          <th style={{ width: 1 }}>#</th>
-          <th style={{ width: 1 }}>Nº Patronal</th>
-          <th >Nombre</th>
-          <th style={{ width: 1 }}></th>
-        </tr>
-      </thead>
-      <tbody>
-        {renderRows()}
-      </tbody>
-    </Table>
-    {buscar.status === "success" ? <div className="d-flex flex-row">
-        <span className="mr-auto">{`Se encontraron ${total} resultados`}</span>
-        <Pagination
-          current={page.current}
-          total={Math.ceil((total - page.size) / page.size) + 1}
-          onChange={(current) => setPage((page) => ({ ...page, current }))}
-        />
-      </div> : null}
+      </div>
+      <Table responsive className="text-nowrap">
+        <thead>
+          <tr>
+            <th style={{ width: 1 }}>#</th>
+            <th style={{ width: 1 }}>Nº Patronal</th>
+            <th >Nombre</th>
+            <th style={{ width: 1 }}></th>
+          </tr>
+        </thead>
+        <tbody>
+          {renderRows()}
+        </tbody>
+      </Table>
+      {buscar.status === "success" ? <div className="d-flex flex-row">
+          <span className="mr-auto">{`Se encontraron ${total} resultados`}</span>
+          <Pagination
+            current={page.current}
+            total={Math.ceil((total - page.size) / page.size) + 1}
+            onChange={(current) => setPage((page) => ({ ...page, current }))}
+          />
+        </div> : null}
     </ProtectedContent>
   </div>
 }

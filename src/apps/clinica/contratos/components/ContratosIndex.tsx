@@ -1,6 +1,6 @@
 import { AxiosError } from "axios"
 import { useEffect, useState, useRef } from "react"
-import { Button, Col, Form, Spinner, Table } from "react-bootstrap"
+import { Button, Col, Collapse, Form, Spinner, Table } from "react-bootstrap"
 import { FaFilter, FaSync, FaPlus } from "react-icons/fa"
 import { useQuery } from "react-query"
 import { Link, useLocation, useParams } from "react-router-dom"
@@ -8,7 +8,7 @@ import { Pagination } from "../../../../commons/components"
 import { ProtectedContent, useLoggedUser, Permisos } from "../../../../commons/auth"
 import { ContratoPolicy } from "../policies"
 import { ContratosService, Filter } from "../services"
-// import { ProveedoresFilterForm } from "./ProveedoresFilterForm"
+import { ContratoFilterForm } from "./ContratoFilterForm"
 import { RowOptions } from "./RowOptions"
 
 export const ContratosIndex = () => {
@@ -115,13 +115,16 @@ export const ContratosIndex = () => {
     <ProtectedContent
       authorize={ContratoPolicy.view}
     >
-      <Form.Row>
-        <Col className="mb-2">
-          {/* <ContratosFilterForm onFilter={(filter) => {
+      <Collapse in={filterFormVisible}>
+        <div>
+          <ContratoFilterForm onApply={(filter) => {
             setFilter(filter)
-          }} /> */}
-        </Col>
-        <Col className="mb-2" xs={"auto"}>
+            setPage(page => ({...page, current: 1}))
+          }} />
+        </div>
+      </Collapse>
+      <div className="d-flex">
+        <div className="ml-auto mb-2">
           <div className="d-flex flex-row flex-nowrap align-items-center">
             <span>Mostrar</span>
             <Form.Control className="mx-2" as="select" value={page.size} onChange={(e) => {
@@ -139,8 +142,8 @@ export const ContratosIndex = () => {
             </Form.Control>
             <span>filas</span>
           </div>
-        </Col>
-      </Form.Row>
+        </div>
+      </div>
       <Table>
         <thead>
           <tr>

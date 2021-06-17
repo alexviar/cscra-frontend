@@ -28,7 +28,7 @@ export const MunicipiosTypeahead = ({isInvalid, feedback, filterBy, ...props}: {
     if(buscar.data){
       props.onLoad && props.onLoad(buscar.data?.data)
     }
-  }, [buscar.data])
+  }, [buscar.data, props.onLoad])
 
   const options = useMemo(()=>{
     if(Array.isArray(buscar.data?.data)){
@@ -42,6 +42,7 @@ export const MunicipiosTypeahead = ({isInvalid, feedback, filterBy, ...props}: {
 
   return <InputGroup hasValidation>
     <Typeahead
+      clearButton
       {...props}
       className={(buscar.isError || isInvalid) ? "is-invalid" : ""}
       isInvalid={buscar.isError || isInvalid}

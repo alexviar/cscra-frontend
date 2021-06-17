@@ -1,6 +1,6 @@
 import { useRef, useState} from "react"
 import { AxiosError } from "axios"
-import { Button, Col, Dropdown, Form, Spinner, Table } from "react-bootstrap"
+import { Button, Col, Collapse, Dropdown, Form, Spinner, Table } from "react-bootstrap"
 import {FaFilter, FaPlus, FaSync} from "react-icons/fa"
 import { Link, useLocation } from "react-router-dom"
 import { useMutation, useQuery } from "react-query"
@@ -127,7 +127,7 @@ export const SolicitudAtencionExternaIndex = ()=>{
               as={Link}
               to={`${path}/registrar`}
               className="d-flex align-items-center">
-                <FaPlus className="mr-2" />Nuevo
+                <FaPlus className="mr-1" /><span>Nuevo</span>
             </Button>
           </Col>
         </ProtectedContent>
@@ -138,9 +138,14 @@ export const SolicitudAtencionExternaIndex = ()=>{
     >
       <Form.Row className="mb-2">
         <Col xs={12}>
-          {filterFormVisible && <SolicitudAtencionExternaFilterForm onFilter={(filter)=>{
-            setFilter(filter)
-          }} />}
+          <Collapse in={filterFormVisible}>
+            <div>
+              <SolicitudAtencionExternaFilterForm onFilter={(filter)=>{
+                setFilter(filter)
+                setPage(page=>({ ...page, current: 1 }))
+              }} />
+            </div>
+          </Collapse>
         </Col>
         <Col className="ml-auto" xs={"auto"}>
           <div className="d-flex flex-row flex-nowrap align-items-center">

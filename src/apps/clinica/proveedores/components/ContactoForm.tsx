@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { AxiosError } from "axios" 
+import { AxiosError } from "axios"
 import { Alert, Button, Col, Form, Spinner } from "react-bootstrap"
 import { LatLngExpression } from "leaflet"
 import { Controller, useForm } from "react-hook-form"
@@ -34,12 +34,14 @@ const schema = yup.object().shape({
   telefono1: yup.number().label("telefono 1").typeError("No es un numero válido")
     .emptyStringTo().required(),
   telefono2: yup.number().label("telefono 2")
-  .emptyStringToNull()
-  .typeError("No es un numero válido").nullable().notRequired()
+    .emptyStringToNull()
+    .typeError("No es un numero válido").nullable().notRequired()
 })
 
-export const ContactoForm = (props: Props)=>{
-  const {id} = useParams<{id: string}>()
+export const ContactoForm = (props: Props) => {
+  const params = useParams<{ idProveedor: string }>()
+  const { idProveedor: id } = params
+  console.log("Proveedores", id)
   const history = useHistory<{
     proveedor?: Proveedor
   }>()
@@ -49,7 +51,7 @@ export const ContactoForm = (props: Props)=>{
   const [departamentos, setDepartamentos] = useState<Departamento[]>([])
   const [provincias, setProvincias] = useState<Provincia[]>([])
   const [municipios, setMunicipios] = useState<Municipio[]>([])
-  
+
   const {
     handleSubmit,
     register,
@@ -71,9 +73,7 @@ export const ContactoForm = (props: Props)=>{
 
   const formErrors = formState.errors
 
-  console.log("Errors", formErrors, watch())
-
-  const cargar = useQuery(["proveedor.cargar", id], ()=>{
+  const cargar = useQuery(["proveedor.cargar", id], () => {
     return ProveedoresService.cargar(parseInt(id))
   }, {
     enabled: !!id && !history.location.state?.proveedor,
@@ -91,13 +91,13 @@ export const ContactoForm = (props: Props)=>{
     }
   })
 
-  const guardar = useMutation((values: Inputs) =>{
+  const guardar = useMutation((values: Inputs) => {
     let lat, lng
-    if(Array.isArray(values.ubicacion)){
+    if (Array.isArray(values.ubicacion)) {
       [lat, lng] = values.ubicacion!
     }
-    else{
-      ({lat, lng} = values.ubicacion!)
+    else {
+      ({ lat, lng } = values.ubicacion!)
     }
 
     return ProveedoresService.actualizarInformacionDeContacto(parseInt(id), {
@@ -111,60 +111,60 @@ export const ContactoForm = (props: Props)=>{
       telefono2: values.telefono2!
     })
   }, {
-    onSuccess: ({data})=>{
+    onSuccess: ({ data }) => {
       history.replace(`/clinica/proveedores/${data.id}`)
     },
     onError: (error) => {
-      if(error?.response?.status == 422){
-        const {errors} = error.response?.data
-        Object.keys(errors).forEach((key: any)=>{
+      if (error?.response?.status == 422) {
+        const { errors } = error.response?.data
+        Object.keys(errors).forEach((key: any) => {
           let localKey = key
           // if(key == "asegurado.id") localKey = "asegurado.matricula"
-          setError(localKey, {type: "serverError", message: errors[key]})
+          setError(localKey, { type: "serverError", message: errors[key] })
         })
       }
     }
   })
 
   const proveedor = history.location.state?.proveedor || cargar.data?.data
-  
-  useEffect(()=>{
+
+  useEffect(() => {
     setValue("direccion", proveedor?.direccion || "")
-    const { latitud, longitud } = proveedor?.ubicacion || { 
+    const { latitud, longitud } = proveedor?.ubicacion || {
       latitud: -17.78629,
       longitud: -63.18117
     }
-    setValue("ubicacion", [ latitud, longitud ])
+    setValue("ubicacion", [latitud, longitud])
     setValue("telefono1", proveedor?.telefono1)
     setValue("telefono2", proveedor?.telefono2)
   }, [proveedor])
 
-  useEffect(()=>{
-    if(proveedor){
-      const municipio = municipios.filter(m=>m.id == proveedor?.municipioId)
-      const provincia = provincias.filter(p=>municipios.some(m=>m.provinciaId == p.id))
-      const departamento = departamentos.filter(d=>provincias.some(p=>p.departamentoId == d.id))
-      setValue("municipio", municipio)
-      setValue("provincia", provincia)
-      setValue("departamento", departamento)
+  useEffect(() => {
+    if (proveedor && municipios.length && provincias.length && departamentos.length) {
+      const municipio = municipios.find(m => m.id == proveedor?.municipioId)
+      const provincia = provincias.find(p => municipio?.id == p.id)
+      const departamento = departamentos.find(d => provincia?.id == d.id)
+      setValue("municipio", municipio ? [municipio] : [])
+      setValue("provincia", provincia ? [provincia] : [])
+      setValue("departamento", departamento ? [departamento] : [])
     }
   }, [proveedor, departamentos, provincias, municipios])
 
-  useEffect(()=>{
-    if(cargar.isLoading){
+  useEffect(() => {
+    if (cargar.isLoading) {
       loader.open({
         state: "loading"
       })
     }
   }, [cargar.isLoading])
 
-  const renderAlert = ()=>{
-    if(guardar.isSuccess){
+  const renderAlert = () => {
+    if (guardar.isSuccess) {
       return <Alert variant="success">
-      La operacion se realizó exitosamente
-    </Alert>
+        La operacion se realizó exitosamente
+      </Alert>
     }
-    if(guardar.isError){
+    if (guardar.isError) {
       const guardarError = guardar.error as AxiosError
       return <Alert variant="danger">
         {guardarError ? guardarError.response?.data?.message || guardarError.message : ""}
@@ -176,7 +176,7 @@ export const ContactoForm = (props: Props)=>{
   return <Form id="proveedor-contacto-form" onSubmit={handleSubmit(props.onSubmit || ((data) => {
     guardar.mutate(data)
   }))}>
-    <h1 style={{fontSize: "1.75rem"}}>Información de contacto</h1>
+    <h1 style={{ fontSize: "1.75rem" }}>Información de contacto</h1>
     {renderAlert()}
     <Form.Row>
       <Form.Group as={Col} sm={4}>
@@ -184,16 +184,16 @@ export const ContactoForm = (props: Props)=>{
         <Controller
           name="departamento"
           control={control}
-          render={({field, fieldState})=>{
+          render={({ field, fieldState }) => {
             return <DepartamentosTypeahead
               id="contacto-form/departamentos"
-              onLoad={(departamentos)=>{
+              onLoad={(departamentos) => {
                 setDepartamentos(departamentos)
               }}
               feedback={fieldState.error?.message}
               isInvalid={!!fieldState.error}
               selected={field.value}
-              onChange={(value)=>{
+              onChange={(value) => {
                 field.onChange(value)
                 setValue("provincia", [])
                 setValue("municipio", [])
@@ -208,10 +208,10 @@ export const ContactoForm = (props: Props)=>{
         <Controller
           name="provincia"
           control={control}
-          render={({field, fieldState})=>{
+          render={({ field, fieldState }) => {
             return <ProvinciasTypeahead
               id="contacto-form/provincias"
-              onLoad={(provincias)=>{
+              onLoad={(provincias) => {
                 setProvincias(provincias)
               }}
               filterBy={(provincia) => {
@@ -235,10 +235,10 @@ export const ContactoForm = (props: Props)=>{
         <Controller
           name="municipio"
           control={control}
-          render={({field, fieldState})=>{
+          render={({ field, fieldState }) => {
             return <MunicipiosTypeahead
               id="contacto-form/municipios"
-              onLoad={(municipios)=>{
+              onLoad={(municipios) => {
                 setMunicipios(municipios)
               }}
               filterBy={(municipio) => {
@@ -271,7 +271,7 @@ export const ContactoForm = (props: Props)=>{
         <Controller
           name="ubicacion"
           control={control}
-          render={({field, fieldState})=>{
+          render={({ field, fieldState }) => {
             return <>
               <LocationInput
                 isInvalid={!!fieldState.error}
@@ -303,9 +303,9 @@ export const ContactoForm = (props: Props)=>{
         <Form.Control.Feedback type="invalid">{formErrors.telefono2?.message}</Form.Control.Feedback>
       </Form.Group>
     </Form.Row>
-    {!props.onSubmit ? <Button>
-      {guardar.isLoading ? <Spinner animation="border" size="sm"/> : null}
-      <span className="ml-2 align-middle">Guardar</span>
+    {!props.onSubmit ? <Button type="submit">
+      {guardar.isLoading ? <Spinner className="mr-2" animation="border" size="sm" /> : null}
+      <span className="align-middle">Guardar</span>
     </Button> : null}
   </Form>
 }

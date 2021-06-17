@@ -20,7 +20,8 @@ export const ProveedoresFilterForm = (props: Props)=>{
   const {
     control,
     handleSubmit,
-    register
+    register,
+    reset
   } = useForm<Inputs>({
     defaultValues: {
       prestaciones: []
@@ -33,6 +34,7 @@ export const ProveedoresFilterForm = (props: Props)=>{
     if(!filter.tipos!.length) delete filter.tipos
     if(inputs.nombre) filter.nombre = inputs.nombre
     if(inputs.prestaciones.length) filter.prestacionesId = inputs.prestaciones.map(p=>p.id)
+    console.log(filter)
     props.onFilter(filter)
   })}>
     <Form.Row>
@@ -60,7 +62,7 @@ export const ProveedoresFilterForm = (props: Props)=>{
         <Controller
           control={control}
           name="prestaciones"
-          render={({field: {value, ...field}})=>{
+          render={({field: {ref, value, ...field}})=>{
             return <PrestacionesTypeahead
               id="proveedores-filter/prestaciones"
               multiple
@@ -76,7 +78,7 @@ export const ProveedoresFilterForm = (props: Props)=>{
         <Button type="submit">Aplicar</Button>
       </Col>
       <Col xs="auto">
-        <Button type="reset" variant="secondary">Limpiar</Button>
+        <Button variant="secondary" onClick={()=>reset()}>Limpiar</Button>
       </Col>
     </Form.Row>
   </Form>

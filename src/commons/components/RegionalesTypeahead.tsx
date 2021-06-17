@@ -25,7 +25,7 @@ export const RegionalesTypeahead = ({isInvalid, feedback, filterBy, ...props}: {
     if(buscar.data){
       props.onLoad && props.onLoad(buscar.data?.data)
     }
-  }, [buscar.data])
+  }, [buscar.data, props.onLoad])
 
   const options = useMemo(()=>{
     if(Array.isArray(buscar.data?.data)){

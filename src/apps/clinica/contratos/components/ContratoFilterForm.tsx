@@ -1,17 +1,17 @@
 import { Button, Col, Form } from "react-bootstrap"
 import { useForm } from "react-hook-form"
-import { ListaMoraFilter as Filter } from "../services"
+import { Filter } from "../services"
 
 type Inputs = {
-  numeroPatronal: string
-  nombre: string
+  desde: string
+  hasta: string
 }
 
 type Props = {
   onApply: (filter: Filter) => void
 }
 
-export const ListaMoraFilterForm = (props: Props)=>{
+export const ContratoFilterForm = (props: Props)=>{
   const {
     handleSubmit,
     register,
@@ -20,19 +20,23 @@ export const ListaMoraFilterForm = (props: Props)=>{
 
   return <Form onSubmit={handleSubmit((inputs)=>{
     const filter: Filter = {}
-    if(inputs.nombre) filter.nombre = inputs.nombre
-    if(inputs.numeroPatronal) filter.numeroPatronal = inputs.numeroPatronal
+    if(inputs.desde) filter.desde = inputs.desde
+    if(inputs.hasta) filter.hasta = inputs.hasta
     props.onApply(filter)
   })}>
     <Form.Row>
       <Form.Group as={Col} sm={4}>
-        <Form.Label>Nº Patronal</Form.Label>
-        <Form.Control {...register("numeroPatronal")} />
+        <Form.Label>Desde</Form.Label>
+        <Form.Control type="date" {...register("desde")} />
       </Form.Group>
-      <Form.Group as={Col} sm={8}>
+      <Form.Group as={Col} sm={4}>
+        <Form.Label>Hasta</Form.Label>
+        <Form.Control type="date" {...register("hasta")} />
+      </Form.Group>
+      {/* <Form.Group as={Col} sm={4}>
         <Form.Label>Nombre</Form.Label>
-        <Form.Control {...register("nombre")} />
-      </Form.Group>
+        <Form.Control {...register("estado")} />
+      </Form.Group> */}
     </Form.Row>
     <Form.Row>
       <Col xs="auto">
