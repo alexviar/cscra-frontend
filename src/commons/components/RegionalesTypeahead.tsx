@@ -39,6 +39,9 @@ export const RegionalesTypeahead = ({isInvalid, feedback, filterBy, ...props}: {
 
   return <InputGroup hasValidation>
     <Typeahead
+      clearButton
+      emptyLabel="No se encontraron resultados"
+      align="left"
       {...props}
       className={(buscar.isError || isInvalid) ? "is-invalid" : ""}
       isInvalid={buscar.isError || isInvalid}

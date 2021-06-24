@@ -50,6 +50,8 @@ export const ProvinciasTypeahead = ({
   return <InputGroup hasValidation>
     <Typeahead
       clearButton
+      emptyLabel="No se encontraron resultados"
+      align="left"
       {...props}
       className={(buscar.isError || isInvalid) ? "is-invalid" : ""}
       isInvalid={buscar.isError || isInvalid}

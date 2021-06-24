@@ -47,6 +47,8 @@ export const ProveedoresTypeahead = ({isInvalid, feedback, filter={}, filterBy, 
   return <InputGroup hasValidation>
     <Typeahead
       clearButton
+      emptyLabel="No se encontraron resultados"
+      align="left"
       {...props}
       disabled={!buscar.data}
       className={(buscar.isError || isInvalid) ? "is-invalid" : ""}

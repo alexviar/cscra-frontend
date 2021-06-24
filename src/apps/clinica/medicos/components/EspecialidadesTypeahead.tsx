@@ -78,13 +78,14 @@ export const EspecialidadesTypeahead = ({
   return <InputGroup hasValidation>
     <Typeahead
       clearButton
+      allowNew
+      emptyLabel="No se encontraron resultados"
+      align="left"
       {...props}
       onChange={_onChange}
-      allowNew
       //@ts-ignore
       newSelectionPrefix={<i>Crear nueva: </i>}
-      emptyLabel={"No se encontraron resultados"}
-      className={"is-invalid"}
+      className={(buscar.isError || isInvalid) ? "is-invalid" : ""}
       isInvalid={buscar.isError || isInvalid}
       filterBy={(especialidad, props)=>{
         return (!props.text || isMatch(especialidad.nombre, props)) 

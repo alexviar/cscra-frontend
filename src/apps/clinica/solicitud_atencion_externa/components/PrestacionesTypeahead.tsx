@@ -19,6 +19,7 @@ export const PrestacionesTypeahead = ({
   ...props
 }: {feedback?: string, onLoad?: (options: Prestacion[])=>void} & Omit<TypeaheadProps<Prestacion>, "isLoading" | "options">) => {
   const queryKey = "prestaciones.buscar"
+  console.log("AllowNew", props.allowNew)
 
   const queryClient = useQueryClient()
 
@@ -79,9 +80,11 @@ export const PrestacionesTypeahead = ({
   return <InputGroup hasValidation>
     <Typeahead
       clearButton
+      allowNew
+      emptyLabel="No se encontraron coincidencias"
+      align="left"
       {...props}
       onChange={_onChange}
-      allowNew
       //@ts-ignore
       newSelectionPrefix={<i>Crear nueva: </i>}
       className={(buscar.isError || isInvalid) ? "is-invalid" : ""}
@@ -96,7 +99,7 @@ export const PrestacionesTypeahead = ({
       labelKey="nombre"
     />
     <InputGroup.Append>
-      <Button variant={buscar.isError ? "outline-danger" : "outline-secondary"} onClick={()=>buscar.refetch()}><FaSync /></Button>
+      <Button disabled={!buscar.data || registrar.isLoading} variant={buscar.isError ? "outline-danger" : "outline-secondary"} onClick={()=>buscar.refetch()}><FaSync /></Button>
     </InputGroup.Append>
     <Form.Control.Feedback type="invalid">{
       (buscar.error as AxiosError)?.response?.data?.message || (buscar.error as AxiosError)?.message

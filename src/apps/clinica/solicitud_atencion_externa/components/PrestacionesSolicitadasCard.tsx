@@ -59,6 +59,7 @@ export const PrestacionesSolicitadasCard = () => {
                       return <>
                         <PrestacionesTypeahead
                           id={`solicitud-atencion-externa/prestacionesSolicitadas.${index}.prestacion`}
+                          allowNew={false}
                           className={!!fieldState.error ? "is-invalid" : ""}
                           isInvalid={!!fieldState.error}
                           filterBy={(prestacion) => {

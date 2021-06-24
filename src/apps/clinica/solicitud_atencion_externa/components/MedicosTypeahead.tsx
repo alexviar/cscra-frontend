@@ -46,6 +46,8 @@ export const MedicosTypeahead = ({isInvalid, feedback, filter, filterBy, ...prop
   return <InputGroup hasValidation>
     <Typeahead
       clearButton
+      emptyLabel="No se encontraron resultados"
+      align="left"
       {...props}
       disabled={!buscar.data}
       className={(buscar.isError || isInvalid) ? "is-invalid" : ""}
@@ -54,7 +56,7 @@ export const MedicosTypeahead = ({isInvalid, feedback, filter, filterBy, ...prop
         return (!props.text || isMatch(medico.nombreCompleto, props) || isMatch(medico.especialidad, props))
           && (!filterBy || typeof filterBy === "function" && filterBy(medico, props))
       }}
-      isLoading={buscar.isFetching}
+      isLoading={!buscar.data}
       options={options}
       labelKey="nombreCompleto"
       minLength={0}
@@ -66,7 +68,7 @@ export const MedicosTypeahead = ({isInvalid, feedback, filter, filterBy, ...prop
       }}
     />
     <InputGroup.Append>
-      <Button disabled={buscar.isFetching} variant={buscar.isError ? "outline-danger" : "outline-secondary"} onClick={()=>buscar.refetch()}><FaSync /></Button>
+      <Button disabled={!buscar.data} variant={buscar.isError ? "outline-danger" : "outline-secondary"} onClick={()=>buscar.refetch()}><FaSync /></Button>
     </InputGroup.Append>
     <Form.Control.Feedback type="invalid">{
       (buscar.error as AxiosError)?.response?.data?.message || (buscar.error as AxiosError)?.message
