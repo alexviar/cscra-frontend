@@ -1,17 +1,18 @@
 import { AxiosError } from "axios"
-import React, {useState, useRef, useEffect} from "react"
-import { Alert, Dropdown, Button, Form, Modal, Table, Spinner, Row, Col } from "react-bootstrap"
+import {useState, useRef, useEffect, useMemo} from "react"
+import { Button, Collapse, Form, Table, Spinner, Row, Col } from "react-bootstrap"
 import { Link } from "react-router-dom"
 import { useQuery } from "react-query"
 import { FaSync, FaFilter, FaUserPlus } from "react-icons/fa"
-import { RowOptions } from "./RowOptions"
 import { Page } from "../../../../commons/services"
 import { Pagination } from "../../../../commons/components"
 import { ProtectedContent } from "../../../../commons/auth/components"
 import { Permisos } from "../../../../commons/auth/constants"
 import { useLoggedUser } from "../../../../commons/auth/hooks"
-import { User, UserService, UserFilter } from "../services"
+import { UserService, UserFilter } from "../services"
 import { UsuarioPolicy } from "../policies"
+import { UserFilterForm } from "./UserFilterForm"
+import { RowOptions } from "./RowOptions"
 
 
 export const UserIndex = ()=>{
@@ -23,33 +24,37 @@ export const UserIndex = ()=>{
     size: 10
   })
 
-  const [filter, setFilter] = useState<UserFilter>({})
-
-  const [showFilterForm, setShowFilterForm] = useState(false)
-
-  const queryKey = "usuarios.buscar"
-  const buscar = useQuery(queryKey, ()=>{
+  const defaultFilter = useMemo(()=>{
+    const filter: UserFilter =  {}
     if(loggedUser.can(Permisos.VER_USUARIOS_DE_LA_MISMA_REGIONAL_QUE_EL_USUARIO, false)){
       filter.regionalId = loggedUser.regionalId
     }
+    return filter
+  }, [loggedUser])
+
+  const [filter, setFilter] = useState<UserFilter>(defaultFilter)
+
+  const [filterFormVisible, showFilterForm] = useState(false)
+
+  const queryKey = "usuarios.buscar"
+  const buscar = useQuery(queryKey, ()=>{
     return UserService.buscar(filter, page)
   }, {
     enabled: UsuarioPolicy.view(loggedUser),
-    // refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false
   })
 
   const total = buscar.data?.data?.meta?.total || 0
 
-  const didMountRef = useRef(false)
-  useEffect(()=>{
-    if(!didMountRef.current) {
-      didMountRef.current = true
-      return
-    }
-    if(UsuarioPolicy.view(loggedUser)) buscar.refetch()
-  }, [page, filter, loggedUser])
+  // const didMountRef = useRef(false)
+  // useEffect(()=>{
+  //   if(!didMountRef.current) {
+  //     didMountRef.current = true
+  //     return
+  //   }
+  //   if(UsuarioPolicy.view(loggedUser)) buscar.refetch()
+  // }, [page, filter, loggedUser])
 
   const renderRows = ()=>{
     if (buscar.isFetching) {
@@ -103,11 +108,11 @@ export const UserIndex = ()=>{
               buscar.refetch()
             }}><FaSync /></Button>
           </Col>
-          {/* <Col xs="auto" >
+          <Col xs="auto" >
             <Button onClick={()=>{
-              // showUserFilterForm(visible=>!visible)
+              showFilterForm(visible=>!visible)
             }}><FaFilter /></Button>
-          </Col> */}
+          </Col>
         </ProtectedContent>
         <ProtectedContent
           authorize={UsuarioPolicy.register}
@@ -126,32 +131,34 @@ export const UserIndex = ()=>{
     <ProtectedContent
       authorize={UsuarioPolicy.view}
     >
-      <Row>
-        <Col className="mb-2">
-          {/* <UserFilterForm onApply={(filter)=>{
-            setFilter(filter)
-          }} /> */}
-        </Col>
-        <Col className="mb-2" xs={"auto"}>
+      <Collapse in={filterFormVisible}>
+        <div>
+          <UserFilterForm onFilter={(filter)=>{
+            setFilter({...filter, ...defaultFilter})
+          }} />
+        </div>
+      </Collapse>
+      <div className="d-flex">
+        <div className="ml-auto mb-2">          
           <div className="d-flex flex-row flex-nowrap align-items-center">
-              <span>Mostrar</span>
-              <Form.Control className="mx-2" as="select" value={page.size} onChange={(e) => {
-                const value = e.target.value
-                setPage((page) => ({
-                  current: 1,
-                  size: parseInt(value)
-                }))
-              }}>
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={30}>30</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </Form.Control>
-              <span>filas</span>
+            <span>Mostrar</span>
+            <Form.Control className="mx-2" as="select" value={page.size} onChange={(e) => {
+              const value = e.target.value
+              setPage((page) => ({
+                ...page,
+                size: parseInt(value)
+              }))
+            }}>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={30}>30</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </Form.Control>
+            <span>filas</span>
           </div>
-        </Col>
-      </Row>
+        </div>
+      </div>
       <Table responsive>
         <thead>
           <tr>

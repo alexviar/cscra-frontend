@@ -5,7 +5,7 @@ import { RolService, Rol } from '../services'
 import { useQuery, useMutation } from 'react-query'
 import { FaEdit } from 'react-icons/fa'
 import { Link, useLocation, useParams } from 'react-router-dom'
-import { ImperativeModalRef, ImperativeModal } from '../../../../commons/components'
+import { useModal } from "../../../../commons/reusable-modal"
 
 
 export const RolView = ()=>{
@@ -16,7 +16,7 @@ export const RolView = ()=>{
     id: string
   }>()
 
-  const modalRef = useRef<ImperativeModalRef>(null)
+  const queryLoader = useModal("queryLoader")
 
   const cargar = useQuery(["cargar", id], ()=>{
     return RolService.cargar(parseInt(id))
@@ -26,7 +26,13 @@ export const RolView = ()=>{
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     onSuccess: () => {
-      modalRef.current?.show(false)
+      queryLoader.close()
+    },
+    onError: (error) => {
+      queryLoader.open({
+        state: "error",
+        error
+      })
     }
   })
 
@@ -34,7 +40,13 @@ export const RolView = ()=>{
     return RolService.eliminar(parseInt(id))
   }, {
     onSuccess: () => {
-      modalRef.current?.show(false)
+      queryLoader.close()
+    },
+    onError: (error) => {
+      queryLoader.open({
+        state: error,
+        error
+      })
     }
   })
 
@@ -42,51 +54,15 @@ export const RolView = ()=>{
 
   useEffect(()=>{
     if(cargar.isFetching){
-      modalRef.current?.show(true)
+      queryLoader.open({
+        state: "loading"
+      })
     }
   }, [cargar.isFetching])
 
-  const renderModalHeader = ()=>{
-    if(eliminar.isLoading) return "Eliminando"
-    if(cargar.isFetching) return "Cargando"
-    if(eliminar.isError || cargar.isError) return "Error"
-    return null
-  }
-
-  const renderModalBody = ()=>{
-    if(eliminar.isLoading || cargar.isFetching){
-      return <>
-        <Spinner animation="border" size="sm"></Spinner>
-        <span className="ml-2">Espere un momento</span>
-      </>
-    }
-    if(eliminar.isError){
-      return <Alert variant="danger">
-        Ocurrio un error mientras se eliminaba el rol
-      </Alert>
-    }
-    if(cargar.isError){
-      return <Alert variant="danger">
-        {(cargar.error as AxiosError).response?.status == 404 ?
-        "El rol no existe" :
-        "Ocurrio un error mientras se cargaban los datos del rol"}
-      </Alert>
-    }
-    return null
-  }
   
   return <>
     <h2 style={{fontSize: "1.75rem"}}>{rol?.name}</h2>
-
-    <ImperativeModal ref={modalRef}>
-      <Modal.Header>
-        {renderModalHeader()}
-      </Modal.Header>
-      <Modal.Body>
-        {renderModalBody()}
-      </Modal.Body>
-    </ImperativeModal>
-    
     <Table>
       <tbody>
         <tr>
@@ -130,7 +106,9 @@ export const RolView = ()=>{
       </Col>
       <Col xs="auto">
         <Button variant="danger" onClick={()=>{
-          modalRef.current?.show(true)
+          queryLoader.open({
+            state: "loading"
+          })
           eliminar.mutate()
         }}>
           {eliminar.isLoading ? <Spinner className="mr-2" animation="border" size="sm" /> : null}

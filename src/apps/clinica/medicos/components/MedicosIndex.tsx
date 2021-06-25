@@ -136,7 +136,7 @@ export const MedicosIndex = () => {
       <Collapse in={filterFormVisible}>
         <div>
           <MedicosFilterForm onFilter={(filter)=>{
-            setFilter(filter)
+            setFilter({...filter, ...getDefaultFilter()})
             setPage(page => ({...page, current: 1}))
           }} />
         </div>

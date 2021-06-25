@@ -5,12 +5,13 @@ import { Link } from "react-router-dom"
 import { useQuery, useMutation } from "react-query"
 import { FaSync, FaFilter, FaPlus } from "react-icons/fa"
 import { Page, PaginatedResponse } from "../../../../commons/services"
-// import { RolFilterForm } from "./RolFilterForm"
+import { RolFilterForm } from "./RolFilterForm"
 import { ImperativeModal, ImperativeModalRef, Pagination, VerticalEllipsisDropdownToggle } from "../../../../commons/components"
 import { ProtectedContent } from "../../../../commons/auth/components"
 import { useLoggedUser } from "../../../../commons/auth/hooks"
 import { Rol, RolService, RolFilter } from "../services"
 import { RolPolicy } from "../policies"
+import { RowOptions } from "./RowOptions"
 
 export const RolIndex = ()=>{
 
@@ -24,11 +25,8 @@ export const RolIndex = ()=>{
 
   const [filter, setFilter] = useState<RolFilter>({})
 
-  const [showFilterForm, setShowFilterForm] = useState(false)
-
-  const modalRef = useRef<ImperativeModalRef>(null)
-
-  const buscar = useQuery(["roles.buscar", page, filter], ()=>{
+  const queryKey = ["roles.buscar", page, filter]
+  const buscar = useQuery(queryKey, ()=>{
     return RolService.buscar(filter, page) as AxiosPromise<PaginatedResponse<Rol>>
   }, {
     enabled: RolPolicy.view(loggedUser),
@@ -39,40 +37,6 @@ export const RolIndex = ()=>{
       setTotal(meta.total)
     }
   })
-
-  const eliminar = useMutation((id: number)=>{
-    return RolService.eliminar(id)
-  }, {
-    onSuccess: ()=>{
-      buscar.refetch()
-      modalRef.current?.show(false)
-    }
-  })
-
-  const renderModalHeader = ()=>{
-    if(eliminar.isLoading){
-      return "Eliminando"
-    }
-    if(eliminar.isError){
-      return "Error"
-    }
-    return null
-  }
-
-  const renderModalBody = ()=>{
-    if(eliminar.isLoading){
-      return <>
-        <Spinner animation="border" size="sm"></Spinner>
-        <span className="ml-2">Espere un momento</span>
-      </>
-    }
-    if(eliminar.isError){
-      return <Alert variant="danger">
-        Ocurrio un error mientras se eliminaba el rol
-      </Alert>
-    }
-    return null
-  }
 
   const renderRows = ()=>{
     if (buscar.isFetching) {
@@ -106,43 +70,7 @@ export const RolIndex = ()=>{
           <td className="text-capitalize">{rol.name}</td>
           <td>{rol.description}</td>
           <td>
-            <Dropdown>
-              <Dropdown.Toggle as={VerticalEllipsisDropdownToggle}
-                variant="link" id={`dropdown-users-${rol.id}`}
-              />
-              <Dropdown.Menu>
-                <ProtectedContent
-                  authorize={RolPolicy.view}
-                >
-                  <Dropdown.Item as={Link} to={{
-                    pathname: `/iam/roles/${rol.id}`,
-                    state: {
-                      rol
-                    }
-                  }} >Ver</Dropdown.Item>
-                </ProtectedContent>
-                <ProtectedContent
-                  authorize={RolPolicy.edit}
-                >
-                  <Dropdown.Item as={Link} to={{
-                    pathname: `/iam/roles/${rol.id}/editar`,
-                    state: {
-                      rol
-                    }
-                  }}>Editar</Dropdown.Item>
-                </ProtectedContent>
-                <ProtectedContent
-                  authorize={RolPolicy.delete}
-                >
-                  <Dropdown.Item className="text-danger" onClick={()=>{
-                    if(window.confirm("Esta accion es irreversible, ¿Esta seguro de continuar?")){
-                      eliminar.mutate(rol.id)
-                      modalRef.current?.show(true)
-                    }
-                  }}>Eliminar</Dropdown.Item>
-                </ProtectedContent>
-              </Dropdown.Menu>
-            </Dropdown>
+            <RowOptions rol={rol} queryKey={queryKey} />
           </td>
         </tr>
       })
@@ -151,30 +79,8 @@ export const RolIndex = ()=>{
 
   return <div className="px-1">
     <h2 style={{fontSize: "1.75rem"}}>Roles</h2>
-    <ImperativeModal ref={modalRef}>
-      <Modal.Header>
-        {renderModalHeader()}
-      </Modal.Header>
-      <Modal.Body>
-        {renderModalBody()}
-      </Modal.Body>
-    </ImperativeModal>
     <div className="d-flex my-2">
       <Row className="ml-auto flex-nowrap" >
-        <ProtectedContent
-          authorize={RolPolicy.view}
-        >
-          <Col className={"pr-0"} xs="auto" >
-            <Button onClick={()=>{
-              buscar.refetch()
-            }}><FaSync /></Button>
-          </Col>
-          <Col className={"pr-0"} xs="auto" >
-            <Button onClick={()=>{
-              // showUserFilterForm(visible=>!visible)
-            }}><FaFilter /></Button>
-          </Col>
-        </ProtectedContent>
         <ProtectedContent
           authorize={RolPolicy.register}
         >
@@ -194,9 +100,9 @@ export const RolIndex = ()=>{
     >
       <Row>
         <Col className="mb-2">
-          {/* <UserFilterForm onApply={(filter)=>{
-            setFilter(filter)
-          }} /> */}
+          <RolFilterForm onSearch={(filter)=>{
+            setFilter({texto: filter})
+          }} />
         </Col>
         <Col className="mb-2" xs={"auto"}>
           <div className="d-flex flex-row flex-nowrap align-items-center">

@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Accordion, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap'
+import { Alert, Accordion, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap'
 import { useForm, Controller } from 'react-hook-form'
+import { AxiosError } from 'axios'
 import { useQuery, useMutation, useQueryClient } from 'react-query'
 import { useParams, useHistory } from "react-router-dom"
 import { RegionalesTypeahead } from "../../../../commons/components"
-import { Regional, RegionalesService } from "../../../../commons/services"
+import { Regional } from "../../../../commons/services"
 import { UserService, User, Rol } from "../services"
 import { RolesCheckList } from './RolesCheckList'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -55,7 +56,7 @@ export const UserForm = () => {
     informacionUsuario: yup.object().shape(id ? {
         roles: yup.array().label("roles").min(1, "Debe seleccionar al menos un rol")
       } : {
-      username: yup.string().label("usuario").required().matches(/[a-zA-Z0-9]{4,}/).min(4).max(16),
+      username: yup.string().label("usuario").required().min(6).max(16).matches(/[a-zA-Z0-9]*/),
       password: yup.string().label("contraseña").min(8).max(256).matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\/()=?\*])(?=.{8,})/,
         "La contraseña debe contener al menos un caracter en minuscula, uno en mayuscula, un número y uno de los siguientes caracter especial: !@#$%^&*")
         .required(),
@@ -160,6 +161,9 @@ export const UserForm = () => {
       guardar.mutate(data)
     })}>
       <h1 style={{ fontSize: "2rem" }}>Usuarios</h1>
+      {guardar.status == "error" || guardar.status == "success"  ? <Alert variant={guardar.isError ? "danger" : "success"}>
+        {guardar.isError ? (guardar.error as AxiosError).response?.data?.message || (guardar.error as AxiosError).message : "Guardado"}
+      </Alert> : null}
       <Accordion className="mb-2" defaultActiveKey="0">
         <Card>
           <Accordion.Toggle as={Card.Header} className={["text-light",

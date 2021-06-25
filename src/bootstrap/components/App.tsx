@@ -109,6 +109,7 @@ export default ()=>{
           </>} id="collasible-nav-dropdown">
           {/* <NavDropdown.Item href="#action/3.2">Cuenta</NavDropdown.Item>
           <NavDropdown.Item href="#action/3.3">Configuracion</NavDropdown.Item> */}
+          <NavDropdown.Item as={Link} to={`/iam/usuarios/cambiar-contrasena`}>Cambiar contraseña</NavDropdown.Item>
           <NavDropdown.Divider />
           <NavDropdown.Item as={Button} className="btn-link" onClick={()=>{
             modal.open({

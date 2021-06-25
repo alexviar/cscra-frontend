@@ -62,6 +62,9 @@ export const IamApp = ()=>{
       >
         <CambiarContrasenaForm />
       </ProtectedRoute>
+      <ProtectedRoute exact path={`${url}/usuarios/cambiar-contrasena`}>
+        <CambiarContrasenaForm />
+      </ProtectedRoute>
       <ProtectedRoute exact path={`${url}/usuarios/:id`}
         authorize={UsuarioPolicy.view}
       >

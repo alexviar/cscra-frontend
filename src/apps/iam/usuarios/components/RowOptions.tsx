@@ -56,7 +56,7 @@ export const RowOptions = ({user}: Props) => {
     }
   }, [cambiarEstado.status])
 
-  return <Dropdown>
+  return <Dropdown style={{position: "initial"}}>
     <Dropdown.Toggle as={VerticalEllipsisDropdownToggle}
       variant="link" id={`dropdown-users-${user.id}`}
     />

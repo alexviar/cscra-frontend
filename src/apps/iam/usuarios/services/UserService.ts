@@ -3,8 +3,11 @@ import { keysToUnderscore } from "../../../../commons/utils"
 import { Rol } from "../../roles/services"
 
 export type UserFilter = {
-  username?: string,
-  estado?: boolean,
+  ci?: string
+  ciComplemento?: string
+  nombreCompleto?: string
+  username?: string
+  estado?: boolean
   regionalId?: number
 }
 
@@ -62,7 +65,7 @@ export const UserService = {
   }) => {
     return apiClient.put(`/usuarios/${id}`, keysToUnderscore(data))
   },
-  cambiarContrasena: (id: number, data: {password: string}) => {
+  cambiarContrasena: (id: number, data: {oldPassword?: string, password: string}) => {
     return apiClient.put(`/usuarios/${id}/cambiar-contrasena`, keysToUnderscore(data))
   },
   bloquear: (id: number) => {
