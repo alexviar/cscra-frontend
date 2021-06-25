@@ -11,9 +11,14 @@ import reportWebVitals from './reportWebVitals';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 import configureStore from './bootstrap/store';
-// import './polyfills/String.ts'
 import './bootstrap/components/custom.scss';
 import './index.css';
+
+if (process.env.NODE_ENV === 'development') {
+  console.log("Starting worker")
+  const { worker } = require('./__mocks__/browser')
+  worker.start()
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
