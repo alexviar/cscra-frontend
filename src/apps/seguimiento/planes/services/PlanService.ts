@@ -62,6 +62,26 @@ class Service {
   }) {
     return apiClient.post('/planes', keysToUnderscore(payload))
   }
+  
+  cargarActividad(id: number, actividadId: number) {
+    return apiClient.get<Actividad>(`/planes/${id}/actividades/${actividadId}`)
+  }
+  
+  registrarAvance(id: number, actividadId: number, payload: {
+    avance: number,
+    informe: File,
+    observaciones: string
+  }) {
+    const formData = new FormData()
+    formData.append("avance", String(payload.avance))
+    formData.append("observaciones", payload.observaciones)
+    formData.append("informe", payload.informe)
+    return apiClient.post<Actividad>(`/planes/${id}/actividades/${actividadId}/registrar-avance`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  }
 }
 
 export const PlanService = new Service()

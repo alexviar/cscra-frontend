@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 import { Dropdown } from "react-bootstrap"
 import { useMutation, useQuery, useQueryClient, QueryKey } from "react-query"
-import { FaHistory, FaChartLine } from 'react-icons/fa'
+import { FaEye, FaChartLine } from 'react-icons/fa'
 import { Link, useParams, useLocation } from "react-router-dom"
 import { VerticalEllipsisDropdownToggle } from "../../../../commons/components"
 import { useModal } from "../../../../commons/reusable-modal"
@@ -27,22 +27,11 @@ export const ActividadRowOptions = ({actividad}: Props) => {
         authorize={()=>true}
       >
         <Dropdown.Item as={Link} to={{
-          pathname: `/seguimiento/planes/${planId}/actividades/${actividad.id}/grafico`,
-          state: {
-            background: location,
-            actividad
-          }
-        }} ><FaChartLine className="mr-2" />Ver gráfico</Dropdown.Item>
-      </ProtectedContent>
-      <ProtectedContent
-        authorize={()=>true}
-      >
-        <Dropdown.Item as={Link} to={{
           pathname: `/seguimiento/planes/${planId}/actividades/${actividad.id}`,
           state: {
             actividad
           }
-        }} ><FaHistory className="mr-2" />Historial</Dropdown.Item>
+        }} ><FaEye className="mr-2" />Detalles</Dropdown.Item>
       </ProtectedContent>
     </Dropdown.Menu>
   </Dropdown>

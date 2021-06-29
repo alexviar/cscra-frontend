@@ -1,34 +1,16 @@
-import React, {useMemo, useState} from 'react'
+import React, {useMemo, useEffect, ComponentProps} from 'react'
 import { Button, Card, Col, Form, Row, Table } from 'react-bootstrap'
 import { FaPlus } from 'react-icons/fa'
-import { useLocation, useParams } from 'react-router'
+import { useHistory, useParams } from 'react-router'
 import { Link } from 'react-router-dom'
 import { useQuery } from 'react-query'
 import moment from 'moment'
 import 'moment/locale/es'
+import { Line } from 'react-chartjs-2';
+import { useModal } from '../../../../commons/reusable-modal'
 import { PlanService, Actividad } from '../services'
 // import { HistorialRowOptions } from './HistorialRowOptions'
-import { Line } from 'react-chartjs-2';
 
-const data = {
-  labels: ['11 Jun', '2', '3', '4', '5', '2', '3', '4', '5', '2', '3', '4', '5', '2', '3', '4', '5', '2', '3', '4', '5', '2', '3', '4', '5', '2', '3', '4', '5', '2', '3', '4', '5', '6'],
-  datasets: [
-    {
-      label: 'Avance real',
-      data: [12, 19, 3, 5, 2, 3],
-      fill: false,
-      backgroundColor: 'rgb(255, 99, 132)',
-      borderColor: 'rgba(255, 99, 132, 0.2)',
-    },
-    {
-      label: 'Avance Esperado',
-      data: [0, 20, 40, 60, 80, 100],
-      fill: false,
-      backgroundColor: 'rgb(53, 54, 95)',
-      borderColor: 'rgba(53, 54, 95, 0.2)',
-    }
-  ],
-};
 
 const options = {
   scales: {
@@ -42,44 +24,83 @@ const options = {
   },
 };
 
+const LineChart = React.memo((props: ComponentProps<typeof Line>)=><Line {...props}/>)
+
 export const ActividadView = ()=>{
-  const location = useLocation<{actividad?: Actividad}>()
-  const { state } = location
+  const history = useHistory<{actividad: Actividad}>()
   const { planId, actividadId } = useParams<{
     planId: string
     actividadId: string
   }>()
 
-  const cargar = useQuery(["planes.cargar", planId], ()=>{
-    return PlanService.cargar(parseInt(planId))
+  const queryLoader = useModal('queryLoader')
+
+  const cargar = useQuery(["actividades.cargar", planId, actividadId], ()=>{
+    return PlanService.cargarActividad(parseInt(planId), parseInt(actividadId))
   }, {
-    enabled: !state?.actividad,
     refetchOnWindowFocus: false,
-    refetchOnReconnect: false
+    refetchOnReconnect: false,
+    onSuccess: ({data})=>{
+      queryLoader.close()
+      // history.replace(history.location.pathname, {
+      //   actividad: data
+      // })
+    },
+    onError: (error) => {
+      queryLoader.open({
+        state: 'error',
+        error
+      })
+    }
   })
-
-  const plan = cargar.data?.data
-  const actividad = state?.actividad || plan?.actividades?.find(a => a.id == parseInt(actividadId))
   
+  // useEffect(()=>{
+  //   if(history.location.state?.actividad)
+  // }, [history.location.state?.actividad])
 
-  const data = useMemo(()=> {
-    if (!actividad) return
+  const actividad = cargar.data?.data //|| history.location.state?.actividad
+  console.log(actividad)
 
+  const getLabels = () =>{
     const labels = [] as string[]
-    const inicio = moment(actividad.inicio)
-    const fin = moment(actividad.fin).add(1, 'days')
+    const inicio = moment(actividad!.inicio)
+    const fin = moment(actividad!.fin).add(1, 'days')
 
     while(inicio.isSameOrBefore(fin)){
       labels.push(inicio.format('Do MMM'))
       inicio.add(1, 'days')
     }
 
+    return labels
+  }
+
+  const getData = () =>{
+    const data = [0]
+    const inicio = moment(actividad!.inicio)
+    const fin = moment(actividad!.fin).add(1, 'days')
+
+    let last = 0
+    while(inicio.isSameOrBefore(fin)){
+      const avance = actividad!.historial.find(h=>h.fecha == inicio.format('YYYY-MM-DD'))
+      last = avance ? avance.actual : last
+      data.push(last)
+      inicio.add(1, 'days')
+    }
+
+    return data
+  }
+  
+  const data = useMemo(()=> {
+    if (!actividad) return
+    console.log('new data')
+    const labels = getLabels()
+
     return {
     labels: labels,
     datasets: [
         {
           label: 'Avance real',
-          data: [0, 12, 19, 3, 5, 10, 13],
+          data: getData(),
           fill: false,
           backgroundColor: 'rgb(255, 99, 132)',
           borderColor: 'rgba(255, 99, 132, 0.2)',
@@ -97,12 +118,18 @@ export const ActividadView = ()=>{
     }
   }, [actividad]);
 
-  console.log(data)
+  useEffect(()=>{
+    if(cargar.isFetching){
+      queryLoader.open({
+        state: 'loading'
+      })
+    }
+  }, [cargar.isFetching])
 
   return <>
     <h1 style={{fontSize: "1.5rem"}}>Actividad</h1>
-    <Row className="mb-3">
-      <Col>
+    <Row>
+      <Col className='mb-3'>
         <Card style={{height: '100%'}}>
           <Card.Header>Información</Card.Header>
           <Card.Body>
@@ -125,11 +152,11 @@ export const ActividadView = ()=>{
           </Card.Body>
         </Card>
       </Col>
-      <Col>
+      <Col className="mb-3">
         <Card style={{height: '100%'}}>
           <Card.Header>Gráfico</Card.Header>
           <Card.Body>
-            {data && <Line data={data} options={options} type="line" />}
+            {data && <LineChart data={data} options={options} type="line" />}
           </Card.Body>
         </Card>
       </Col>
@@ -139,9 +166,10 @@ export const ActividadView = ()=>{
       <Card.Body>
         <div className="d-flex mb-2">
           <Button className="ml-auto" as={Link} to={{
-            pathname: `${location.pathname}/registrar-avance`,
+            pathname: `/seguimiento/planes/${planId}/actividades/${actividadId}/registrar-avance`,
             state: {
-              background: location
+              background: history.location,
+              actividad
             }
           }}><FaPlus /></Button>
         </div>

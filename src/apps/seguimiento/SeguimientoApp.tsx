@@ -27,8 +27,6 @@ export const SeguimientoApp = ()=>{
 
   const background = location.state?.background || location
 
-  console.log(url, removeTrailingSlashes(url))
-
   return <SidebarLayout 
     sidebar={{
         header: <div className="d-flex justify-content-center"><Image src="/logo-lg.png" /></div>,
@@ -36,15 +34,15 @@ export const SeguimientoApp = ()=>{
     }}
   >
     <Switch location={background}>
-      <ProtectedRoute exact path={`${removeTrailingSlashes(url)}/planes`}
+      <ProtectedRoute exact path={`${url}/planes`}
       >
         <PlanIndex />
       </ProtectedRoute>
-      <ProtectedRoute exact path={[`${removeTrailingSlashes(url)}/planes/registrar`]}
+      <ProtectedRoute exact path={[`${url}/planes/registrar`]}
       >
         <PlanForm />
       </ProtectedRoute>
-      <ProtectedRoute exact path={`${url}/planes/:planId/actividades/:actividadId`}
+      <ProtectedRoute path={`${url}/planes/:planId/actividades/:actividadId`}
       >
         <ActividadView />
       </ProtectedRoute>
