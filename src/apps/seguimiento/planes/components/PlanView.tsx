@@ -10,8 +10,8 @@ import { ActividadRowOptions } from './ActividadRowOptions'
 
 export const PlanView = ()=>{
   const { state } = useLocation<{plan?: Plan}>()
-  const { id } = useParams<{
-    id: string
+  const { planId: id } = useParams<{
+    planId: string
   }>()
 
   const cargar = useQuery(["planes.cargar", id], ()=>{
@@ -44,7 +44,7 @@ export const PlanView = ()=>{
       </tbody>
     </Table>
     <h2 style={{fontSize: "1.25rem"}}>Actividades</h2>
-    <Table>
+    <Table responsive>
       <thead>
         <tr>
           <th>#</th>

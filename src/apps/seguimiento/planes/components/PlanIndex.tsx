@@ -87,7 +87,7 @@ export const PlanIndex = ()=>{
   }
 
   return <div className="px-1">
-    <h2 style={{fontSize: "1.75rem"}}>Usuarios</h2>
+    <h2 style={{fontSize: "1.75rem"}}>Planes</h2>
     <div className="d-flex my-2">
       <Form.Row className="ml-auto flex-nowrap" >
         <ProtectedContent

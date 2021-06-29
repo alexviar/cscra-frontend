@@ -1,2 +1,5 @@
 export * from './PlanIndex'
+export * from './PlanForm'
 export * from './PlanView'
+export * from './ActividadView'
+export * from './AvanceForm'

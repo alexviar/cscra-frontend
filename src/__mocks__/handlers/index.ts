@@ -1,5 +1,11 @@
+import { authHandlers } from './authHandlers'
 import { planHandlers } from './planHandlers'
+import { areaHandlers } from './areaHandlers'
+import { regionalHandlers } from './regionalHandlers'
 
 export const handlers = [
-  ...planHandlers
+  ...authHandlers,
+  ...planHandlers,
+  ...areaHandlers,
+  ...regionalHandlers
 ]

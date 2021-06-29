@@ -28,6 +28,18 @@
   color: #61dafb;
 } */
 
+dt {
+  position: relative;
+  margin-bottom: .5rem;
+}
+
+dt::after {
+  content: ':';
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
 input[type="date"]:read-only::-webkit-inner-spin-button,
 input[type="date"]:read-only::-webkit-calendar-picker-indicator {
     display: none;

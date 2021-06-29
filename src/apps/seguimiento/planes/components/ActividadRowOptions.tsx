@@ -38,7 +38,7 @@ export const ActividadRowOptions = ({actividad}: Props) => {
         authorize={()=>true}
       >
         <Dropdown.Item as={Link} to={{
-          pathname: `/seguimiento/planes/${planId}/actividades/${actividad.id}/historial`,
+          pathname: `/seguimiento/planes/${planId}/actividades/${actividad.id}`,
           state: {
             actividad
           }

@@ -11,5 +11,7 @@ export const planFactory = PlanFactory.define(({sequence, associations}) => ({
   id: sequence,
   objetivoGeneral: faker.hacker.phrase(),
   concluido: faker.datatype.boolean(),
+  regionalId: associations.regionalId || 1,
+  areaId: associations.areaId || 1,
   actividades: associations.actividades || actividadFactory.buildList(5)
 }))

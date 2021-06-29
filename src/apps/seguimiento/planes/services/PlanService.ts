@@ -8,8 +8,8 @@ export type PlanFilter = {
 export type Avance = {
   id: number
   fecha: string
-  avanceEsperado: number,
-  avanceReal: number
+  actual: number
+  esperado: number,
   informe: string
   observaciones: string
 }
@@ -28,6 +28,8 @@ export type Actividad = {
 
 export type Plan = {
   id: number
+  regionalId: number
+  areaId: number
   objetivoGeneral: string
   concluido: boolean
   actividades: Actividad[]
@@ -45,6 +47,20 @@ class Service {
 
   cargar(id: number) {
     return apiClient.get<Plan>(`/planes/${id}`)
+  }
+
+  registrar(payload: {
+    regionalId: number
+    areaId: number
+    objetivoGeneral: string
+    actividades: {
+      nombre: string
+      indicadores: string
+      inicio: string
+      fin: string
+    }[]
+  }) {
+    return apiClient.post('/planes', keysToUnderscore(payload))
   }
 }
 

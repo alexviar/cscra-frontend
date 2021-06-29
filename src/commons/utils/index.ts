@@ -1,6 +1,13 @@
 export * from "./latLngExpressionToString"
 export * from "./isMatch"
 
+/**
+ * @param {string} url
+ */
+export function removeTrailingSlashes(url: string) {
+  return url.replace(/\/+$/, ''); //Removes one or more trailing slashes from URL
+}
+
 export const toCamel = (s: string) => {
   return s.replace(/([-_][a-z])/ig, ($1) => {
     return $1.toUpperCase()

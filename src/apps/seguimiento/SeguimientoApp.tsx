@@ -5,10 +5,12 @@ import { FaTasks } from 'react-icons/fa'
 import SidebarLayout from '../../commons/components/layouts/SidebarLayout'
 import { ProtectedRoute } from '../../commons/auth/components'
 import { useLoggedUser } from '../../commons/auth/hooks'
-import { PlanIndex, PlanView } from './planes'
+import { removeTrailingSlashes } from '../../commons/utils'
+import { PlanIndex, PlanForm, PlanView, ActividadView, AvanceForm } from './planes'
 
 export const SeguimientoApp = ()=>{
-  const { url } = useRouteMatch()
+  const match = useRouteMatch()
+  const url = removeTrailingSlashes(match.url)
   const location = useLocation<any>()
   const loggedUser = useLoggedUser()
 
@@ -25,6 +27,8 @@ export const SeguimientoApp = ()=>{
 
   const background = location.state?.background || location
 
+  console.log(url, removeTrailingSlashes(url))
+
   return <SidebarLayout 
     sidebar={{
         header: <div className="d-flex justify-content-center"><Image src="/logo-lg.png" /></div>,
@@ -32,17 +36,17 @@ export const SeguimientoApp = ()=>{
     }}
   >
     <Switch location={background}>
-      <ProtectedRoute exact path={`${url}/planes`}
+      <ProtectedRoute exact path={`${removeTrailingSlashes(url)}/planes`}
       >
         <PlanIndex />
       </ProtectedRoute>
-      <ProtectedRoute exact path={[`${url}/planes/registrar`]}
+      <ProtectedRoute exact path={[`${removeTrailingSlashes(url)}/planes/registrar`]}
       >
-        <div>Registrar planes</div>
+        <PlanForm />
       </ProtectedRoute>
-      <ProtectedRoute exact path={`${url}/planes/:planId/actividades/:actividadId/historial`}
+      <ProtectedRoute exact path={`${url}/planes/:planId/actividades/:actividadId`}
       >
-        <div>Actividad</div>
+        <ActividadView />
       </ProtectedRoute>
       <ProtectedRoute exact path={`${url}/planes/:planId`}
       >
@@ -51,9 +55,7 @@ export const SeguimientoApp = ()=>{
     </Switch>
     <ProtectedRoute exact path={`${url}/planes/:planId/actividades/:actividadId/registrar-avance`}
     >
-      <Modal show={true}>
-        Registrar Avance
-      </Modal>
+      <AvanceForm />
     </ProtectedRoute>   
     <ProtectedRoute exact path={`${url}/planes/:planId/actividades/:actividadId/grafico`}
     >

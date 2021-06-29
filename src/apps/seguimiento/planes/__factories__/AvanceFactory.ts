@@ -10,8 +10,8 @@ class AvanceFactory extends Factory<Avance> {
 export const avanceFactory = AvanceFactory.define(({sequence, associations}) => ({
   id: sequence,
   fecha: faker.datatype.datetime().toISOString().split("T")[0],
-  avanceEsperado: faker.datatype.number(100),
-  avanceReal: faker.datatype.number(100),
+  esperado: faker.datatype.number(100),
+  actual: faker.datatype.number(100),
   informe: faker.internet.url(),
   observaciones: faker.lorem.sentence()
 }))

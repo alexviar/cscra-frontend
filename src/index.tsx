@@ -13,9 +13,11 @@ import { Provider } from 'react-redux';
 import configureStore from './bootstrap/store';
 import './bootstrap/components/custom.scss';
 import './index.css';
+import moment from 'moment'
+
+moment.locale('es')
 
 if (process.env.NODE_ENV === 'development') {
-  console.log("Starting worker")
   const { worker } = require('./__mocks__/browser')
   worker.start()
 }
