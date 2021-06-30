@@ -51,7 +51,7 @@ export const SeguimientoApp = ()=>{
         <PlanView />
       </ProtectedRoute>
     </Switch>
-    <ProtectedRoute exact path={`${url}/planes/:planId/actividades/:actividadId/registrar-avance`}
+    {/* <ProtectedRoute exact path={`${url}/planes/:planId/actividades/:actividadId/registrar-avance`}
     >
       <AvanceForm />
     </ProtectedRoute>   
@@ -60,7 +60,7 @@ export const SeguimientoApp = ()=>{
       <Modal show={true}>
         Grafico
       </Modal>
-    </ProtectedRoute>  
+    </ProtectedRoute>   */}
   </SidebarLayout>
 }
 

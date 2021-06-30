@@ -44,7 +44,7 @@ export const planHandlers = [
       const inicio = moment(actividad.inicio)
       const fin = moment(actividad.fin)
       const hoy = moment().startOf('day')
-      const avanceEsperado= Math.max(0, Math.min(1, moment.duration(hoy.diff(inicio)).asDays()/moment.duration(fin.diff(inicio)).asDays()))*100
+      const avanceEsperado= Math.round(Math.max(0, Math.min(1, moment.duration(hoy.diff(inicio)).asDays()/moment.duration(fin.diff(inicio)).asDays()))*10000)/100
 
       const entry = avanceFactory.build({
         fecha: moment().format("YYYY-MM-DD"),

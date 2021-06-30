@@ -1,4 +1,4 @@
-import React, {useMemo, useEffect, ComponentProps} from 'react'
+import React, { useEffect, useMemo, useState, ComponentProps } from 'react'
 import { Button, Card, Col, Form, Row, Table } from 'react-bootstrap'
 import { FaPlus } from 'react-icons/fa'
 import { useHistory, useParams } from 'react-router'
@@ -9,6 +9,7 @@ import 'moment/locale/es'
 import { Line } from 'react-chartjs-2';
 import { useModal } from '../../../../commons/reusable-modal'
 import { PlanService, Actividad } from '../services'
+import { AvanceForm } from './AvanceForm'
 // import { HistorialRowOptions } from './HistorialRowOptions'
 
 
@@ -35,16 +36,15 @@ export const ActividadView = ()=>{
 
   const queryLoader = useModal('queryLoader')
 
-  const cargar = useQuery(["actividades.cargar", planId, actividadId], ()=>{
+  const [avanceFormVisible, showAvanceForm] = useState(false)
+
+  const cargar = useQuery(["actividades.cargar", parseInt(planId), parseInt(actividadId)], ()=>{
     return PlanService.cargarActividad(parseInt(planId), parseInt(actividadId))
   }, {
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     onSuccess: ({data})=>{
       queryLoader.close()
-      // history.replace(history.location.pathname, {
-      //   actividad: data
-      // })
     },
     onError: (error) => {
       queryLoader.open({
@@ -53,38 +53,59 @@ export const ActividadView = ()=>{
       })
     }
   })
-  
-  // useEffect(()=>{
-  //   if(history.location.state?.actividad)
-  // }, [history.location.state?.actividad])
 
   const actividad = cargar.data?.data //|| history.location.state?.actividad
-  console.log(actividad)
 
   const getLabels = () =>{
     const labels = [] as string[]
-    const inicio = moment(actividad!.inicio)
-    const fin = moment(actividad!.fin).add(1, 'days')
+    const first = actividad!.historial.length && moment(actividad!.historial[0].fecha)
+    const last = actividad!.historial.length && moment(actividad!.historial[actividad!.historial.length-1].fecha)
+    const inicio = moment(actividad!.inicio).subtract(1, 'days')
+    const fin = moment(actividad!.fin)
 
-    while(inicio.isSameOrBefore(fin)){
-      labels.push(inicio.format('Do MMM'))
-      inicio.add(1, 'days')
+    const startDate = (!first || inicio.isBefore(first)) ? inicio :  first
+    const endDate = (!last || fin.isAfter(last)) ? fin : last
+
+    while(startDate.isSameOrBefore(endDate)){
+      labels.push(startDate.format('Do MMM'))
+      endDate.add(1, 'days')
     }
 
     return labels
   }
 
   const getData = () =>{
-    const data = [0]
-    const inicio = moment(actividad!.inicio)
-    const fin = moment(actividad!.fin).add(1, 'days')
+    const data = [] as number[]
+    const first = actividad!.historial.length && moment(actividad!.historial[0].fecha)
+    const last = actividad!.historial.length && moment(actividad!.historial[actividad!.historial.length-1].fecha)
+    const inicio = moment(actividad!.inicio).subtract(1, 'days')
+    let fin = moment(actividad!.fin)
+    const hoy = moment()
+    fin = hoy.isBefore(fin) ? hoy : fin
+
+    const startDate = (!first || inicio.isBefore(first)) ? inicio :  first
+    let endDate = (!last || fin.isAfter(last)) ? fin : last
 
     let last = 0
-    while(inicio.isSameOrBefore(fin)){
-      const avance = actividad!.historial.find(h=>h.fecha == inicio.format('YYYY-MM-DD'))
+    while(startDate.isSameOrBefore(endDate)){
+      const entries = actividad!.historial.filter(h=>h.fecha == startDate.format('YYYY-MM-DD'))
+      const avance = entries[entries.length-1]
       last = avance ? avance.actual : last
       data.push(last)
-      inicio.add(1, 'days')
+      startDate.add(1, 'days')
+    }
+
+    return data
+  }
+
+  const getIdealData = () => {
+    const data = [] as number
+    const inicio = moment(actividad!.inicio).startOf('day').subtract(1, 'days')
+    const fin = moment(actividad!.fin)
+    const duration = moment.duration(fin.diff(inicio)).asDays()
+
+    for(let i = 0; i < duration; i++) {
+      data.push(Math.round(10000*i/duration)/100)
     }
 
     return data
@@ -92,7 +113,6 @@ export const ActividadView = ()=>{
   
   const data = useMemo(()=> {
     if (!actividad) return
-    console.log('new data')
     const labels = getLabels()
 
     return {
@@ -107,9 +127,8 @@ export const ActividadView = ()=>{
         },
         {
           label: 'Avance Esperado',
-          data: labels.map((_,index)=>{
-            return (index/(labels.length-1))*100
-          }),
+          data: getIdealData(),
+          borderDash: [5, 5],
           fill: false,
           backgroundColor: 'rgb(53, 54, 95)',
           borderColor: 'rgba(53, 54, 95, 0.2)',
@@ -165,13 +184,16 @@ export const ActividadView = ()=>{
       <Card.Header>Historial de avance</Card.Header>
       <Card.Body>
         <div className="d-flex mb-2">
-          <Button className="ml-auto" as={Link} to={{
+          {/* <Button className="ml-auto" as={Link} to={{
             pathname: `/seguimiento/planes/${planId}/actividades/${actividadId}/registrar-avance`,
             state: {
               background: history.location,
               actividad
-            }
-          }}><FaPlus /></Button>
+            } */}
+          <Button className="ml-auto" onClick={()=>{
+            showAvanceForm(true)
+          }}
+          ><FaPlus /></Button>
         </div>
         <Table>
           <thead>
@@ -207,6 +229,7 @@ export const ActividadView = ()=>{
             })}
           </tbody>
         </Table>
+        {actividad && <AvanceForm actividad={actividad} show={avanceFormVisible} onHide={()=>showAvanceForm(false)} />}
       </Card.Body>
     </Card>
   </>
