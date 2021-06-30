@@ -6,12 +6,11 @@ import 'core-js/es/promise';
 import ReactDOM from 'react-dom';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary'
 import { Alert, Button } from 'react-bootstrap'
-import Routes from "./bootstrap/components/App"
+import App from "./bootstrap/components/App"
 import reportWebVitals from './reportWebVitals';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 import configureStore from './bootstrap/store';
-// import './polyfills/String.ts'
 import './bootstrap/components/custom.scss';
 import './index.css';
 
@@ -41,7 +40,7 @@ ReactDOM.render(
   >
     <QueryClientProvider client={queryClient}>
       <Provider store={configureStore()}>
-        <Routes />
+        <App />
       </Provider>
     </QueryClientProvider>
   </ErrorBoundary>,

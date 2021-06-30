@@ -1,4 +1,3 @@
-import React, {useEffect} from "react"
 import { Form, Button, Alert, Spinner } from 'react-bootstrap'
 import { useForm } from "react-hook-form"
 import { useMutation } from "react-query"
@@ -6,7 +5,6 @@ import { useDispatch, useSelector } from "react-redux"
 import { Redirect, useLocation } from "react-router"
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from "yup"
-import {authClient} from "../../../commons/services"
 import { getIsAuthenticated } from "../selectors/inputSelectors"
 import { AuthService } from "../services/AuthService"
 import "./auth.css"
