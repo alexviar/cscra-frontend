@@ -1,10 +1,10 @@
 import { Button, Col, Form, InputGroup, Modal, ModalProps, Spinner } from 'react-bootstrap'
 import { useForm } from 'react-hook-form'
-import { Redirect, useHistory, useParams } from 'react-router-dom'
-import { useMutation, useQueryClient } from 'react-query'
+import { useHistory, useParams } from 'react-router-dom'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import moment from 'moment'
+import { useRegistrarAvance } from '../queries'
 import { Actividad, PlanService } from '../services'
 
 type Inputs = {
@@ -25,11 +25,9 @@ type Props = {
 
 
 export const AvanceForm = ({actividad, ...modalProps}: Props ) => {
-  const history = useHistory<any>()
 
-  const {
-    planId
-  } = useParams<any>()
+  const params = useParams<any>()
+  const planId = parseInt(params.planId)
 
   const {
     formState,
@@ -42,50 +40,28 @@ export const AvanceForm = ({actividad, ...modalProps}: Props ) => {
 
   const formErrors = formState.errors
 
-  const queryClient = useQueryClient()
-  const guardar = useMutation((inputs: Inputs) => {
-    return PlanService.registrarAvance(planId, actividad.id, {
-      avance: inputs.avance,
-      observaciones: inputs.observaciones,
-      informe: inputs.informe[0]
-    })
-  }, {
-    onSuccess: ({data: entry}) => {
-      const queryKey = ["actividades.cargar", parseInt(planId), actividad.id]
-      queryClient.setQueryData(queryKey, (oldData: any)=>{
-        return {
-          ...oldData,
-          data: {
-            ...oldData.data,
-            historial: [
-              ...oldData.data.historial,
-              entry
-            ]
-          }
-        }
-      })
-      modalProps.onHide && modalProps.onHide()
+  const guardar = useRegistrarAvance({
+    onSuccess: () => {
       reset()
+      modalProps.onHide && modalProps.onHide()
     }
   })
-
-  // if(!history.location.state?.actividad){
-  //   return <Redirect to={history.location.pathname.substring(0, history.location.pathname.lastIndexOf('/'))} />
-  // }
-
-  // return <Modal centered show={!!history.location.state?.actividad} onHide={()=>{
-    //   if(history.location.state?.background){
-      //     history.goBack()
-      //   } else {
-        //     history.replace(history.location.pathname.substring(0, history.location.pathname.lastIndexOf('/')))
-        //   }
-        // }}>
+  
   return <Modal centered {...modalProps} >
     <Modal.Header>Registro de avance</Modal.Header>
     <Modal.Body>
       <Form id="avance-form" onSubmit={handleSubmit((values)=>{
-        console.log(values)
-        guardar.mutate(values)
+        guardar.mutate({
+          params: {
+            planId,
+            actividadId: actividad.id
+          },
+          data: {
+            avance: values.avance,
+            observaciones: values.observaciones,
+            informe: values.informe[0]
+          }
+        })
       })}>
         <Form.Row>
           <Form.Group as={Col} sm={6}>
@@ -97,7 +73,7 @@ export const AvanceForm = ({actividad, ...modalProps}: Props ) => {
             <InputGroup hasValidation>
               <Form.Control
                 disabled
-                value={actividad?.avanceEsperado} />
+                value={actividad.avanceEsperado} />
               <InputGroup.Append><InputGroup.Text>%</InputGroup.Text></InputGroup.Append>
               <Form.Control.Feedback type="invalid">{formErrors.avance?.message}</Form.Control.Feedback>
             </InputGroup>

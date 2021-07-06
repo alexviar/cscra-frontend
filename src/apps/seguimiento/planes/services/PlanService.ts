@@ -10,7 +10,7 @@ export type Avance = {
   fecha: string
   actual: number
   esperado: number,
-  informe: string
+  informeUrl: string
   observaciones: string
 }
 
@@ -31,6 +31,8 @@ export type Plan = {
   regionalId: number
   areaId: number
   objetivoGeneral: string
+  avance: number
+  avanceEsperado: number
   concluido: boolean
   actividades: Actividad[]
 }
@@ -76,7 +78,7 @@ class Service {
     formData.append("avance", String(payload.avance))
     formData.append("observaciones", payload.observaciones)
     formData.append("informe", payload.informe)
-    return apiClient.post<Actividad>(`/planes/${id}/actividades/${actividadId}/registrar-avance`, formData, {
+    return apiClient.post<Avance>(`/planes/${id}/actividades/${actividadId}/registrar-avance`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }

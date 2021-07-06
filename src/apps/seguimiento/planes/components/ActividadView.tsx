@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState, ComponentProps } from 'react'
 import { Button, Card, Col, Form, Row, Table } from 'react-bootstrap'
+import Skeleton from 'react-loading-skeleton'
 import { FaPlus } from 'react-icons/fa'
 import { useHistory, useParams } from 'react-router'
 import { Link } from 'react-router-dom'
@@ -8,9 +9,10 @@ import moment from 'moment'
 import 'moment/locale/es'
 import { Line } from 'react-chartjs-2';
 import { useModal } from '../../../../commons/reusable-modal'
-import { PlanService, Actividad } from '../services'
+import { Actividad } from '../services'
+import { useCargarActividad } from '../queries'
 import { AvanceForm } from './AvanceForm'
-// import { HistorialRowOptions } from './HistorialRowOptions'
+import { HistorialRowOptions } from './HistorialRowOptions'
 
 
 const options = {
@@ -18,8 +20,10 @@ const options = {
     yAxes: [
       {
         ticks: {
-          beginAtZero: true,
+          beginAtZero: true
         },
+        min: 0,
+        max: 100
       },
     ],
   },
@@ -29,46 +33,37 @@ const LineChart = React.memo((props: ComponentProps<typeof Line>)=><Line {...pro
 
 export const ActividadView = ()=>{
   const history = useHistory<{actividad: Actividad}>()
-  const { planId, actividadId } = useParams<{
+  const params = useParams<{
     planId: string
     actividadId: string
   }>()
+  const planId = parseInt(params.planId)
+  const actividadId = parseInt(params.actividadId)
 
-  const queryLoader = useModal('queryLoader')
+  // const queryLoader = useModal('queryLoader')
 
   const [avanceFormVisible, showAvanceForm] = useState(false)
 
-  const cargar = useQuery(["actividades.cargar", parseInt(planId), parseInt(actividadId)], ()=>{
-    return PlanService.cargarActividad(parseInt(planId), parseInt(actividadId))
-  }, {
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    onSuccess: ({data})=>{
-      queryLoader.close()
-    },
-    onError: (error) => {
-      queryLoader.open({
-        state: 'error',
-        error
-      })
-    }
-  })
+  const cargar = useCargarActividad(planId, actividadId)
+  const actividad = cargar.data
 
-  const actividad = cargar.data?.data //|| history.location.state?.actividad
+  console.log("Actividad", cargar)
 
-  const getLabels = () =>{
+  const getLabels = () => {
     const labels = [] as string[]
     const first = actividad!.historial.length && moment(actividad!.historial[0].fecha)
     const last = actividad!.historial.length && moment(actividad!.historial[actividad!.historial.length-1].fecha)
     const inicio = moment(actividad!.inicio).subtract(1, 'days')
-    const fin = moment(actividad!.fin)
+    let fin = moment(actividad!.fin)
+    const hoy = moment()
+    fin = hoy.isAfter(fin) ? hoy : fin
 
     const startDate = (!first || inicio.isBefore(first)) ? inicio :  first
     const endDate = (!last || fin.isAfter(last)) ? fin : last
 
     while(startDate.isSameOrBefore(endDate)){
       labels.push(startDate.format('Do MMM'))
-      endDate.add(1, 'days')
+      startDate.add(1, 'days')
     }
 
     return labels
@@ -86,26 +81,32 @@ export const ActividadView = ()=>{
     const startDate = (!first || inicio.isBefore(first)) ? inicio :  first
     let endDate = (!last || fin.isAfter(last)) ? fin : last
 
-    let last = 0
+    let ultimoAvance = 0
     while(startDate.isSameOrBefore(endDate)){
       const entries = actividad!.historial.filter(h=>h.fecha == startDate.format('YYYY-MM-DD'))
       const avance = entries[entries.length-1]
-      last = avance ? avance.actual : last
-      data.push(last)
+      ultimoAvance = avance ? avance.actual : ultimoAvance
+      data.push(ultimoAvance)
       startDate.add(1, 'days')
     }
-
     return data
   }
 
   const getIdealData = () => {
-    const data = [] as number
+    const data = [] as number[]
     const inicio = moment(actividad!.inicio).startOf('day').subtract(1, 'days')
     const fin = moment(actividad!.fin)
     const duration = moment.duration(fin.diff(inicio)).asDays()
+    const first = actividad!.historial.length && moment(actividad!.historial[0].fecha)
+    const last = actividad!.historial.length && moment(actividad!.historial[actividad!.historial.length-1].fecha)
 
-    for(let i = 0; i < duration; i++) {
-      data.push(Math.round(10000*i/duration)/100)
+    const date = ((!first || inicio.isBefore(first)) ? inicio :  first).clone()
+    const endDate = ((!last || fin.isAfter(last)) ? fin : last).clone()
+
+    while(date.isSameOrBefore(endDate)){
+      const day = moment.duration(date.diff(inicio)).asDays()
+      data.push(Math.min(100, Math.max(0, Math.round(10000*day/duration)/100)))
+      date.add(1, 'days')
     }
 
     return data
@@ -137,14 +138,6 @@ export const ActividadView = ()=>{
     }
   }, [actividad]);
 
-  useEffect(()=>{
-    if(cargar.isFetching){
-      queryLoader.open({
-        state: 'loading'
-      })
-    }
-  }, [cargar.isFetching])
-
   return <>
     <h1 style={{fontSize: "1.5rem"}}>Actividad</h1>
     <Row>
@@ -154,10 +147,10 @@ export const ActividadView = ()=>{
           <Card.Body>
             <dl className="form-row">
               <dt className="col-sm-3">Nombre</dt>
-              <dd className="col-sm-9">{actividad?.nombre}</dd>
+              <dd className="col-sm-9">{cargar.isFetching ? <Skeleton /> : actividad?.nombre}</dd>
               
               <dt className="col-sm-3">Fecha de inicio</dt>
-              <dd className="col-sm-9">{`${moment(actividad?.inicio).format('L')}`}</dd>
+              <dd className="col-sm-9">{cargar.isFetching ? <Skeleton /> : `${moment(actividad?.inicio).format('L')}`}</dd>
 
               <dt className="col-sm-3">Fecha de conclusión</dt>
               <dd className="col-sm-9">{`${moment(actividad?.fin).format('L')} (${moment(actividad?.fin).locale('es').fromNow()})`}</dd>
@@ -184,12 +177,6 @@ export const ActividadView = ()=>{
       <Card.Header>Historial de avance</Card.Header>
       <Card.Body>
         <div className="d-flex mb-2">
-          {/* <Button className="ml-auto" as={Link} to={{
-            pathname: `/seguimiento/planes/${planId}/actividades/${actividadId}/registrar-avance`,
-            state: {
-              background: history.location,
-              actividad
-            } */}
           <Button className="ml-auto" onClick={()=>{
             showAvanceForm(true)
           }}
@@ -202,7 +189,7 @@ export const ActividadView = ()=>{
               <th>Fecha</th>
               <th style={{width: 110}}>Avance</th>
               <th>Observaciones</th>
-              <th></th>
+              <th style={{width: 1}}></th>
             </tr>
           </thead>
           <tbody>
@@ -210,7 +197,7 @@ export const ActividadView = ()=>{
               return <tr key={avance.id}>
                 <th scope="row">{index + 1}</th>
                 <td className="text-nowrap">{moment(avance.fecha).format("L")}</td>
-                <td >
+                <td>
                   <div className="text-center">
                     <div>
                       {`${avance.actual}%/${avance.esperado}%`}
@@ -221,14 +208,20 @@ export const ActividadView = ()=>{
                         {`${avance.actual}%/${avance.esperado}%`}
                       </div>
                     </div>
-                  </div>              
+                  </div>
                 </td>
                 <td>{avance.observaciones}</td>
-                {/* <td><ActividadRowOptions actividad={actividad}/></td> */}
+                <td><HistorialRowOptions avance={avance}/></td>
               </tr>
             })}
           </tbody>
         </Table>
+        <div className="d-flex mb-2">
+          <Button className="ml-auto" onClick={()=>{
+            showAvanceForm(true)
+          }}
+          ><FaPlus /></Button>
+        </div>
         {actividad && <AvanceForm actividad={actividad} show={avanceFormVisible} onHide={()=>showAvanceForm(false)} />}
       </Card.Body>
     </Card>

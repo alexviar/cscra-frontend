@@ -10,7 +10,7 @@ import { MdApps } from 'react-icons/md'
 import { FaBell, FaUserCircle, FaBars, FaClinicMedical, FaCalendar } from 'react-icons/fa'
 import { useDispatch, useSelector } from 'react-redux'
 import { useQueryClient } from 'react-query'
-import { QueryProgressModal } from "../../commons/components"
+import { QueryProgressModal, PdfModal } from "../../commons/components"
 import { useModal } from "../../commons/reusable-modal"
 import {Login, ProtectedRoute} from "../../commons/auth/components"
 import { getUser } from "../../commons/auth/selectors/inputSelectors"
@@ -132,6 +132,7 @@ export default ()=>{
     </Navbar>
 
     <QueryProgressModal />
+    <PdfModal />
     <Suspense fallback={<div>Cargando...</div>}>
       <Switch>
         <ProtectedRoute path="/iam">

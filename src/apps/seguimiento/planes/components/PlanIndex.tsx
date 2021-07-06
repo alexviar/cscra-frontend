@@ -9,7 +9,7 @@ import { Pagination } from "../../../../commons/components"
 import { ProtectedContent } from "../../../../commons/auth/components"
 import { Permisos } from "../../../../commons/auth/constants"
 import { useLoggedUser } from "../../../../commons/auth/hooks"
-import { PlanService, PlanFilter } from "../services"
+import { PlanFilter, useBuscarPlanes } from "../queries"
 // import { UsuarioPolicy } from "../policies"
 // import { UserFilterForm } from "./UserFilterForm"
 import { RowOptions } from "./RowOptions"
@@ -36,14 +36,15 @@ export const PlanIndex = ()=>{
 
   const [filterFormVisible, showFilterForm] = useState(false)
 
-  const queryKey = "planes.buscar"
-  const buscar = useQuery(queryKey, ()=>{
-    return PlanService.buscar(filter, page)
-  }, {
-    // enabled: UsuarioPolicy.view(loggedUser),
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false
-  })
+  // const queryKey = "planes.buscar"
+  // const buscar = useQuery(queryKey, ()=>{
+  //   return PlanService.buscar(filter, page)
+  // }, {
+  //   // enabled: UsuarioPolicy.view(loggedUser),
+  //   refetchOnWindowFocus: false,
+  //   refetchOnReconnect: false
+  // })
+  const buscar = useBuscarPlanes(filter, page)
 
   const total = buscar.data?.data?.meta?.total || 0
 
@@ -79,7 +80,7 @@ export const PlanIndex = ()=>{
           <td>{plan.objetivoGeneral}</td>
           <td>{plan.concluido ? "Sí" : "No"}</td>
           <td>
-            <RowOptions plan={plan} queryKey={queryKey} />
+            <RowOptions plan={plan} queryKey={["planes.buscar", filter, page]} />
           </td>
         </tr>
       })

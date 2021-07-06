@@ -20,7 +20,7 @@ export const ActividadRowOptions = ({actividad}: Props) => {
 
   return <Dropdown style={{position: "initial"}}>
     <Dropdown.Toggle as={VerticalEllipsisDropdownToggle}
-      variant="link" id={`dropdown-planes-${actividad.id}`}
+      variant="link" id={`dropdown-actividades-${actividad.id}`}
     />
     <Dropdown.Menu>
       <ProtectedContent
