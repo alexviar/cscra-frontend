@@ -68,6 +68,16 @@ export const RowOptions = ({medico, queryKey}: Props) => {
     
     <Dropdown.Menu>
       <ProtectedContent
+        authorize={MedicoPolicy.view}
+      >
+        <Dropdown.Item as={Link} to={{
+          pathname: `/clinica/medicos/${medico.id}`,
+          state: {
+            medico
+          }
+        }} ><span className="align-middle">Ver</span></Dropdown.Item>
+      </ProtectedContent>
+      <ProtectedContent
         authorize={MedicoPolicy.edit}
       >
         <Dropdown.Item as={Link} to={{

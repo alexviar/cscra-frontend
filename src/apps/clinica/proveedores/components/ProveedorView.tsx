@@ -40,7 +40,6 @@ export const ProveedorView = ()=>{
     return ProveedoresService.cargar(parseInt(id))
   }, {
     enabled: !locationState?.proveedor,
-    refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     onSuccess: () => {

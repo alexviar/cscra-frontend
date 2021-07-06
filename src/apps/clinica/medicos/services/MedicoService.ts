@@ -19,6 +19,7 @@ export type Medico = {
   estado: number
   estadoText: string
   regionalId: number
+  regional: string
 }
 
 export type MedicoFilter = {
