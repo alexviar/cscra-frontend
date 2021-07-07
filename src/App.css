@@ -13,20 +13,48 @@
   }
 }
 
-/* .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+dt {
+  margin-bottom: .5rem;
 }
 
-.App-link {
-  color: #61dafb;
-} */
+dt::after {
+  content: ':';
+}
+
+@media (min-width: 576px) { 
+  dt {
+    position: relative
+  }
+  dt[class*="col-sm"]::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}
+
+@media (min-width: 768px) { 
+  dt[class*="col-md"]::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}
+
+@media (min-width: 992px) { 
+  dt[class*="col-lg"]::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}
+
+@media (min-width: 1200px) { 
+  dt[class*="col-xl"]::after  {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}
 
 input[type="date"]:read-only::-webkit-inner-spin-button,
 input[type="date"]:read-only::-webkit-calendar-picker-indicator {

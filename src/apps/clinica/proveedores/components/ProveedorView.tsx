@@ -63,45 +63,45 @@ export const ProveedorView = ()=>{
 
   const renderGeneralInfo = ()=>{
     return <dl className="form-row">
-        <dt className="col-sm-3">Tipo</dt>
-        <dd className="col-sm-9">{proveedor?.tipoId == 1 ? "Médico" : proveedor?.tipoId == 2 ? "Empresa" : null}</dd>
-        <dt className="col-sm-3" style={{width: '1px'}}>NIT</dt>
-        <dd className="col-sm-9">{proveedor?.nit}</dd>
+        <dt className="col-sm-3 col-md-2">Tipo</dt>
+        <dd className="col-sm-9 col-md-10">{proveedor?.tipoId == 1 ? "Médico" : proveedor?.tipoId == 2 ? "Empresa" : null}</dd>
+        <dt className="col-sm-3 col-md-2" style={{width: '1px'}}>NIT</dt>
+        <dd className="col-sm-9 col-md-10">{proveedor?.nit}</dd>
       {proveedor?.tipoId == 1 ? 
         <>
-            <dt className="col-sm-3" style={{width: 1}}>Carnet de identidad</dt>
-            <dd className="col-sm-9">{proveedor?.ciText}</dd>
-            <dt className="col-sm-3" style={{width: 1}}>Nombre</dt>
+            <dt className="col-sm-3 col-md-2" style={{width: 1}}>Carnet de identidad</dt>
+            <dd className="col-sm-9 col-md-10">{proveedor?.ciText}</dd>
+            <dt className="col-sm-3 col-md-2" style={{width: 1}}>Nombre</dt>
             <dd className="col-sm-9">{proveedor?.nombreCompleto}</dd>
-            <dt className="col-sm-3">Especialidad</dt>
-            <dd className="col-sm-9">{proveedor?.especialidad?.nombre}</dd>
+            <dt className="col-sm-3 col-md-2">Especialidad</dt>
+            <dd className="col-sm-9 col-md-10">{proveedor?.especialidad?.nombre}</dd>
         </> : (proveedor?.tipoId == 2 ? <>
-          <dt className="col-sm-3" style={{width: 1}}>Nombre</dt>
-          <dd className="col-sm-9">{proveedor?.nombre}</dd>
+          <dt className="col-sm-3 col-md-2" style={{width: 1}}>Nombre</dt>
+          <dd className="col-sm-9 col-md-10">{proveedor?.nombre}</dd>
         </> : null)}
-        <dt className="col-sm-3">Regional</dt>
-        <dd className="col-sm-9">{proveedor?.regional?.nombre}</dd>
+        <dt className="col-sm-3 col-md-2">Regional</dt>
+        <dd className="col-sm-9 col-md-10">{proveedor?.regional?.nombre}</dd>
     </dl>
   }
 
   const renderContactInfo = ()=>{
     if(!proveedor) return null
     const position: LatLngExpression = proveedor.ubicacion && [proveedor.ubicacion.latitud, proveedor.ubicacion.longitud]
-    return <Row className="py-3">
+    return <Row className="px-2 py-3">
       <Col sm={6}>
         <dl className="form-row">
-          <dt className="col-sm-3">Departamento</dt>
-          <dd className="col-sm-9">{proveedor.municipio?.provincia?.departamento?.nombre}</dd>
-          <dt className="col-sm-3">Provincia</dt>
-          <dd className="col-sm-9">{proveedor.municipio?.provincia?.nombre}</dd>
-          <dt className="col-sm-3">Municipio</dt>
-          <dd className="col-sm-9">{proveedor.municipio?.nombre}</dd>
-          <dt className="col-sm-3">Dirección</dt>
-          <dd className="col-sm-9">{proveedor.direccion}</dd>
-          <dt className="col-sm-3">Teléfono 1</dt>
-          <dd className="col-sm-9">{proveedor.telefono1}</dd>
-          <dt className="col-sm-3">Teléfono 2</dt>
-          <dd className="col-sm-9">{proveedor.telefono2}</dd>
+          <dt className="col-lg-5 col-xl-4">Departamento</dt>
+          <dd className="col-lg-7 col-xl-8">{proveedor.municipio?.provincia?.departamento?.nombre || 'No proporcionado'}</dd>
+          <dt className="col-lg-5 col-xl-4">Provincia</dt>
+          <dd className="col-lg-7 col-xl-8">{proveedor.municipio?.provincia?.nombre || 'No proporcionado'}</dd>
+          <dt className="col-lg-5 col-xl-4">Municipio</dt>
+          <dd className="col-lg-7 col-xl-8">{proveedor.municipio?.nombre || 'No proporcionado'}</dd>
+          <dt className="col-lg-5 col-xl-4">Dirección</dt>
+          <dd className="col-lg-7 col-xl-8">{proveedor.direccion || 'No proporcionado'}</dd>
+          <dt className="col-lg-5 col-xl-4">Teléfono 1</dt>
+          <dd className="col-lg-7 col-xl-8">{proveedor.telefono1 || 'No proporcionado'}</dd>
+          <dt className="col-lg-5 col-xl-4">Teléfono 2</dt>
+          <dd className="col-lg-7 col-xl-8">{proveedor.telefono2 || 'No proporcionado'}</dd>
         </dl>
       </Col>
       <Col sm={6}>
@@ -123,10 +123,7 @@ export const ProveedorView = ()=>{
   return <>
     <h2 style={{fontSize: "1.75rem"}}>Proveedor</h2>
     <div id="general-info">
-      <Table>
-        {renderGeneralInfo()}
-      </Table>
-      
+      {renderGeneralInfo()}      
       {proveedor ? <Form.Row>
         <ProtectedContent
           authorize={ProveedorPolicy.edit}
@@ -140,15 +137,6 @@ export const ProveedorView = ()=>{
             }} >Editar</Button>
           </Col>
         </ProtectedContent>
-        {/* <Col xs="auto">
-          <Button variant="danger" onClick={()=>{
-            modalRef.current?.show(true)
-            eliminar.mutate()
-          }}>
-            {eliminar.isLoading ? <Spinner className="mr-2" animation="border" size="sm" /> : null}
-            Eliminar
-          </Button>
-        </Col> */}
       </Form.Row> : null}
     </div>
     

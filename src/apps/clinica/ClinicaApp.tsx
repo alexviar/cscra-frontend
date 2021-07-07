@@ -38,14 +38,14 @@ export const ClinicaApp = ()=>{
     const items = [] as any[]
 
     if(ListaMoraPolicy.index(loggedUser)){
-        items.push(
-            {
-              id: "lista-mora",
-              path: `${url}/lista-mora`,
-              title: "Lista de mora",
-              icon: <FcDebt  />
-            }
-        )
+      items.push(
+        {
+          id: "lista-mora",
+          path: `${url}/lista-mora`,
+          title: "Lista de mora",
+          icon: <FcDebt  />
+        }
+      )
     }
 
     if(SolicitudATPolicy.index(loggedUser)) {
