@@ -6,6 +6,7 @@ import * as yup from 'yup'
 import moment from 'moment'
 import { useRegistrarAvance } from '../queries'
 import { Actividad, PlanService } from '../services'
+import { formatBytes } from '../../../../commons/utils'
 
 type Inputs = {
   avance: number
@@ -15,14 +16,25 @@ type Inputs = {
 
 const schema = yup.object().shape({
   avance: yup.number().emptyStringTo().required().min(0).max(100),
-  informe: yup.mixed(),
+  informe: yup.mixed().required("Debe proporcionar un archivo").test("max-size", "El archivo debe pesar menos de ${max}MB, tamaño actual ${size}", function(files?: FileList){
+    const file = files && files.length ? files[0] : null
+    console.log("Files", file?.type)
+    if(file && file.size < 1024*1024*1.5){
+      return this.createError({
+        params: {
+          max: 1.5,
+          size: formatBytes(file.size)
+        }
+      })
+    }
+    return true
+  }),
   observaciones: yup.string().emptyStringTo(null).nullable().notRequired().max(250)
 })
 
 type Props = {
   actividad: Actividad
 } & ModalProps
-
 
 export const AvanceForm = ({actividad, ...modalProps}: Props ) => {
 
@@ -39,6 +51,7 @@ export const AvanceForm = ({actividad, ...modalProps}: Props ) => {
   })
 
   const formErrors = formState.errors
+  console.log(formErrors)
 
   const guardar = useRegistrarAvance({
     onSuccess: () => {

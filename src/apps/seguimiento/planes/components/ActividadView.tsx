@@ -166,7 +166,7 @@ export const ActividadView = ()=>{
       </Col>
       <Col className="mb-3">
         <Card style={{height: '100%'}}>
-          <Card.Header>Gráfico</Card.Header>
+          <Card.Header>Progreso</Card.Header>
           <Card.Body>
             {data && <LineChart data={data} options={options} type="line" />}
           </Card.Body>
