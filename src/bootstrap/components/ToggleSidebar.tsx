@@ -2,7 +2,7 @@ import { useCallback } from "react"
 import { Button, Navbar } from "react-bootstrap"
 import { FaBars } from "react-icons/fa"
 import { useRouteMatch } from "react-router-dom"
-import { useDispatch } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
 
 export const ToggleSidebar = ()=>{
   const match = useRouteMatch(["/", "/login", "/forbbiden"])

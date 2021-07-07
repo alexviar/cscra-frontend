@@ -142,8 +142,8 @@ export const ContactoForm = (props: Props) => {
   useEffect(() => {
     if (proveedor && municipios.length && provincias.length && departamentos.length) {
       const municipio = municipios.find(m => m.id == proveedor?.municipioId)
-      const provincia = provincias.find(p => municipio?.id == p.id)
-      const departamento = departamentos.find(d => provincia?.id == d.id)
+      const provincia = provincias.find(p => p.id == municipio?.provinciaId)
+      const departamento = departamentos.find(d => d.id == provincia?.departamentoId )
       setValue("municipio", municipio ? [municipio] : [])
       setValue("provincia", provincia ? [provincia] : [])
       setValue("departamento", departamento ? [departamento] : [])

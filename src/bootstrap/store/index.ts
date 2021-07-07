@@ -4,7 +4,7 @@ import { combineReducers, createStore, applyMiddleware, compose } from "redux";
 import { watchUnauthorized } from "../../commons/auth/actions";
 import auth from "../../commons/auth/reducers";
 import { createModalReducer } from "../../commons/reusable-modal"
-import main from "../reducers";
+import { sidebarVisibility } from "../../commons/components/layouts/reducer";
 
 function* rootSaga() {
   yield all([
@@ -21,7 +21,7 @@ export const configureStore = () => {
       dm11Viewer: createModalReducer("dm11Viewer"),
       pdfModal: createModalReducer("pdfModal")
     }),
-    main,
+    sidebarVisibility,
     auth
   })
 
