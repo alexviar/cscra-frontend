@@ -62,39 +62,26 @@ export const ProveedorView = ()=>{
 
 
   const renderGeneralInfo = ()=>{
-    return <tbody>
-      <tr>
-        <th scope="row">Tipo</th>
-        <td >{proveedor?.tipoId == 1 ? "Médico" : proveedor?.tipoId == 2 ? "Empresa" : null}</td>
-      </tr>
-      <tr>
-        <th scope="row" style={{width: '1px'}}>NIT</th>
-        <td>{proveedor?.nit}</td>
-      </tr>
+    return <dl className="form-row">
+        <dt className="col-sm-3">Tipo</dt>
+        <dd className="col-sm-9">{proveedor?.tipoId == 1 ? "Médico" : proveedor?.tipoId == 2 ? "Empresa" : null}</dd>
+        <dt className="col-sm-3" style={{width: '1px'}}>NIT</dt>
+        <dd className="col-sm-9">{proveedor?.nit}</dd>
       {proveedor?.tipoId == 1 ? 
         <>
-          <tr>
-            <th scope="row" style={{width: 1}}>Carnet de identidad</th>
-            <td>{proveedor?.ciText}</td>
-          </tr>
-          <tr>
-            <th scope="row" style={{width: 1}}>Nombre</th>
-            <td>{proveedor?.nombreCompleto}</td>
-          </tr>
-          <tr>
-            <th scope="row">Especialidad</th>
-            <td>{proveedor?.especialidad?.nombre}</td>
-          </tr>
-        </> : (proveedor?.tipoId == 2 ?
-        <tr>
-          <th scope="row" style={{width: 1}}>Nombre</th>
-          <td>{proveedor?.nombre}</td>
-        </tr> : null)}
-      <tr>
-        <th scope="row">Regional</th>
-        <td>{proveedor?.regional?.nombre}</td>
-      </tr>
-    </tbody>
+            <dt className="col-sm-3" style={{width: 1}}>Carnet de identidad</dt>
+            <dd className="col-sm-9">{proveedor?.ciText}</dd>
+            <dt className="col-sm-3" style={{width: 1}}>Nombre</dt>
+            <dd className="col-sm-9">{proveedor?.nombreCompleto}</dd>
+            <dt className="col-sm-3">Especialidad</dt>
+            <dd className="col-sm-9">{proveedor?.especialidad?.nombre}</dd>
+        </> : (proveedor?.tipoId == 2 ? <>
+          <dt className="col-sm-3" style={{width: 1}}>Nombre</dt>
+          <dd className="col-sm-9">{proveedor?.nombre}</dd>
+        </> : null)}
+        <dt className="col-sm-3">Regional</dt>
+        <dd className="col-sm-9">{proveedor?.regional?.nombre}</dd>
+    </dl>
   }
 
   const renderContactInfo = ()=>{
@@ -118,7 +105,7 @@ export const ProveedorView = ()=>{
         </dl>
       </Col>
       <Col sm={6}>
-        <MapContainer center={position} zoom={14} dragging={false} scrollWheelZoom={false} doubleClickZoom={false} style={{minHeight: 200, heigth: "100%"}}>
+        <MapContainer center={position} zoom={14} dragging={false} scrollWheelZoom={false} doubleClickZoom={false} style={{minHeight: 200, height: "100%"}}>
           <TileLayer
             attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
