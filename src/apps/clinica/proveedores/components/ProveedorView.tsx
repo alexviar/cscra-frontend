@@ -3,8 +3,7 @@ import { Button, Col, Form, Row, Tab, Tabs, Table } from 'react-bootstrap'
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet"
 import L, { LatLngExpression } from "leaflet"
 import { Proveedor, ProveedoresService } from '../services'
-import { useQuery, useMutation } from 'react-query'
-import { FaEdit } from 'react-icons/fa'
+import { useQuery } from 'react-query'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { useLoggedUser, ProtectedContent } from "../../../../commons/auth"
 import { useModal } from "../../../../commons/reusable-modal"
@@ -102,38 +101,24 @@ export const ProveedorView = ()=>{
     if(!proveedor) return null
     const position: LatLngExpression = proveedor.ubicacion && [proveedor.ubicacion.latitud, proveedor.ubicacion.longitud]
     return <Row className="py-3">
-      <Col>
-        <Table>
-          <tbody>
-            <tr>
-              <th scope="row">Departamento</th>
-              <td >{proveedor.municipio?.provincia?.departamento?.nombre}</td>
-            </tr>
-            <tr>
-              <th scope="row">Provincia</th>
-              <td>{proveedor.municipio?.provincia?.nombre}</td>
-            </tr>
-            <tr>
-              <th scope="row">Municipio</th>
-              <td>{proveedor.municipio?.nombre}</td>
-            </tr>
-            <tr>
-              <th scope="row">Dirección</th>
-              <td>{proveedor.direccion}</td>
-            </tr>
-            <tr>
-              <th scope="row">Teléfono 1</th>
-              <td>{proveedor.telefono1}</td>
-            </tr>
-            <tr>
-              <th scope="row">Teléfono 2</th>
-              <td>{proveedor.telefono2}</td>
-            </tr>
-          </tbody>
-        </Table>
+      <Col sm={6}>
+        <dl className="form-row">
+          <dt className="col-sm-3">Departamento</dt>
+          <dd className="col-sm-9">{proveedor.municipio?.provincia?.departamento?.nombre}</dd>
+          <dt className="col-sm-3">Provincia</dt>
+          <dd className="col-sm-9">{proveedor.municipio?.provincia?.nombre}</dd>
+          <dt className="col-sm-3">Municipio</dt>
+          <dd className="col-sm-9">{proveedor.municipio?.nombre}</dd>
+          <dt className="col-sm-3">Dirección</dt>
+          <dd className="col-sm-9">{proveedor.direccion}</dd>
+          <dt className="col-sm-3">Teléfono 1</dt>
+          <dd className="col-sm-9">{proveedor.telefono1}</dd>
+          <dt className="col-sm-3">Teléfono 2</dt>
+          <dd className="col-sm-9">{proveedor.telefono2}</dd>
+        </dl>
       </Col>
-      <Col>
-        <MapContainer center={position} zoom={14} dragging={false} scrollWheelZoom={false} doubleClickZoom={false} style={{height: "100%"}}>
+      <Col sm={6}>
+        <MapContainer center={position} zoom={14} dragging={false} scrollWheelZoom={false} doubleClickZoom={false} style={{minHeight: 200, heigth: "100%"}}>
           <TileLayer
             attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

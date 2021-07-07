@@ -9,6 +9,7 @@ import { Alert, Button } from 'react-bootstrap'
 import App from "./bootstrap/components/App"
 import reportWebVitals from './reportWebVitals';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { BrowserRouter as Router } from 'react-router-dom'
 import { Provider } from 'react-redux';
 import configureStore from './bootstrap/store';
 import './bootstrap/components/custom.scss';
@@ -38,11 +39,13 @@ ReactDOM.render(
         window.location.reload()
     }}
   >
-    <QueryClientProvider client={queryClient}>
-      <Provider store={configureStore()}>
-        <App />
-      </Provider>
-    </QueryClientProvider>
+    <Router>
+      <QueryClientProvider client={queryClient}>
+        <Provider store={configureStore()}>
+          <App />
+        </Provider>
+      </QueryClientProvider>
+    </Router>
   </ErrorBoundary>,
   document.getElementById('root')
 );
