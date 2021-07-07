@@ -1,7 +1,6 @@
 import React, { useEffect, Suspense } from 'react';
 import { Button, Col, Image, Navbar, Nav, NavDropdown, Popover, OverlayTrigger, Row } from 'react-bootstrap'
 import {
-  BrowserRouter as Router,
   Switch,
   Route,
   Link,
@@ -52,10 +51,10 @@ export default ()=>{
     // apiClient.get('/user')
   }, [])
 
-  return <Router >
+  return <>
     <Navbar className="shadow-sm border-bottom" bg="primary" variant="dark" style={{zIndex: 1}}>
       <ToggleSidebar />
-      <Navbar.Brand >
+      <Navbar.Brand className="overflow-hidden text-truncate" as={Link} to="/" >
         <Image className="mx-1" width={32} src="/logo-sm.png" />
         Transferencias - DM11
       </Navbar.Brand>
@@ -127,7 +126,7 @@ export default ()=>{
               error
             }))
           }} >Cerrar sesión</NavDropdown.Item>
-        </NavDropdown> : <Nav.Link as={Link} to="/login">Iniciar sesión</Nav.Link>}
+        </NavDropdown> : <Nav.Link as={Link} className="text-nowrap" to="/login">Iniciar sesión</Nav.Link>}
       </Nav>
     </Navbar>
 
@@ -149,5 +148,5 @@ export default ()=>{
         </Route>
       </Switch>
     </Suspense>
-  </Router>
+  </>
 };

@@ -7,7 +7,7 @@ export const Dm11Viewer = ()=>{
   //@ts-ignore
   const modal = useModal("dm11Viewer")
 
-  return <BSModal centered show={modal.show} onHide={()=>{
+  return <BSModal centered show={modal.show} size="lg" onHide={()=>{
     modal.close()
   }}>
     <BSModal.Header>
@@ -18,25 +18,3 @@ export const Dm11Viewer = ()=>{
     </BSModal.Body>
   </BSModal>
 }
-
-// export const Dm11Viewer = forwardRef<Dm11ViewerRef, ModalProps>((props, ref) => {
-//   const [url, setUrl] = useState("")
-//   const imperativeModalRef = useRef<ImperativeModalRef>(null)
-//   // const [visible, show] = useState(false)
-
-//   useImperativeHandle(ref, ()=>({
-//     show: (visible: boolean)=>imperativeModalRef.current?.show(visible),
-//     setUrl
-//   }), [])
-//   return <ImperativeModal {...props} ref={imperativeModalRef}>
-//     <Modal.Header>
-//       D.M. - 11
-//     </Modal.Header>
-//     <Modal.Body>
-//       {url ? <PDFViewer url={url}/> : null}
-//     </Modal.Body>
-//     <Modal.Footer>
-
-//     </Modal.Footer>
-//   </ImperativeModal>
-// })

@@ -12,7 +12,7 @@ import { SolicitudAtencionExternaForm } from './solicitud_atencion_externa/compo
 import { SolicitudATPolicy } from './solicitud_atencion_externa/policies';
 import { EspecialidadesIndex, EspecialidadForm } from './especialidades/components';
 import { PrestacionesIndex, PrestacionForm } from './prestaciones/componentes';
-import { MedicosIndex, MedicosForm, MedicoPolicy } from './medicos';
+import { MedicosIndex, MedicoView, MedicosForm, MedicoPolicy } from './medicos';
 import { 
   ProveedoresIndex,
   ProveedorView,
@@ -120,6 +120,11 @@ export const ClinicaApp = ()=>{
         authorize={(user, path) => path == `${url}/medicos/registrar` ? MedicoPolicy.register(user) : MedicoPolicy.edit(user) }
       >
         <MedicosForm />
+      </ProtectedRoute>
+      <ProtectedRoute exact path={`${url}/medicos/:id`}
+        authorize={MedicoPolicy.view}
+      >
+        <MedicoView />
       </ProtectedRoute>
       <ProtectedRoute exact path={`${url}/proveedores`}
         authorize={ProveedorPolicy.index}

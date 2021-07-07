@@ -42,7 +42,7 @@ export const ContratoView = ()=>{
   return <>
     <h2 style={{fontSize: "1.75rem"}}>Contrato</h2>
     
-    <Table>
+    <Table responsive>
         <tbody>
           <tr>
             <th scope="row" style={{width:1}}>Inicio</th>

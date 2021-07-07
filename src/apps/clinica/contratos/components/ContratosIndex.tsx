@@ -144,7 +144,7 @@ export const ContratosIndex = () => {
           </div>
         </div>
       </div>
-      <Table>
+      <Table responsive>
         <thead>
           <tr>
             <th style={{width: 1}}>#</th>
@@ -152,7 +152,7 @@ export const ContratosIndex = () => {
             <th>Fin</th>
             <th>Extensión</th>
             <th>Estado</th>
-            <th></th>
+            <th style={{width: 1}}></th>
           </tr>
         </thead>
         <tbody>
