@@ -70,6 +70,7 @@ export const MedicosForm = ()=>{
     clearErrors,
     setError,
     setValue,
+    reset,
     watch,
     control,
     formState,
@@ -113,6 +114,7 @@ export const MedicosForm = ()=>{
     )
   }, {
     onSuccess: ()=>{
+      reset()
       queryClient.invalidateQueries("medicos.buscar")
       if(!continueRef.current)
         history.replace("/clinica/medicos", {

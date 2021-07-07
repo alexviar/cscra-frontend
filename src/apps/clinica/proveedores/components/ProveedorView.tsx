@@ -3,8 +3,7 @@ import { Button, Col, Form, Row, Tab, Tabs, Table } from 'react-bootstrap'
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet"
 import L, { LatLngExpression } from "leaflet"
 import { Proveedor, ProveedoresService } from '../services'
-import { useQuery, useMutation } from 'react-query'
-import { FaEdit } from 'react-icons/fa'
+import { useQuery } from 'react-query'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { useLoggedUser, ProtectedContent } from "../../../../commons/auth"
 import { useModal } from "../../../../commons/reusable-modal"
@@ -40,7 +39,6 @@ export const ProveedorView = ()=>{
     return ProveedoresService.cargar(parseInt(id))
   }, {
     enabled: !locationState?.proveedor,
-    refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     onSuccess: () => {
@@ -64,77 +62,50 @@ export const ProveedorView = ()=>{
 
 
   const renderGeneralInfo = ()=>{
-    return <tbody>
-      <tr>
-        <th scope="row">Tipo</th>
-        <td >{proveedor?.tipoId == 1 ? "Médico" : proveedor?.tipoId == 2 ? "Empresa" : null}</td>
-      </tr>
-      <tr>
-        <th scope="row" style={{width: '1px'}}>NIT</th>
-        <td>{proveedor?.nit}</td>
-      </tr>
+    return <dl className="form-row">
+        <dt className="col-sm-3 col-md-2">Tipo</dt>
+        <dd className="col-sm-9 col-md-10">{proveedor?.tipoId == 1 ? "Médico" : proveedor?.tipoId == 2 ? "Empresa" : null}</dd>
+        <dt className="col-sm-3 col-md-2" style={{width: '1px'}}>NIT</dt>
+        <dd className="col-sm-9 col-md-10">{proveedor?.nit}</dd>
       {proveedor?.tipoId == 1 ? 
         <>
-          <tr>
-            <th scope="row" style={{width: 1}}>Carnet de identidad</th>
-            <td>{proveedor?.ciText}</td>
-          </tr>
-          <tr>
-            <th scope="row" style={{width: 1}}>Nombre</th>
-            <td>{proveedor?.nombreCompleto}</td>
-          </tr>
-          <tr>
-            <th scope="row">Especialidad</th>
-            <td>{proveedor?.especialidad?.nombre}</td>
-          </tr>
-        </> : (proveedor?.tipoId == 2 ?
-        <tr>
-          <th scope="row" style={{width: 1}}>Nombre</th>
-          <td>{proveedor?.nombre}</td>
-        </tr> : null)}
-      <tr>
-        <th scope="row">Regional</th>
-        <td>{proveedor?.regional?.nombre}</td>
-      </tr>
-    </tbody>
+            <dt className="col-sm-3 col-md-2" style={{width: 1}}>Carnet de identidad</dt>
+            <dd className="col-sm-9 col-md-10">{proveedor?.ciText}</dd>
+            <dt className="col-sm-3 col-md-2" style={{width: 1}}>Nombre</dt>
+            <dd className="col-sm-9">{proveedor?.nombreCompleto}</dd>
+            <dt className="col-sm-3 col-md-2">Especialidad</dt>
+            <dd className="col-sm-9 col-md-10">{proveedor?.especialidad?.nombre}</dd>
+        </> : (proveedor?.tipoId == 2 ? <>
+          <dt className="col-sm-3 col-md-2" style={{width: 1}}>Nombre</dt>
+          <dd className="col-sm-9 col-md-10">{proveedor?.nombre}</dd>
+        </> : null)}
+        <dt className="col-sm-3 col-md-2">Regional</dt>
+        <dd className="col-sm-9 col-md-10">{proveedor?.regional?.nombre}</dd>
+    </dl>
   }
 
   const renderContactInfo = ()=>{
     if(!proveedor) return null
     const position: LatLngExpression = proveedor.ubicacion && [proveedor.ubicacion.latitud, proveedor.ubicacion.longitud]
-    return <Row className="py-3">
-      <Col>
-        <Table>
-          <tbody>
-            <tr>
-              <th scope="row">Departamento</th>
-              <td >{proveedor.municipio?.provincia?.departamento?.nombre}</td>
-            </tr>
-            <tr>
-              <th scope="row">Provincia</th>
-              <td>{proveedor.municipio?.provincia?.nombre}</td>
-            </tr>
-            <tr>
-              <th scope="row">Municipio</th>
-              <td>{proveedor.municipio?.nombre}</td>
-            </tr>
-            <tr>
-              <th scope="row">Dirección</th>
-              <td>{proveedor.direccion}</td>
-            </tr>
-            <tr>
-              <th scope="row">Teléfono 1</th>
-              <td>{proveedor.telefono1}</td>
-            </tr>
-            <tr>
-              <th scope="row">Teléfono 2</th>
-              <td>{proveedor.telefono2}</td>
-            </tr>
-          </tbody>
-        </Table>
+    return <Row className="px-2 py-3">
+      <Col sm={6}>
+        <dl className="form-row">
+          <dt className="col-lg-5 col-xl-4">Departamento</dt>
+          <dd className="col-lg-7 col-xl-8">{proveedor.municipio?.provincia?.departamento?.nombre || 'No proporcionado'}</dd>
+          <dt className="col-lg-5 col-xl-4">Provincia</dt>
+          <dd className="col-lg-7 col-xl-8">{proveedor.municipio?.provincia?.nombre || 'No proporcionado'}</dd>
+          <dt className="col-lg-5 col-xl-4">Municipio</dt>
+          <dd className="col-lg-7 col-xl-8">{proveedor.municipio?.nombre || 'No proporcionado'}</dd>
+          <dt className="col-lg-5 col-xl-4">Dirección</dt>
+          <dd className="col-lg-7 col-xl-8">{proveedor.direccion || 'No proporcionado'}</dd>
+          <dt className="col-lg-5 col-xl-4">Teléfono 1</dt>
+          <dd className="col-lg-7 col-xl-8">{proveedor.telefono1 || 'No proporcionado'}</dd>
+          <dt className="col-lg-5 col-xl-4">Teléfono 2</dt>
+          <dd className="col-lg-7 col-xl-8">{proveedor.telefono2 || 'No proporcionado'}</dd>
+        </dl>
       </Col>
-      <Col>
-        <MapContainer center={position} zoom={14} dragging={false} scrollWheelZoom={false} doubleClickZoom={false} style={{height: "100%"}}>
+      <Col sm={6}>
+        <MapContainer center={position} zoom={14} dragging={false} scrollWheelZoom={false} doubleClickZoom={false} style={{minHeight: 200, height: "100%"}}>
           <TileLayer
             attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -152,10 +123,7 @@ export const ProveedorView = ()=>{
   return <>
     <h2 style={{fontSize: "1.75rem"}}>Proveedor</h2>
     <div id="general-info">
-      <Table>
-        {renderGeneralInfo()}
-      </Table>
-      
+      {renderGeneralInfo()}      
       {proveedor ? <Form.Row>
         <ProtectedContent
           authorize={ProveedorPolicy.edit}
@@ -169,15 +137,6 @@ export const ProveedorView = ()=>{
             }} >Editar</Button>
           </Col>
         </ProtectedContent>
-        {/* <Col xs="auto">
-          <Button variant="danger" onClick={()=>{
-            modalRef.current?.show(true)
-            eliminar.mutate()
-          }}>
-            {eliminar.isLoading ? <Spinner className="mr-2" animation="border" size="sm" /> : null}
-            Eliminar
-          </Button>
-        </Col> */}
       </Form.Row> : null}
     </div>
     

@@ -1,6 +1,5 @@
 import React, { forwardRef, useImperativeHandle, useRef, useCallback } from "react"
 import { Button, Modal, ModalProps, Table } from "react-bootstrap"
-import { ImperativeModal, ImperativeModalRef } from "../../../../commons/components/ImperativeModal"
 import { nombreCompleto } from "../../../../commons/utils/nombreCompleto"
 import { Asegurado } from "../services"
 import { EstadosAfi } from "../utils"
@@ -11,10 +10,9 @@ type Props = Omit<ModalProps, "children"> & {
   title: string
 }
 
-
-export const AseguradoChooser = forwardRef<ImperativeModalRef, Props>((props, ref) => {
+export const AseguradoChooser = (props: Props) => {
   console.log(props.asegurados.length)
-  return <ImperativeModal {...props} ref={ref}>
+  return <Modal {...props} >
     <Modal.Header>
       {props.title}
     </Modal.Header>
@@ -46,5 +44,5 @@ export const AseguradoChooser = forwardRef<ImperativeModalRef, Props>((props, re
         </tbody>
       </Table>
     </Modal.Body>
-  </ImperativeModal>
-})
+  </Modal>
+}

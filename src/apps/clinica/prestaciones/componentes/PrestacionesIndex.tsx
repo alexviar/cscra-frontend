@@ -4,8 +4,6 @@ import { Dropdown, ButtonGroup, Button, Form, Table, Spinner, Row, Col } from "r
 import { FaSync, FaEdit, FaTrash } from "react-icons/fa"
 import { useQuery, useMutation } from "react-query"
 import { Link } from "react-router-dom"
-import { ImperativeModalRef } from "../../../../commons/components/ImperativeModal"
-import { ImportModal } from "../../../../commons/components/ImportModal"
 import Pagination from "../../../../commons/components/Pagination"
 import VerticalEllipsisDropdownToggle from "../../../../commons/components/VerticalEllipsisDropdownToggle"
 import { Page } from "../../../../commons/services/Page"
@@ -20,8 +18,6 @@ export const PrestacionesIndex = ()=>{
   })
 
   const [filter, setFilter] = useState("")
-
-  const importModalRef = useRef<ImperativeModalRef>(null)
 
   const buscar = useQuery(["prestaciones.buscar", page, filter], ()=>{
     return PrestacionesService.buscar(page, filter)
@@ -157,10 +153,5 @@ export const PrestacionesIndex = ()=>{
         onChange={(current) => setPage((page) => ({ ...page, current }))}
       />
     </div>
-    <ImportModal ref={importModalRef}
-      import={(file, options)=>{
-        return PrestacionesService.importar(file, options.separator, options.format)
-      }}
-    />
   </div>
 }
