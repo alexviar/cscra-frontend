@@ -9,7 +9,6 @@ import VerticalEllipsisDropdownToggle from "../../../../commons/components/Verti
 import { Page } from "../../../../commons/services/Page"
 import { EspecialidadesService } from "../services"
 import { EspecialidadesFilter } from "./EspecialidadesFilter"
-import { ImportarForm } from "./ImportarForm"
 
 export const EspecialidadesIndex = ()=>{
   const [total, setTotal] = useState(0)
@@ -25,7 +24,6 @@ export const EspecialidadesIndex = ()=>{
   const buscar = useQuery(["especialidades.buscar", page, filter], ()=>{
     return EspecialidadesService.buscar(filter, page)
   }, {
-    // refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
     onSuccess: ({data: {meta}}) => {
@@ -157,6 +155,5 @@ export const EspecialidadesIndex = ()=>{
           onChange={(current) => setPage((page) => ({ ...page, current }))}
         />
       </div> : null}
-    <ImportarForm modalRef={importModalRef} />
   </div>
 }

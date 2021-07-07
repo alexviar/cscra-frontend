@@ -1,12 +1,12 @@
-import { useMemo, useEffect, useRef } from 'react'
-import { Alert, Modal, Button, Form, Col, Spinner } from 'react-bootstrap'
+import { useMemo, useEffect } from 'react'
+import { Button, Form, Col, Spinner } from 'react-bootstrap'
 import { Controller, useForm } from 'react-hook-form'
 import { AxiosError } from 'axios'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
 import { useHistory, useParams } from 'react-router-dom'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { ImperativeModalRef, ImperativeModal } from '../../../../commons/components'
+import { useModal } from '../../../../commons/reusable-modal'
 import {PermisoCheckList} from './PermisoCheckList'
 import { RolService, Rol, Permiso } from '../services'
 
@@ -50,7 +50,7 @@ export const RolForm = () => {
     ignoreAuthorization?: boolean
   }>()
 
-  const modalRef = useRef<ImperativeModalRef>(null)
+  const queryLoader = useModal('queryLoader')
 
   const queryClient = useQueryClient()
 
@@ -87,7 +87,10 @@ export const RolForm = () => {
     },
     onError: (error: AxiosError) => {
       if(error!.response?.status !== 422)
-        modalRef.current?.show(true)
+        queryLoader.open({
+          state: "error",
+          error
+        })
     }
   })
   const rol = cargar.data?.data || history.location.state?.rol
@@ -105,7 +108,9 @@ export const RolForm = () => {
 
   useEffect(()=>{
     if(cargar.isFetching){
-      modalRef.current?.show(true)
+      queryLoader.open({
+        state: "loading",
+      })
     }
   }, [cargar.isFetching])
 
@@ -121,44 +126,11 @@ export const RolForm = () => {
     }
   }, [guardar.error])
 
-  console.log("Guardar State", formErrors)
-
-  const renderModalHeader = ()=>{
-    if(cargar.isFetching) return "Cargando"
-    if(cargar.isError || guardar.isError) return "Error"
-    return null
-  }
-
-  const renderModalBody = ()=>{
-    if(cargar.isFetching){
-      return <>
-        <Spinner animation="border" size="sm"></Spinner>
-        <span className="ml-2">Espere un momento</span>
-      </>
-    }
-    if(cargar.isError || guardar.isError){
-      return <Alert variant="danger">
-        {(cargar.error as AxiosError)?.response?.status == 404 ?
-        "El rol no existe" :
-        "Ocurrio un error mientras se cargaban los datos del rol"}
-      </Alert>
-    }
-    return null
-  }
-
   return <>
     <Form noValidate validated={formState.isValid} onSubmit={handleSubmit((data) => {
       guardar.mutate(data)
     })}>
       <h1 style={{ fontSize: "2rem" }}>Roles</h1>
-      <ImperativeModal ref={modalRef}>
-        <Modal.Header>
-          {renderModalHeader()}
-        </Modal.Header>
-        <Modal.Body>
-          {renderModalBody()}
-        </Modal.Body>
-      </ImperativeModal>
       <Form.Group>
         <Form.Label >Nombre</Form.Label>
         <Form.Control 

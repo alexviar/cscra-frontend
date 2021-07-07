@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useState } from "react"
 import { Accordion, Card, Form, Col, InputGroup, FormControl, Button, Spinner } from "react-bootstrap"
 import { useFormContext, useWatch, ValidationRule } from "react-hook-form"
 import { FaSearch } from "react-icons/fa"
@@ -6,7 +6,6 @@ import { useQuery } from "react-query"
 import { nombreCompleto } from "../../../../commons/utils/nombreCompleto"
 import { AseguradoChooser } from "./AseguradoChooser"
 import { Asegurado, AseguradosService } from "../services/AseguradosService"
-import { ImperativeModalRef } from "../../../../commons/components/ImperativeModal"
 import moment from 'moment';
 
 import { EstadosAfi, EstadosEmp } from "../utils"
@@ -72,7 +71,7 @@ export const AseguradoCard = () => {
     name: 'empleador', // without supply name will watch the entire form, or ['firstName', 'lastName'] to watch both
   });
 
-  const aseguradoChooserRef = useRef<ImperativeModalRef | null>(null)
+  const [aseguradoChooserVisible, showAseguradoChooser] = useState(false)
 
   const matricula = asegurado.matricula
   const buscar = useQuery(["asegurados.buscar", matricula], () => {
@@ -85,7 +84,7 @@ export const AseguradoCard = () => {
         onChange(asegurado)
       }
       else {
-        aseguradoChooserRef.current?.show(true)
+        showAseguradoChooser(true)
       }
     }
   })
@@ -189,7 +188,7 @@ export const AseguradoCard = () => {
                             onChange(asegurado)
                           }
                           else {
-                            aseguradoChooserRef.current?.show(true)
+                            showAseguradoChooser(true)
                           }
                         }
                       }
@@ -364,14 +363,15 @@ export const AseguradoCard = () => {
             <Form.Control.Feedback type="invalid">{formErrors.empleador?.aportes?.message}</Form.Control.Feedback>
           </Form.Group>
         </Form.Row>
-        <AseguradoChooser ref={aseguradoChooserRef}
+        <AseguradoChooser
           title="Resultados"
           asegurados={buscar.data?.data.records || []}
           onSelect={(asegurado: Asegurado) => {
             // asegurado.matricula = watch("asegurado.matricula")
             onChange(asegurado)
-            aseguradoChooserRef.current!.show(false)
+            showAseguradoChooser(false)
           }}
+          onHide={()=>showAseguradoChooser(false)}
         />
       </Card.Body>
     </Accordion.Collapse>
