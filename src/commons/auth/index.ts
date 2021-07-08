@@ -1,3 +1,3 @@
 export { ProtectedContent, ProtectedRoute } from "./components"
-export { useLoggedUser } from "./hooks"
+export * from "./hooks"
 export { Permisos } from "./constants"

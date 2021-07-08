@@ -1,10 +1,10 @@
 import { useMemo } from "react"
 import { useSelector } from "react-redux"
 import { getUser } from "../selectors/inputSelectors"
-import { User } from "../state"
+import { User as TUser } from "../state"
 
 export const useLoggedUser = () => {
-  const user = useSelector(getUser) as User
+  const user = useSelector(getUser) as TUser
 
   const loggedUser = useMemo(()=>{
     return user && {
@@ -27,3 +27,5 @@ export const useLoggedUser = () => {
 
   return loggedUser
 }
+
+export type User = ReturnType<typeof useLoggedUser>
