@@ -19,7 +19,7 @@ const schema = yup.object().shape({
   informe: yup.mixed().required("Debe proporcionar un archivo").test("max-size", "El archivo debe pesar menos de ${max}MB, tamaño actual ${size}", function(files?: FileList){
     const file = files && files.length ? files[0] : null
     console.log("Files", file?.type)
-    if(file && file.size < 1024*1024*1.5){
+    if(file && file.size > 1024*1024*1.5){
       return this.createError({
         params: {
           max: 1.5,
