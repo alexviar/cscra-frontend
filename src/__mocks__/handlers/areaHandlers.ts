@@ -8,7 +8,28 @@ const route = (path: string)=>{
 
 export const areaHandlers = [
   rest.get(route('areas'), (req, res, ctx) => {
-    const areas = areaFactory.buildList(10)
+    const areas = [
+      {
+        id: 1,
+        nombre: "Control de empresas"
+      },
+      {
+        id: 2,
+        nombre: "Afiliación"
+      },
+      {
+        id: 3,
+        nombre: "Sistemas"
+      },
+      {
+        id: 4,
+        nombre: "Contabilidad"
+      },
+      {
+        id: 5,
+        nombre: "Facturación"
+      }
+    ]//areaFactory.buildList(10)
     return res(
       // Respond with a 200 status code
       ctx.status(200),
