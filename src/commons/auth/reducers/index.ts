@@ -1,14 +1,10 @@
 import { combineReducers } from 'redux'
 import user from './user'
-import loadUser from './loadUser'
-import login from './login'
-import loginForm from './loginForm'
+import isAuthenticated from './isAuthenticated'
 
 export const AuthModuleReducer = combineReducers({
   user,
-  loadUser,
-  login,
-  loginForm
+  isAuthenticated
 })
 
 export type AuthModuleState = ReturnType<typeof AuthModuleReducer>

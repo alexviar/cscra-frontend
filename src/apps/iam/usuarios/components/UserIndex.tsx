@@ -1,5 +1,5 @@
 import { AxiosError } from "axios"
-import {useState, useRef, useEffect, useMemo} from "react"
+import {useState, useMemo} from "react"
 import { Button, Collapse, Form, Table, Spinner, Row, Col } from "react-bootstrap"
 import { Link } from "react-router-dom"
 import { useQuery } from "react-query"
@@ -26,7 +26,7 @@ export const UserIndex = ()=>{
 
   const defaultFilter = useMemo(()=>{
     const filter: UserFilter =  {}
-    if(loggedUser.can(Permisos.VER_USUARIOS_DE_LA_MISMA_REGIONAL_QUE_EL_USUARIO, false)){
+    if(loggedUser?.can(Permisos.VER_USUARIOS_DE_LA_MISMA_REGIONAL_QUE_EL_USUARIO, false)){
       filter.regionalId = loggedUser.regionalId
     }
     return filter

@@ -51,7 +51,7 @@ export const CambiarContrasenaForm = ()=>{
 
   const guardar = useMutation((data: Inputs) =>{
     const parsedId = parseInt(id)
-    return UserService.cambiarContrasena(isNaN(parsedId) ? user.id : parsedId, {
+    return UserService.cambiarContrasena(isNaN(parsedId) ? user!.id : parsedId, {
       password: data.password,
       oldPassword: data.oldPassword
     })

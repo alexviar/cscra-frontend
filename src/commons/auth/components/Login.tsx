@@ -1,4 +1,4 @@
-import { Form, Button, Alert, Spinner } from 'react-bootstrap'
+import { Form, Button, Alert, Image, Spinner } from 'react-bootstrap'
 import { useForm } from "react-hook-form"
 import { useMutation } from "react-query"
 import { useDispatch, useSelector } from "react-redux"
@@ -49,7 +49,9 @@ export const Login = () => {
     }
   })
 
-  return isAuthenticated ? 
+  console.log(isAuthenticated)
+
+  return isAuthenticated !== false ? 
     <Redirect to={state?.from || "/"} /> :
     <div className="auth-wrapper bg-light">
       <div className="auth-inner shadow-sm">
@@ -57,7 +59,8 @@ export const Login = () => {
             login.mutate(credentials)
           })}
         >
-          <h3 className="mb-2 text-center" style={{ fontSize: "1.25rem" }}>Iniciar Sesión en Galeno - DM11</h3>
+          <div className="d-flex justify-content-center"><Image src="/logo-lg.png" /></div>
+          <h3 className="mb-2 text-center" style={{ fontSize: "1.25rem" }}>Iniciar Sesión</h3>
           {login.isError ? <Alert variant="danger" >{login.error?.response?.message || login.error?.message}</Alert> :  null}
           <Form.Group>
             <Form.Label>Usuario</Form.Label>

@@ -134,7 +134,7 @@ export const UserForm = () => {
   const [regionales, setRegionales] = useState<Regional[]>([])
 
   const filterRegional = useCallback((regional: Regional)=>{
-    return loggedUser.can(Permisos.REGISTRAR_USUARIOS) ? true : (regional.id == loggedUser.regionalId)
+    return loggedUser?.can(Permisos.REGISTRAR_USUARIOS) ? true : (regional.id == loggedUser?.regionalId)
   }, [loggedUser])
 
   const user = cargar.data?.data || history.location.state?.user

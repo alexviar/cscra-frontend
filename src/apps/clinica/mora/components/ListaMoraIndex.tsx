@@ -21,8 +21,8 @@ export default () => {
   
   const getDefaultFilter = ()=>{
     const filter: Filter = {}
-    if(!loggedUser.can(Permisos.VER_LISTA_DE_MORA)){
-      if(loggedUser.can(Permisos.VER_LISTA_DE_MORA_REGIONAL)){
+    if(!loggedUser?.can(Permisos.VER_LISTA_DE_MORA)){
+      if(loggedUser?.can(Permisos.VER_LISTA_DE_MORA_REGIONAL)){
         filter.regionalId = loggedUser.regionalId;
       }
     }

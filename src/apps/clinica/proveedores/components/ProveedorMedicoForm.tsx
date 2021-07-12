@@ -222,10 +222,10 @@ export const ProveedorMedicoForm = ({proveedor, onSubmit}: Props)=>{
                   id="proveedor-form/regionales-typeahead"
                   onLoad={(regionales)=>setRegionales(regionales)}
                   filterBy={(regional) => {
-                    if(loggedUser.can(Permisos.REGISTRAR_PROVEEDORES)) return true 
-                    if(loggedUser.can(Permisos.REGISTRAR_PROVEEDORES_REGIONAL) && loggedUser.regionalId == regional.id) return true
-                    if(id && loggedUser.can(Permisos.EDITAR_PROVEEDORES)) return true
-                    if(id && loggedUser.can(Permisos.EDITAR_PROVEEDORES_REGIONAL) && loggedUser.regionalId == regional.id) return true
+                    if(loggedUser?.can(Permisos.REGISTRAR_PROVEEDORES)) return true 
+                    if(loggedUser?.can(Permisos.REGISTRAR_PROVEEDORES_REGIONAL) && loggedUser?.regionalId == regional.id) return true
+                    if(id && loggedUser?.can(Permisos.EDITAR_PROVEEDORES)) return true
+                    if(id && loggedUser?.can(Permisos.EDITAR_PROVEEDORES_REGIONAL) && loggedUser?.regionalId == regional.id) return true
                     return false
                   }}
                   feedback={fieldState.error?.message}

@@ -139,10 +139,10 @@ export const SolicitudAtencionExternaForm = ()=>{
     )
   }, {
     onSuccess: ({data: {urlDm11, regionalId}}) => {
-      if(loggedUser.canAny([
+      if(loggedUser?.canAny([
         Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA,
         Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA_REGISTRADO_POR
-      ]) || (loggedUser.can(Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL) && regionalId == loggedUser.regionalId)){
+      ]) || (loggedUser?.can(Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL) && regionalId == loggedUser?.regionalId)){
         dm11Viewer.open({url: urlDm11})
         reset()
       }
@@ -205,8 +205,8 @@ export const SolicitudAtencionExternaForm = ()=>{
                       return <RegionalesTypeahead
                         id="solicitud-atencion-externa-form/regionales"
                         filterBy={(regional: Regional)=>{
-                          return (loggedUser.can(Permisos.REGISTRAR_SOLICITUDES_DE_ATENCION_EXTERNA) ? true : 
-                            (regional.id == loggedUser.regionalId))
+                          return (loggedUser?.can(Permisos.REGISTRAR_SOLICITUDES_DE_ATENCION_EXTERNA) ? true : 
+                            (regional.id == loggedUser?.regionalId))
                         }}
                         isInvalid={!!fieldState.error}
                         feedback={fieldState.error?.message}

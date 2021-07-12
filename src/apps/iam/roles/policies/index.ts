@@ -1,30 +1,29 @@
-import { Permisos } from "../../../../commons/auth/constants";
-import { useLoggedUser } from "../../../../commons/auth/hooks";
+import { Permisos, User } from "../../../../commons/auth";
 
 export const RolPolicy = {
-  index: function(user: ReturnType<typeof useLoggedUser>){
-    return user.canAny([
+  index: function(user: User){
+    return user?.canAny([
       Permisos.VER_ROLES,
       Permisos.REGISTRAR_ROLES,
     ])
   },
-  register: function(user: ReturnType<typeof useLoggedUser>){
-    return user.canAny([
+  register: function(user: User){
+    return user?.canAny([
       Permisos.REGISTRAR_ROLES,
     ])
   },
-  edit: function(user: ReturnType<typeof useLoggedUser>){
-    return user.canAny([
+  edit: function(user: User){
+    return user?.canAny([
       Permisos.EDITAR_ROLES,
     ])
   },
-  view: function(user: ReturnType<typeof useLoggedUser>){
-    return user.canAny([
+  view: function(user: User){
+    return user?.canAny([
       Permisos.VER_ROLES,
     ])
   },
-  delete: function(user: ReturnType<typeof useLoggedUser>){
-    return user.canAny([
+  delete: function(user: User){
+    return user?.canAny([
       Permisos.ELIMINAR_ROLES
     ])
   },

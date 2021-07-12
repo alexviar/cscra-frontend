@@ -23,12 +23,12 @@ export const PlanIndex = ()=>{
 
   const defaultFilter = useMemo(()=>{
     const filter: PlanFilter =  {}
-    if(loggedUser.can([Permisos.VER_PLANES])) return filter
-    if(loggedUser.can([Permisos.VER_PLANES_REGIONAL])) {
-      filter.regionalId = loggedUser.regionalId
+    if(loggedUser?.can([Permisos.VER_PLANES])) return filter
+    if(loggedUser?.can([Permisos.VER_PLANES_REGIONAL])) {
+      filter.regionalId = loggedUser?.regionalId
       return filter
     }
-    filter.creadoPor = loggedUser.id
+    filter.creadoPor = loggedUser?.id
     return filter
   }, [loggedUser])
 

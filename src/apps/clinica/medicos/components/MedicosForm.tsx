@@ -87,8 +87,7 @@ export const MedicosForm = ()=>{
 
   const queryClient = useQueryClient()
 
-  const guardar = useMutation((inputs: Inputs)=>{    
-    console.log(inputs)
+  const guardar = useMutation((inputs: Inputs)=>{ 
     return id ? MedicosService.actualizar(parseInt(id), 
       parseInt(inputs.tipo),
       {
@@ -276,7 +275,7 @@ export const MedicosForm = ()=>{
               <RegionalesTypeahead
                 id="medicos-form/regionales-typeahead"
                 onLoad={(regionales)=>setRegionales(regionales)}
-                filterBy={(regional) => loggedUser.can(Permisos.REGISTRAR_MEDICOS) || loggedUser.regionalId == regional.id}
+                filterBy={(regional) => loggedUser?.can(Permisos.REGISTRAR_MEDICOS) || loggedUser?.regionalId == regional.id}
                 feedback={fieldState.error?.message}
                 className={fieldState.error ? "is-invalid" : ""}
                 isInvalid={!!fieldState.error}

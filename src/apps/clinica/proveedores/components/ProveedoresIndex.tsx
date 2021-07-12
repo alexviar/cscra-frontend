@@ -24,8 +24,8 @@ export const ProveedoresIndex = () => {
 
   const getDefaultFilter = () => {
     const filter: Filter = {}
-    if (!loggedUser.can(Permisos.VER_PROVEEDORES)) {
-      if (loggedUser.can(Permisos.VER_PROVEEDORES_REGIONAL)) {
+    if (!loggedUser?.can(Permisos.VER_PROVEEDORES)) {
+      if (loggedUser?.can(Permisos.VER_PROVEEDORES_REGIONAL)) {
         filter.regionalId = loggedUser.regionalId;
       }
     }

@@ -62,14 +62,9 @@ export const RowOptions = ({plan, queryKey}: Props) => {
     />
     <Dropdown.Menu>
       <ProtectedContent
-        authorize={PlanPolicy.ver}
+        authorize={(user) => PlanPolicy.ver(user, plan)}
       >
-        <Dropdown.Item as={Link} to={{
-          pathname: `/seguimiento/planes/${plan.id}`,
-          state: {
-            plan
-          }
-        }} ><FaEye className="mr-2"/> Detalles</Dropdown.Item>
+        <Dropdown.Item as={Link} to={`/seguimiento/planes/${plan.id}`}><FaEye className="mr-2"/> Detalles</Dropdown.Item>
       </ProtectedContent>
       {/* <ProtectedContent
         authorize={()=>true}

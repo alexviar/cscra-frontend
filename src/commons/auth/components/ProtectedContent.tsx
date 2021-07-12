@@ -1,11 +1,11 @@
 import { PropsWithChildren } from "react"
 // import { Permisos } from "../constants"
-import { useLoggedUser } from "../hooks"
+import { User, useLoggedUser } from "../hooks"
 
 // type Values<T> = T[keyof T] 
 
 type Props = {
-  authorize: (user: ReturnType<typeof useLoggedUser>) => boolean|undefined
+  authorize: (user: User) => boolean | undefined
 }
 
 export const ProtectedContent = ({
@@ -15,7 +15,7 @@ export const ProtectedContent = ({
   const loggedUser = useLoggedUser()
 
   const authorized = authorize(loggedUser)
-  if(authorized || authorized === undefined && loggedUser.isSuperUser()) return <>{children}</>
+  if(authorized || authorized === undefined && loggedUser?.isSuperUser()) return <>{children}</>
 
 
   return null

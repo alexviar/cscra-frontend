@@ -1,29 +1,29 @@
 import { Permisos } from "../../../../commons/auth/constants";
-import { useLoggedUser } from "../../../../commons/auth/hooks";
+import { User } from "../../../../commons/auth/hooks";
 
 export const ListaMoraPolicy = {
-  index: (user: ReturnType<typeof useLoggedUser>) => {
-    return user.canAny([
+  index: (user: User) => {
+    return user?.canAny([
       Permisos.VER_LISTA_DE_MORA,
       Permisos.VER_LISTA_DE_MORA_REGIONAL,
       Permisos.AGREGAR_EMPLEADOR_EN_MORA,
       Permisos.AGREGAR_EMPLEADOR_EN_MORA_DE_LA_MISMA_REGIONAL
     ])
   },
-  view: (user: ReturnType<typeof useLoggedUser>) => {
-    return user.canAny([
+  view: (user: User) => {
+    return user?.canAny([
       Permisos.VER_LISTA_DE_MORA,
       Permisos.VER_LISTA_DE_MORA_REGIONAL
     ])
   },
-  agregar: (user: ReturnType<typeof useLoggedUser>) => {
-    return user.canAny([
+  agregar: (user: User) => {
+    return user?.canAny([
       Permisos.AGREGAR_EMPLEADOR_EN_MORA,
       Permisos.AGREGAR_EMPLEADOR_EN_MORA_DE_LA_MISMA_REGIONAL
     ])
   },
-  quitar: (user: ReturnType<typeof useLoggedUser>) => {
-    return user.canAny([
+  quitar: (user: User) => {
+    return user?.canAny([
       Permisos.QUITAR_EMPLEADOR_EN_MORA,
       Permisos.QUITAR_EMPLEADOR_EN_MORA_DE_LA_MISMA_REGIONAL
     ])

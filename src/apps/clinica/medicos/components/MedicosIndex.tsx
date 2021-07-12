@@ -23,8 +23,8 @@ export const MedicosIndex = () => {
   
   const getDefaultFilter = ()=>{
     const filter: Filter = {  }
-    if(!loggedUser.can(Permisos.VER_MEDICOS)){
-      if(loggedUser.can(Permisos.VER_MEDICOS_REGIONAL)){
+    if(!loggedUser?.can(Permisos.VER_MEDICOS)){
+      if(loggedUser?.can(Permisos.VER_MEDICOS_REGIONAL)){
         filter.regionalId = loggedUser.regionalId;
       }
     }

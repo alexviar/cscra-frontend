@@ -21,16 +21,18 @@ export const useBuscarPlanes = (filter: PlanFilter, page: Page) => {
 export const useCargarPlan = (id: number, options?: UseQueryOptions<AxiosResponse<Plan>, AxiosError, Plan>) => {
   const queryClient = useQueryClient()
   const cargarQueryKey = ["planes.cargar", id]
-  if(queryClient.getQueryState(cargarQueryKey)?.status === 'idle'){
+  const queryState = queryClient.getQueryState(cargarQueryKey)
+  if(!queryState || queryState?.status === 'idle'){
     const planesQueryData = queryClient.getQueryData<any>(queryKey)
     const plan = planesQueryData?.data.records?.find((p: Plan) => p.id === id)
+    console.log("Cargar plan", plan)
     if(plan) {
       queryClient.setQueryData(cargarQueryKey, {
         data: plan
       })
     }
   }
-  const cargar = useQuery(["planes.cargar", id], ()=>{
+  const cargar = useQuery(cargarQueryKey, ()=>{
     return PlanService.cargar(id)
   }, {
     refetchOnWindowFocus: false,

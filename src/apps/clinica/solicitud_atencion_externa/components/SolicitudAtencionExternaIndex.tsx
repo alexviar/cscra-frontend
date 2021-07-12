@@ -1,9 +1,9 @@
-import { useRef, useState} from "react"
+import { useState} from "react"
 import { AxiosError } from "axios"
-import { Button, Col, Collapse, Dropdown, Form, Spinner, Table } from "react-bootstrap"
+import { Button, Col, Collapse, Form, Spinner, Table } from "react-bootstrap"
 import {FaFilter, FaPlus, FaSync} from "react-icons/fa"
 import { Link, useLocation } from "react-router-dom"
-import { useMutation, useQuery } from "react-query"
+import { useQuery } from "react-query"
 import { Pagination } from "../../../../commons/components"
 import { Page } from "../../../../commons/services/Page"
 import { SolicitudesAtencionExternaFilter as Filter, SolicitudesAtencionExternaService } from "../services/SolicitudesAtencionExternaService"
@@ -29,7 +29,7 @@ export const SolicitudAtencionExternaIndex = ()=>{
 
   const getDefaultFilter = ()=>{
     const filter: Filter = {}
-    if(!loggedUser.can(Permisos.VER_SOLICITUDES_DE_ATENCION_EXTERNA)){
+    if(!loggedUser?.can(Permisos.VER_SOLICITUDES_DE_ATENCION_EXTERNA)){
       if(loggedUser?.can(Permisos.VER_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL)){
         filter.regionalId = loggedUser.regionalId;
       }
@@ -46,12 +46,11 @@ export const SolicitudAtencionExternaIndex = ()=>{
     console.log({...filter, ...getDefaultFilter()})
     return SolicitudesAtencionExternaService.buscar({...filter, ...getDefaultFilter()}, page)
   }, {
-    enabled: loggedUser.canAny([
+    enabled: loggedUser?.canAny([
       Permisos.VER_SOLICITUDES_DE_ATENCION_EXTERNA,
       Permisos.VER_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL,
       Permisos.VER_SOLICITUDES_DE_ATENCION_EXTERNA_REGISTRADO_POR,
     ]),
-    // refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
     onSuccess: ({data: {meta}}) => {

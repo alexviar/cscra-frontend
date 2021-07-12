@@ -1,10 +1,9 @@
 import React from 'react'
-import { useSelector } from 'react-redux';
 import { Redirect, Route, RouteProps, useLocation } from 'react-router';
-import { useLoggedUser } from '../hooks';
+import { User, useLoggedUser } from '../hooks';
 
 type Props = {
-  authorize?: (user: ReturnType<typeof useLoggedUser>, url: string) => boolean
+  authorize?: (user: User, url: string) => boolean | undefined
   children: React.ReactNode
 } & RouteProps
 export const ProtectedRoute = ({ children, authorize, ...rest }: Props) => {
@@ -12,6 +11,10 @@ export const ProtectedRoute = ({ children, authorize, ...rest }: Props) => {
     ignoreAuthorization?: boolean
   }>()
   const loggedUser = useLoggedUser()
+
+  console.log(loggedUser)
+  
+  if(loggedUser === undefined) return null
 
   return (
     <Route
