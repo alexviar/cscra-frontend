@@ -68,8 +68,8 @@ export default ()=>{
               <Popover.Title className="text-center" as="h3">Aplicaciones</Popover.Title>
               <Popover.Content>
                 <Row>
-                  {/* <Col className="text-center"><Link to="/iam"><FaUserCircle className="d-block mx-auto" size={48} /><span >IAM</span></Link></Col>
-                  <Col className="text-center"><Link to="/clinica" ><FaClinicMedical className="d-block mx-auto"  size={48} /><span>Clínica</span></Link></Col> */}
+                  <Col className="text-center"><Link to="/iam"><FaUserCircle className="d-block mx-auto" size={48} /><span >IAM</span></Link></Col>
+                  <Col className="text-center"><Link to="/clinica" ><FaClinicMedical className="d-block mx-auto"  size={48} /><span>Clínica</span></Link></Col>
                   <Col className="text-center"><Link to="/seguimiento" ><FaCalendar className="d-block mx-auto"  size={48} /><span>Planes</span></Link></Col>
                </Row>
               </Popover.Content>
