@@ -1,6 +1,25 @@
 export * from "./latLngExpressionToString"
 export * from "./isMatch"
 
+export function formatBytes(bytes: number, decimals = 2) {
+  if (bytes === 0) return '0 Bytes';
+
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
+/**
+ * @param {string} url
+ */
+export function removeTrailingSlashes(url: string) {
+  return url.replace(/\/+$/, ''); //Removes one or more trailing slashes from URL
+}
+
 export const toCamel = (s: string) => {
   return s.replace(/([-_][a-z])/ig, ($1) => {
     return $1.toUpperCase()

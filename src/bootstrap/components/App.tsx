@@ -6,10 +6,10 @@ import {
   Link,
 } from "react-router-dom"
 import { MdApps } from 'react-icons/md'
-import { FaBell, FaUserCircle, FaBars, FaClinicMedical } from 'react-icons/fa'
+import { FaBell, FaUserCircle, FaBars, FaClinicMedical, FaCalendar } from 'react-icons/fa'
 import { useDispatch, useSelector } from 'react-redux'
 import { useQueryClient } from 'react-query'
-import { QueryProgressModal } from "../../commons/components"
+import { QueryProgressModal, PdfModal } from "../../commons/components"
 import { useModal } from "../../commons/reusable-modal"
 import {Login, ProtectedRoute} from "../../commons/auth/components"
 import { getUser } from "../../commons/auth/selectors/inputSelectors"
@@ -22,6 +22,7 @@ import '../../App.css';
 
 const IamApp = React.lazy(()=>import("../../apps/iam/IamApp"))
 const ClinicaApp = React.lazy(()=>import("../../apps/clinica/ClinicaApp"))
+const SeguimientoApp = React.lazy(()=>import("../../apps/seguimiento/SeguimientoApp"))
 
 export default ()=>{
   const dispatch = useDispatch()
@@ -67,8 +68,9 @@ export default ()=>{
               <Popover.Title className="text-center" as="h3">Aplicaciones</Popover.Title>
               <Popover.Content>
                 <Row>
-                  <Col className="text-center"><Link to="/iam"><FaUserCircle className="d-block mx-auto" size={48} /><span >IAM</span></Link></Col>
-                  <Col className="text-center"><Link to="/clinica" ><FaClinicMedical className="d-block mx-auto"  size={48} /><span>Clínica</span></Link></Col>
+                  {/* <Col className="text-center"><Link to="/iam"><FaUserCircle className="d-block mx-auto" size={48} /><span >IAM</span></Link></Col>
+                  <Col className="text-center"><Link to="/clinica" ><FaClinicMedical className="d-block mx-auto"  size={48} /><span>Clínica</span></Link></Col> */}
+                  <Col className="text-center"><Link to="/seguimiento" ><FaCalendar className="d-block mx-auto"  size={48} /><span>Planes</span></Link></Col>
                </Row>
               </Popover.Content>
             </Popover>
@@ -129,6 +131,7 @@ export default ()=>{
     </Navbar>
 
     <QueryProgressModal />
+    <PdfModal />
     <Suspense fallback={<div>Cargando...</div>}>
       <Switch>
         <ProtectedRoute path="/iam">
@@ -136,6 +139,9 @@ export default ()=>{
         </ProtectedRoute>
         <ProtectedRoute path="/clinica">
           <ClinicaApp />
+        </ProtectedRoute>
+        <ProtectedRoute path="/seguimiento">
+          <SeguimientoApp />
         </ProtectedRoute>
         <Route exact path="/login">
           <Login></Login>

@@ -1,0 +1,5 @@
+export const VER_PLANES = 'Ver planes'
+export const VER_PLANES_REGIONAL = 'Ver planes (regional)'
+export const REGISTRAR_PLANES = 'Registrar planes'
+// export const EDITAR_PLANES = 'Editar planes'
+// export const EDITAR_PLANES_REGIONAL = 'Editar planes (regional)'

@@ -12,14 +12,14 @@ function* rootSaga() {
   ])
 }
 
-
 //@ts-ignore
 const composeWithDevTools = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 export const configureStore = () => {
   const rootReducer = combineReducers({
     modals: combineReducers({
       queryLoader: createModalReducer("queryLoader"),
-      dm11Viewer: createModalReducer("dm11Viewer")
+      dm11Viewer: createModalReducer("dm11Viewer"),
+      pdfModal: createModalReducer("pdfModal")
     }),
     sidebarVisibility,
     auth

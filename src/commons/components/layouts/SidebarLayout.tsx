@@ -14,7 +14,6 @@ export const SidebarLayout = ({sidebar, children}: Props) => {
   const dispatch = useDispatch()
 
   const onClickOutsideHandler = React.useCallback((event: MouseEvent | TouchEvent)=>{
-    console.log(event.target)
     const toggle = document.querySelector('[aria-label="Toggle navigation"]')
     if(!toggle?.contains(event.target as Node)){
       dispatch({
