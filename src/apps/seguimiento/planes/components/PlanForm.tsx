@@ -25,7 +25,7 @@ type Inputs = {
 const schema = yup.object().shape({
   regional: yup.array().length(1, "Debe indicar una regional"),
   area: yup.array().length(1, "Debe indicar un area"),
-  objetivoGeneral: yup.string().label("objetivo general").required(),
+  objetivoGeneral: yup.string().label("objetivo general").required().max(150),
   actividades: yup.array().min(1, "Debe indicar al menos una actividad").of(yup.object().shape({
     nombre: yup.string().required().max(150).test("unique", "El nombre debe ser único", function (value, context) {
       //@ts-ignore
@@ -35,7 +35,7 @@ const schema = yup.object().shape({
     indicadores: yup.string().required().max(250),
     inicio: yup.date().emptyStringTo().typeError("No es una fecha valida").required(),
     fin: yup.date().emptyStringTo().typeError("No es una fecha valida").required().when('inicio', (inicio: any)=>{
-      return inicio && yup.date().min(moment(inicio).add(1, 'days').toDate(), "La fecha de fin debe ser mayor a la fecha de inicio")
+      return inicio && yup.date().min(moment(inicio)/*.add(1, 'days')*/.toDate(), "La fecha de fin debe ser mayor a la fecha de inicio")
     })
   }))
 })
@@ -199,6 +199,16 @@ export const PlanForm = () => {
           })
         }
       </tbody>
+      <tfoot>
+        <tr>
+          <td colSpan={100}>
+            <div className={formErrors.actividades ? "is-invalid" : ""}></div>
+            <Form.Control.Feedback type="invalid">{
+              //@ts-ignore
+              formErrors.actividades?.message}</Form.Control.Feedback>
+          </td>
+        </tr>
+      </tfoot>
     </Table>
     <Form.Row>
         <Col>

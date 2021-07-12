@@ -3,14 +3,13 @@ import { Button, Card, Col, Form, Row, Table } from 'react-bootstrap'
 import Skeleton from 'react-loading-skeleton'
 import { FaPlus } from 'react-icons/fa'
 import { useHistory, useParams } from 'react-router'
-import { Link } from 'react-router-dom'
-import { useQuery } from 'react-query'
 import moment from 'moment'
-import 'moment/locale/es'
 import { Line } from 'react-chartjs-2';
 import { useModal } from '../../../../commons/reusable-modal'
+import { ProtectedContent } from '../../../../commons/auth'
+import { PlanPolicy } from '../policies'
 import { Actividad } from '../services'
-import { useCargarActividad } from '../queries'
+import { useCargarPlan } from '../queries'
 import { AvanceForm } from './AvanceForm'
 import { HistorialRowOptions } from './HistorialRowOptions'
 
@@ -44,22 +43,33 @@ export const ActividadView = ()=>{
 
   const [avanceFormVisible, showAvanceForm] = useState(false)
 
-  const cargar = useCargarActividad(planId, actividadId)
-  const actividad = cargar.data
+  const cargar = useCargarPlan(planId)
+  // const cargar = useCargarActividad(planId, actividadId)
+  const plan = cargar.data
+  const actividad =  plan?.actividades?.find(a => a.id == actividadId)
 
   console.log("Actividad", cargar)
 
   const getLabels = () => {
     const labels = [] as string[]
     const first = actividad!.historial.length && moment(actividad!.historial[0].fecha)
-    const last = actividad!.historial.length && moment(actividad!.historial[actividad!.historial.length-1].fecha)
+    const last = actividad!.historial.length ? moment(actividad!.historial[actividad!.historial.length-1].fecha) : null
     const inicio = moment(actividad!.inicio).subtract(1, 'days')
-    let fin = moment(actividad!.fin)
+    const fin = moment(actividad!.fin)
+    const conclusion = actividad!.conclusion ? moment(actividad!.conclusion) : null
     const hoy = moment()
-    fin = hoy.isAfter(fin) ? hoy : fin
 
     const startDate = (!first || inicio.isBefore(first)) ? inicio :  first
-    const endDate = (!last || fin.isAfter(last)) ? fin : last
+    let endDate = fin;
+    if(conclusion && fin.isBefore(conclusion)){
+      endDate = conclusion
+    }
+    if(last && endDate.isBefore(last)){
+      endDate = last
+    }
+    if(endDate.isBefore(hoy)){
+      endDate = hoy
+    }
 
     while(startDate.isSameOrBefore(endDate)){
       labels.push(startDate.format('Do MMM'))
@@ -71,15 +81,30 @@ export const ActividadView = ()=>{
 
   const getData = () =>{
     const data = [] as number[]
-    const first = actividad!.historial.length && moment(actividad!.historial[0].fecha)
-    const last = actividad!.historial.length && moment(actividad!.historial[actividad!.historial.length-1].fecha)
+    const first = actividad!.historial.length ? moment(actividad!.historial[0].fecha) : null
+    const last = actividad!.historial.length ? moment(actividad!.historial[actividad!.historial.length-1].fecha) : null
     const inicio = moment(actividad!.inicio).subtract(1, 'days')
-    let fin = moment(actividad!.fin)
+    const fin = moment(actividad!.fin)
+    const conclusion = actividad!.conclusion ? moment(actividad!.conclusion) : null
     const hoy = moment()
-    fin = hoy.isBefore(fin) ? hoy : fin
 
-    const startDate = (!first || inicio.isBefore(first)) ? inicio :  first
-    let endDate = (!last || fin.isAfter(last)) ? fin : last
+    console.log(actividad!.conclusion)
+
+    let startDate = ((!first || inicio.isBefore(first)) ? inicio :  first).clone()
+    let endDate = last;
+    if(conclusion){
+      if(!endDate || endDate.isBefore(conclusion)){
+        endDate = conclusion
+      }
+    }
+    else {
+      if(!endDate || endDate.isBefore(hoy)){
+        console.log(hoy)
+        endDate = hoy
+      }
+    }
+
+    console.log(actividad)
 
     let ultimoAvance = 0
     while(startDate.isSameOrBefore(endDate)){
@@ -87,26 +112,38 @@ export const ActividadView = ()=>{
       const avance = entries[entries.length-1]
       ultimoAvance = avance ? avance.actual : ultimoAvance
       data.push(ultimoAvance)
-      startDate.add(1, 'days')
+      startDate = startDate.add(1, 'days').clone()
     }
     return data
   }
 
   const getIdealData = () => {
     const data = [] as number[]
-    const inicio = moment(actividad!.inicio).startOf('day').subtract(1, 'days')
+    const first = actividad!.historial.length ? moment(actividad!.historial[0].fecha) : null
+    const last = actividad!.historial.length ? moment(actividad!.historial[actividad!.historial.length-1].fecha) : null
+    const inicio = moment(actividad!.inicio).subtract(1, 'days')
     const fin = moment(actividad!.fin)
-    const duration = moment.duration(fin.diff(inicio)).asDays()
-    const first = actividad!.historial.length && moment(actividad!.historial[0].fecha)
-    const last = actividad!.historial.length && moment(actividad!.historial[actividad!.historial.length-1].fecha)
+    const conclusion = actividad!.conclusion ? moment(actividad!.conclusion) : null
+    const hoy = moment()
 
-    const date = ((!first || inicio.isBefore(first)) ? inicio :  first).clone()
-    const endDate = ((!last || fin.isAfter(last)) ? fin : last).clone()
+    
+    const duration = moment.duration(fin.diff(inicio)).asDays()
+    let date = ((!first || inicio.isBefore(first)) ? inicio :  first).clone()
+    let endDate = fin;
+    if(conclusion && fin.isBefore(conclusion)){
+      endDate = conclusion
+    }
+    if(last && endDate.isBefore(last)){
+      endDate = last
+    }
+    if(endDate.isBefore(hoy)){
+      endDate = hoy
+    }
 
     while(date.isSameOrBefore(endDate)){
       const day = moment.duration(date.diff(inicio)).asDays()
       data.push(Math.min(100, Math.max(0, Math.round(10000*day/duration)/100)))
-      date.add(1, 'days')
+      date = date.add(1, 'days').clone()
     }
 
     return data
@@ -141,7 +178,7 @@ export const ActividadView = ()=>{
   return <>
     <h1 style={{fontSize: "1.5rem"}}>Actividad</h1>
     <Row>
-      <Col className='mb-3'>
+      <Col className='mb-3' lg={6}>
         <Card style={{height: '100%'}}>
           <Card.Header>Información</Card.Header>
           <Card.Body>
@@ -153,7 +190,7 @@ export const ActividadView = ()=>{
               <dd className="col-sm-9">{cargar.isFetching ? <Skeleton /> : `${moment(actividad?.inicio).format('L')}`}</dd>
 
               <dt className="col-sm-3">Fecha de conclusión</dt>
-              <dd className="col-sm-9">{`${moment(actividad?.fin).format('L')} (${moment(actividad?.fin).locale('es').fromNow()})`}</dd>
+              <dd className="col-sm-9">{`${moment(actividad?.fin).format('L')} (${moment(actividad?.fin).fromNow()})`}</dd>
 
               <dt className="col-sm-3">Avanve</dt>
               <dd className="col-sm-9">{actividad?.avance}%</dd>
@@ -164,9 +201,9 @@ export const ActividadView = ()=>{
           </Card.Body>
         </Card>
       </Col>
-      <Col className="mb-3">
+      <Col className="mb-3" lg={6}>
         <Card style={{height: '100%'}}>
-          <Card.Header>Gráfico</Card.Header>
+          <Card.Header>Progreso</Card.Header>
           <Card.Body>
             {data && <LineChart data={data} options={options} type="line" />}
           </Card.Body>
@@ -176,12 +213,16 @@ export const ActividadView = ()=>{
     <Card>
       <Card.Header>Historial de avance</Card.Header>
       <Card.Body>
-        <div className="d-flex mb-2">
-          <Button className="ml-auto" onClick={()=>{
-            showAvanceForm(true)
-          }}
-          ><FaPlus /></Button>
-        </div>
+        <ProtectedContent
+          authorize={(user) => !!plan && PlanPolicy.registrarAvance(user, plan)}
+        >
+          <div className="d-flex mb-2">
+            <Button className="ml-auto" onClick={()=>{
+              showAvanceForm(true)
+            }}
+            ><FaPlus /></Button>
+          </div>
+        </ProtectedContent>
         <Table>
           <thead>
             <tr>
@@ -216,12 +257,16 @@ export const ActividadView = ()=>{
             })}
           </tbody>
         </Table>
-        <div className="d-flex mb-2">
-          <Button className="ml-auto" onClick={()=>{
-            showAvanceForm(true)
-          }}
-          ><FaPlus /></Button>
-        </div>
+        <ProtectedContent
+          authorize={(user) => !!plan && PlanPolicy.registrarAvance(user, plan)}
+        >
+          <div className="d-flex mb-2">
+            <Button className="ml-auto" onClick={()=>{
+              showAvanceForm(true)
+            }}
+            ><FaPlus /></Button>
+          </div>
+        </ProtectedContent>
         {actividad && <AvanceForm actividad={actividad} show={avanceFormVisible} onHide={()=>showAvanceForm(false)} />}
       </Card.Body>
     </Card>

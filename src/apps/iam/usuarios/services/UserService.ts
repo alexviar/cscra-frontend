@@ -23,7 +23,7 @@ export type User = {
   nombres: string
   nombreCompleto: string
   roles: Rol[]
-  roleNames: string[]
+  // roleNames: string[]
   regionalId: number
   createdAt: string
   updatedAt: string

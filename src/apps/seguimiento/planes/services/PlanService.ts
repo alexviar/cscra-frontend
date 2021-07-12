@@ -3,6 +3,7 @@ import { keysToUnderscore } from "../../../../commons/utils"
 
 export type PlanFilter = {
   regionalId?: number
+  creadoPor?: number
 }
 
 export type Avance = {
@@ -19,6 +20,7 @@ export type Actividad = {
   nombre: string
   inicio: string
   fin: string
+  conclusion: string | null
   avance: number
   avanceEsperado: number
   indicadores: string
@@ -35,6 +37,7 @@ export type Plan = {
   avanceEsperado: number
   concluido: boolean
   actividades: Actividad[]
+  usuarioId: number
 }
 
 class Service {
@@ -78,7 +81,7 @@ class Service {
     formData.append("avance", String(payload.avance))
     formData.append("observaciones", payload.observaciones)
     formData.append("informe", payload.informe)
-    return apiClient.post<Avance>(`/planes/${id}/actividades/${actividadId}/registrar-avance`, formData, {
+    return apiClient.post<Avance>(`/planes/${id}/actividades/${actividadId}/avances`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }

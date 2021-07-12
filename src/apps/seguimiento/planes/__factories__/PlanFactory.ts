@@ -15,5 +15,6 @@ export const planFactory = PlanFactory.define(({sequence, associations}) => ({
   areaId: associations.areaId || 1,
   avance: 0,
   avanceEsperado: 0,
+  usuarioId: 1,
   actividades: associations.actividades || actividadFactory.buildList(5)
 }))

@@ -4,7 +4,7 @@ import Skeleton from 'react-loading-skeleton'
 import { useLocation, useParams } from 'react-router'
 import { Link } from 'react-router-dom'
 import moment from 'moment'
-import { PlanService, Plan } from '../services'
+import { useModal } from '../../../../commons/reusable-modal'
 import { useCargarPlan } from '../queries'
 import { ActividadRowOptions } from './ActividadRowOptions'
 
@@ -13,10 +13,16 @@ export const PlanView = ()=>{
     planId: string
   }>()
 
-  const cargar = useCargarPlan(parseInt(id))
+  const queryLoader = useModal("queryLoader")
+
+  const cargar = useCargarPlan(parseInt(id), {
+    onError: (error) => queryLoader.open({
+      state: "error",
+      error
+    })
+  })
 
   const plan = cargar.data
-  console.log(cargar, plan)
 
   return <>
     <h1 style={{fontSize: "1.75rem"}}>Plan</h1>

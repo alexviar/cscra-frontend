@@ -58,7 +58,7 @@ export const planHandlers = [
     )
   }),
 
-  rest.post(route('planes/:planId/actividades/:actividadId/registrar-avance'), (req, res, ctx) => {
+  rest.post(route('planes/:planId/actividades/:actividadId/avances'), (req, res, ctx) => {
     if(req.body){
       const avance = (req.body as any).get("avance")
       const observaciones = (req.body as any).get("observaciones")
