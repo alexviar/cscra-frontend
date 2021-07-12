@@ -23,7 +23,6 @@ export const PlanView = ()=>{
   })
 
   const plan = cargar.data
-  console.log(cargar, plan)
 
   return <>
     <h1 style={{fontSize: "1.75rem"}}>Plan</h1>
