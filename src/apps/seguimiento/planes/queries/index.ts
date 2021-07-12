@@ -38,6 +38,7 @@ export const useCargarPlan = (id: number, options?: UseQueryOptions<AxiosRespons
     select: (data) => data.data,
     ...options
   })
+  console.log("Cargar plan", cargar)
   return cargar
 }
 

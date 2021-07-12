@@ -87,6 +87,7 @@ export const UserForm = () => {
       }
     }
   })
+  const formErrors = formState.errors
 
   const history = useHistory<{
     user: User
@@ -137,7 +138,7 @@ export const UserForm = () => {
   }, [loggedUser])
 
   const user = cargar.data?.data || history.location.state?.user
-  const formErrors = formState.errors
+  console.log(user)
 
   useEffect(()=>{
     if(user && regionales.length) {
@@ -154,7 +155,7 @@ export const UserForm = () => {
         regional: [regionales.find(r=>r.id == user.id)!]
       })
     }
-  }, [user])
+  }, [user, regionales])
 
   return <>
     <Form onSubmit={handleSubmit((data) => {

@@ -15,6 +15,7 @@ import configureStore from './bootstrap/store';
 import './bootstrap/components/custom.scss';
 import './index.css';
 import moment from 'moment'
+import 'moment/locale/es'
 
 moment.locale('es')
 

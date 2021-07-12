@@ -4,11 +4,12 @@ import Skeleton from 'react-loading-skeleton'
 import { FaPlus } from 'react-icons/fa'
 import { useHistory, useParams } from 'react-router'
 import moment from 'moment'
-import 'moment/locale/es'
 import { Line } from 'react-chartjs-2';
 import { useModal } from '../../../../commons/reusable-modal'
+import { ProtectedContent } from '../../../../commons/auth'
+import { PlanPolicy } from '../policies'
 import { Actividad } from '../services'
-import { useCargarActividad } from '../queries'
+import { useCargarPlan } from '../queries'
 import { AvanceForm } from './AvanceForm'
 import { HistorialRowOptions } from './HistorialRowOptions'
 
@@ -42,8 +43,10 @@ export const ActividadView = ()=>{
 
   const [avanceFormVisible, showAvanceForm] = useState(false)
 
-  const cargar = useCargarActividad(planId, actividadId)
-  const actividad = cargar.data
+  const cargar = useCargarPlan(planId)
+  // const cargar = useCargarActividad(planId, actividadId)
+  const plan = cargar.data
+  const actividad =  plan?.actividades?.find(a => a.id == actividadId)
 
   console.log("Actividad", cargar)
 
@@ -187,7 +190,7 @@ export const ActividadView = ()=>{
               <dd className="col-sm-9">{cargar.isFetching ? <Skeleton /> : `${moment(actividad?.inicio).format('L')}`}</dd>
 
               <dt className="col-sm-3">Fecha de conclusión</dt>
-              <dd className="col-sm-9">{`${moment(actividad?.fin).format('L')} (${moment(actividad?.fin).locale('es').fromNow()})`}</dd>
+              <dd className="col-sm-9">{`${moment(actividad?.fin).format('L')} (${moment(actividad?.fin).fromNow()})`}</dd>
 
               <dt className="col-sm-3">Avanve</dt>
               <dd className="col-sm-9">{actividad?.avance}%</dd>
@@ -210,12 +213,16 @@ export const ActividadView = ()=>{
     <Card>
       <Card.Header>Historial de avance</Card.Header>
       <Card.Body>
-        <div className="d-flex mb-2">
-          <Button className="ml-auto" onClick={()=>{
-            showAvanceForm(true)
-          }}
-          ><FaPlus /></Button>
-        </div>
+        <ProtectedContent
+          authorize={(user) => !!plan && PlanPolicy.registrarAvance(user, plan)}
+        >
+          <div className="d-flex mb-2">
+            <Button className="ml-auto" onClick={()=>{
+              showAvanceForm(true)
+            }}
+            ><FaPlus /></Button>
+          </div>
+        </ProtectedContent>
         <Table>
           <thead>
             <tr>
@@ -250,12 +257,16 @@ export const ActividadView = ()=>{
             })}
           </tbody>
         </Table>
-        <div className="d-flex mb-2">
-          <Button className="ml-auto" onClick={()=>{
-            showAvanceForm(true)
-          }}
-          ><FaPlus /></Button>
-        </div>
+        <ProtectedContent
+          authorize={(user) => !!plan && PlanPolicy.registrarAvance(user, plan)}
+        >
+          <div className="d-flex mb-2">
+            <Button className="ml-auto" onClick={()=>{
+              showAvanceForm(true)
+            }}
+            ><FaPlus /></Button>
+          </div>
+        </ProtectedContent>
         {actividad && <AvanceForm actividad={actividad} show={avanceFormVisible} onHide={()=>showAvanceForm(false)} />}
       </Card.Body>
     </Card>

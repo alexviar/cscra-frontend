@@ -1,4 +1,5 @@
 import { User } from '../../../../commons/auth'
+import { Plan } from '../services'
 import * as Permisos from './Permisos'
 
 export const PlanPolicy = {
@@ -6,23 +7,21 @@ export const PlanPolicy = {
     return user.canAny([
       Permisos.VER_PLANES,
       Permisos.VER_PLANES_REGIONAL,
-      Permisos.REGISTRAR_PLANES,
-      Permisos.REGISTRAR_PLANES_REGIONAL
+      Permisos.REGISTRAR_PLANES
     ])
   },
   ver(user: User) {
-    Permisos.VER_PLANES,
-    Permisos.VER_PLANES_REGIONAL
+    return user.canAny([
+      Permisos.VER_PLANES,
+      Permisos.VER_PLANES_REGIONAL,
+    ])
   },
   registrar(user: User) {
     return user.canAny([
-      Permisos.REGISTRAR_PLANES,
-      Permisos.REGISTRAR_PLANES_REGIONAL
+      Permisos.REGISTRAR_PLANES
     ])
   },
-  registrarAvance(user: User) {
-    return user.canAny([
-      Permisos.REGISTRAR_AVANCE
-    ])
+  registrarAvance(user: User, plan: Plan) {
+    return user.id == plan.usuarioId
   }
 }

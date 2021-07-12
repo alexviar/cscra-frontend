@@ -3,6 +3,7 @@ import { keysToUnderscore } from "../../../../commons/utils"
 
 export type PlanFilter = {
   regionalId?: number
+  creadoPor?: number
 }
 
 export type Avance = {
@@ -36,6 +37,7 @@ export type Plan = {
   avanceEsperado: number
   concluido: boolean
   actividades: Actividad[]
+  usuarioId: number
 }
 
 class Service {

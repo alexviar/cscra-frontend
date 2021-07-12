@@ -52,7 +52,7 @@ export const UserView = ()=>{
         </tr>
         <tr>
           <th scope="row">Roles</th>
-          <td className="text-capitalize">: {user?.roleNames}</td>
+          <td className="text-capitalize">: {user?.roles?.map(r => r.name)}</td>
         </tr>
       </tbody>
     </Table>

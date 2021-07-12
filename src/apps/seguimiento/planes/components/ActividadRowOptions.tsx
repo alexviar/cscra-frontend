@@ -7,7 +7,7 @@ import { VerticalEllipsisDropdownToggle } from "../../../../commons/components"
 import { useModal } from "../../../../commons/reusable-modal"
 import { ProtectedContent } from "../../../../commons/auth/components"
 import { Actividad, PlanService } from "../services"
-// import { RolPolicy } from "../policies"
+import { PlanPolicy } from "../policies"
 
 type Props = {
   actividad: Actividad
@@ -24,14 +24,11 @@ export const ActividadRowOptions = ({actividad}: Props) => {
     />
     <Dropdown.Menu>
       <ProtectedContent
-        authorize={()=>true}
+        authorize={(user)=>true}
       >
-        <Dropdown.Item as={Link} to={{
-          pathname: `/seguimiento/planes/${planId}/actividades/${actividad.id}`,
-          state: {
-            actividad
-          }
-        }} ><FaEye className="mr-2" />Detalles</Dropdown.Item>
+        <Dropdown.Item as={Link} to={`/seguimiento/planes/${planId}/actividades/${actividad.id}`} >
+          <FaEye className="mr-2" />Detalles
+        </Dropdown.Item>
       </ProtectedContent>
     </Dropdown.Menu>
   </Dropdown>

@@ -7,7 +7,7 @@ import { VerticalEllipsisDropdownToggle } from "../../../../commons/components"
 import { useModal } from "../../../../commons/reusable-modal"
 import { ProtectedContent } from "../../../../commons/auth/components"
 import { Plan, PlanService } from "../services"
-// import { RolPolicy } from "../policies"
+import { PlanPolicy } from "../policies"
 
 type Props = {
   plan: Plan
@@ -62,7 +62,7 @@ export const RowOptions = ({plan, queryKey}: Props) => {
     />
     <Dropdown.Menu>
       <ProtectedContent
-        authorize={()=>true}
+        authorize={PlanPolicy.ver}
       >
         <Dropdown.Item as={Link} to={{
           pathname: `/seguimiento/planes/${plan.id}`,

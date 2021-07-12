@@ -1,16 +1,14 @@
 import { AxiosError } from "axios"
-import {useState, useRef, useEffect, useMemo} from "react"
+import {useState, useMemo} from "react"
 import { Button, Collapse, Form, Table, Spinner, Row, Col } from "react-bootstrap"
 import { Link } from "react-router-dom"
-import { useQuery } from "react-query"
-import { FaSync, FaFilter, FaUserPlus } from "react-icons/fa"
+import { FaSync, FaFilter } from "react-icons/fa"
 import { Page } from "../../../../commons/services"
 import { Pagination } from "../../../../commons/components"
 import { ProtectedContent } from "../../../../commons/auth/components"
-import { Permisos } from "../../../../commons/auth/constants"
 import { useLoggedUser } from "../../../../commons/auth/hooks"
 import { PlanFilter, useBuscarPlanes } from "../queries"
-// import { UsuarioPolicy } from "../policies"
+import { Permisos, PlanPolicy } from "../policies"
 // import { UserFilterForm } from "./UserFilterForm"
 import { RowOptions } from "./RowOptions"
 
@@ -25,10 +23,12 @@ export const PlanIndex = ()=>{
 
   const defaultFilter = useMemo(()=>{
     const filter: PlanFilter =  {}
-    //TODO: Access Control
-    if(false){
+    if(loggedUser.can([Permisos.VER_PLANES])) return filter
+    if(loggedUser.can([Permisos.VER_PLANES_REGIONAL])) {
       filter.regionalId = loggedUser.regionalId
+      return filter
     }
+    filter.creadoPor = loggedUser.id
     return filter
   }, [loggedUser])
 
@@ -36,14 +36,6 @@ export const PlanIndex = ()=>{
 
   const [filterFormVisible, showFilterForm] = useState(false)
 
-  // const queryKey = "planes.buscar"
-  // const buscar = useQuery(queryKey, ()=>{
-  //   return PlanService.buscar(filter, page)
-  // }, {
-  //   // enabled: UsuarioPolicy.view(loggedUser),
-  //   refetchOnWindowFocus: false,
-  //   refetchOnReconnect: false
-  // })
   const buscar = useBuscarPlanes(filter, page)
 
   const total = buscar.data?.data?.meta?.total || 0
@@ -91,9 +83,9 @@ export const PlanIndex = ()=>{
     <h2 style={{fontSize: "1.75rem"}}>Planes</h2>
     <div className="d-flex my-2">
       <Form.Row className="ml-auto flex-nowrap" >
-        <ProtectedContent
-          authorize={()=>true}
-        >
+        {/* <ProtectedContent
+          authorize={PlanPolicy.ver}
+        > */}
           <Col xs="auto" >
             <Button onClick={()=>{
               buscar.refetch()
@@ -104,9 +96,9 @@ export const PlanIndex = ()=>{
               showFilterForm(visible=>!visible)
             }}><FaFilter /></Button>
           </Col>
-        </ProtectedContent>
+        {/* </ProtectedContent> */}
         <ProtectedContent
-          authorize={()=>true}
+          authorize={PlanPolicy.registrar}
         >
           <Col xs="auto">
             <Button
@@ -119,9 +111,9 @@ export const PlanIndex = ()=>{
         </ProtectedContent>
       </Form.Row>
     </div>
-    <ProtectedContent
-      authorize={()=>true}
-    >
+    {/* <ProtectedContent
+      authorize={PlanPolicy.ver}
+    > */}
       <Collapse in={filterFormVisible}>
         <div>
           {/* <UserFilterForm onFilter={(filter)=>{
@@ -175,6 +167,6 @@ export const PlanIndex = ()=>{
           />
         </Col>
       </Row>
-    </ProtectedContent>
+    {/* </ProtectedContent> */}
   </div>
 }
