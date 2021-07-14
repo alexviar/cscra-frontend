@@ -1,8 +1,6 @@
 import React, { forwardRef, useImperativeHandle, useRef, useCallback } from "react"
 import { Button, Modal, ModalProps, Table } from "react-bootstrap"
-import { nombreCompleto } from "../../../../commons/utils/nombreCompleto"
 import { Asegurado } from "../services"
-import { EstadosAfi } from "../utils"
 
 type Props = Omit<ModalProps, "children"> & {
   asegurados: Asegurado[]
@@ -32,8 +30,8 @@ export const AseguradoChooser = (props: Props) => {
             return <tr key={asegurado.id}>
               <th scope="row">{index+1}</th>
               <td>{asegurado.matricula}-{asegurado.matriculaComplemento}</td>
-              <td>{nombreCompleto(asegurado.apellidoPaterno, asegurado.apellidoMaterno, asegurado.nombres)}</td>
-              <td className={EstadosAfi[asegurado.estado] ? "" : "bg-ligth"}>{EstadosAfi[asegurado.estado] || "Desconocido"}</td>
+              <td>{asegurado.nombreCompleto}</td>
+              <td className={asegurado.estadoText ? "" : "bg-ligth"}>{asegurado.estadoText || "Desconocido"}</td>
               <td><Button onClick={()=>{
                 console.log(asegurado)
                 props.onSelect(asegurado)

@@ -24,7 +24,7 @@ export const PdfModal = ()=>{
     <BSModal.Header>
       {renderModalHeader()}
     </BSModal.Header>
-    <BSModal.Body>
+    <BSModal.Body className="p-0">
       {renderModalBody()}
     </BSModal.Body>
   </BSModal>
