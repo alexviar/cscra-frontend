@@ -231,7 +231,7 @@ export const AseguradoCard = (props: {
             }</Form.Control.Feedback>
           </Form.Group>}
           {asegurado?.tipo == 2 ? <Form.Group as={Col} sm={4}>
-            <Form.Label>Fecha extinsion</Form.Label>
+            <Form.Label>Fecha de extincion</Form.Label>
             <Form.Control
               readOnly
               isInvalid={!!formErrors.asegurado?.fechaExtincion}

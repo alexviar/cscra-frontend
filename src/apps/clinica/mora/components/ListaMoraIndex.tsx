@@ -128,12 +128,14 @@ export default () => {
       authorize={ListaMoraPolicy.view}
     >
       <Collapse in={filterFormVisible}>
-        <ListaMoraFilterForm
-          onApply={(filter) => {
-            setFilter(filter)
-            setPage(page => ({...page, current: 1}))
-          }}
-        />
+        <div>
+          <ListaMoraFilterForm
+            onApply={(filter) => {
+              setFilter(filter)
+              setPage(page => ({...page, current: 1}))
+            }}
+          />
+        </div>
       </Collapse>
       <div className="d-flex">
         <div className="ml-auto mb-2">
