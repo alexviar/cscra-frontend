@@ -1,4 +1,4 @@
 export const EstadosAfi: {[k: number]: string} = {
-  1: "Alta",
+  1: "Activo",
   2: "Baja"
 }

@@ -1,4 +1,4 @@
-import React, { ComponentProps, useRef, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { AxiosError } from "axios"
 import { Accordion, Alert, Button, Card,Col,Form, Spinner } from "react-bootstrap"
 import { useForm, Controller, FormProvider } from "react-hook-form"
@@ -9,10 +9,10 @@ import { AseguradoCard, AseguradoInputs } from "./AseguradoCard"
 import { MedicosTypeahead } from "./MedicosTypeahead"
 import { PrestacionesSolicitadasInputs, PrestacionesSolicitadasCard } from "./PrestacionesSolicitadasCard"
 import { useMutation } from "react-query"
-import { Medico, SolicitudesAtencionExternaService } from "../services"
+import { Asegurado, Medico, SolicitudesAtencionExternaService } from "../services"
 import { Regional, RegionalesTypeahead } from "../../../../commons/components"
 import { useModal } from "../../../../commons/reusable-modal"
-import { Dm11Viewer } from "./Dm11Viewer"
+// import { Dm11Viewer } from "./Dm11Viewer"
 import { Permisos } from "../../../../commons/auth/constants"
 import { useLoggedUser } from "../../../../commons/auth/hooks"
 import { EstadosAfi, EstadosEmp } from "../utils"
@@ -64,16 +64,31 @@ const schema = yup.object().shape({
       yup.mixed()),
     fechaValidezSeguro: validezSchema
   }),
-  titular: yup.lazy(value => value?.id ? yup.object().shape({
-    matricula: yup.string().label("matricula").required(),
-    estado: estadoAfiSchema,
-    fechaValidezSeguro: validezSchema
-  }): yup.object() ),
+  titular: yup.mixed().test("titular", "", (value, context) => {
+    const asegurado = context.options.context?.asegurado
+    if(asegurado?.tipo == 2 && asegurado?.afiliacion?.parentesco != 8) {
+      if(!asegurado.titular){
+        return context.createError({
+          message: "No se encontraron datos del titular"
+        })
+      }
+      try {
+        yup.object().shape({
+          estado: estadoAfiSchema,
+          fechaValidezSeguro: validezSchema
+        }).validateSync(value, {context: {asegurado: asegurado.titular}})
+      } catch (e){
+        return e
+      }
+    }
+    return true
+  }),
   empleador: yup.object().shape({
     numeroPatronal: yup.string().label("numero patronal").required(),
     estado: yup.string().label("estado").oneOf(Object.values(EstadosEmp), "Estado desconocido")
     .test("estado-incoherente", "El empleador figura como activo, pero tiene fecha de baja", function(value, context) {
-      return value != EstadosEmp[1] || !context.parent.fechaBaja
+      const empleador = context.options.context?.asegurado?.empleador
+      return empleador.estado != 1 || !empleador.fechaBaja
     }),
     fechaBaja: yup.mixed().when("estado", {
       is: (estado: string) => estado == EstadosEmp[2] || estado == EstadosEmp[3],
@@ -92,8 +107,13 @@ const schema = yup.object().shape({
 })
 
 export const SolicitudAtencionExternaForm = ()=>{
+  const [asegurado, setAsegurado] = useState<Asegurado|null>(null)
+  console.log("Asegurado", asegurado)
   const formMethods = useForm<Inputs>({
     mode: "onBlur",
+    context: {
+      asegurado
+    },
     resolver: yupResolver(schema),
     defaultValues: {
       regional: [],
@@ -111,7 +131,6 @@ export const SolicitudAtencionExternaForm = ()=>{
   })
   const {
     handleSubmit,
-    trigger,
     formState,
     control,
     reset,
@@ -120,16 +139,16 @@ export const SolicitudAtencionExternaForm = ()=>{
     watch
   } = formMethods
 
-  const dm11Viewer = useModal("dm11Viewer")
+  const dm11Viewer = useModal("pdfModal")
 
   const loggedUser = useLoggedUser()
 
   console.log("Errors", watch(), formState.errors)
-
+  
   const registrar = useMutation((values: Inputs)=>{
     return SolicitudesAtencionExternaService.registrar(
       values.regional![0].id,
-      values.asegurado.id,
+      asegurado!.id,
       values.medico![0].id,
       values.proveedor![0].id,
       values.prestacionesSolicitadas.map(({prestacion, nota})=>({
@@ -143,7 +162,7 @@ export const SolicitudAtencionExternaForm = ()=>{
         Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA,
         Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA_REGISTRADO_POR
       ]) || (loggedUser?.can(Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL) && regionalId == loggedUser?.regionalId)){
-        dm11Viewer.open({url: urlDm11})
+        dm11Viewer.open({url: urlDm11, title: "Formulario D.M. - 11"})
         reset()
       }
     }
@@ -151,10 +170,6 @@ export const SolicitudAtencionExternaForm = ()=>{
 
   const formErrors = formState.errors
   const registrarError = registrar.error as AxiosError
-
-  const serverKeyErrorMappers = (key: string)=>{
-
-  }
 
   useEffect(()=>{
     if(registrarError?.response?.status == 422){
@@ -188,7 +203,9 @@ export const SolicitudAtencionExternaForm = ()=>{
       <h1 style={{fontSize: "1.75rem"}}>Solicitud de atención externa</h1>
       {renderAlert()}
       <Accordion className="mt-3"  defaultActiveKey="0">
-        <AseguradoCard />
+        <AseguradoCard value={asegurado} onChange={(asegurado)=>{
+          setAsegurado(asegurado)
+        }} />
         <Card style={{overflow: "visible"}} >
           <Accordion.Toggle as={Card.Header} className={"text-light " + (formErrors.regional ? "bg-danger" : "bg-primary")} eventKey="1">
             Regional
@@ -265,6 +282,6 @@ export const SolicitudAtencionExternaForm = ()=>{
         Guardar
       </Button>
     </Form>
-    <Dm11Viewer />
+    {/* <Dm11Viewer /> */}
   </FormProvider>
 }
