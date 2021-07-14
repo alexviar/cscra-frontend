@@ -10,6 +10,7 @@ import { FaBell, FaUserCircle, FaBars, FaClinicMedical, FaCalendar } from 'react
 import { useDispatch, useSelector } from 'react-redux'
 import { useQueryClient } from 'react-query'
 import { QueryProgressModal, PdfModal } from "../../commons/components"
+import { useNavTitle } from "../../commons/hooks"
 import { useModal } from "../../commons/reusable-modal"
 import {Login, ProtectedRoute} from "../../commons/auth/components"
 import { getUser } from "../../commons/auth/selectors/inputSelectors"
@@ -31,6 +32,8 @@ export default ()=>{
   const modal = useModal("queryLoader")
 
   const queryClient = useQueryClient()
+
+  const navTitle = useNavTitle()
 
   useEffect(()=>{
     apiClient.interceptors.response.use(
@@ -56,7 +59,7 @@ export default ()=>{
       <ToggleSidebar />
       <Navbar.Brand className="overflow-hidden text-truncate" as={Link} to="/" >
         <Image className="mx-1" width={32} src="/logo-sm.png" />
-        Transferencias - DM11
+        {navTitle}
       </Navbar.Brand>
       <Nav className="ml-auto">
         <OverlayTrigger

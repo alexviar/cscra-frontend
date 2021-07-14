@@ -30,6 +30,10 @@ export const PlanView = ()=>{
       <Card.Header>Información</Card.Header>
       <Card.Body>
         <dl className="form-row">
+          <dt className="col-sm-3">Regional</dt>
+          <dd className="col-sm-9">{cargar.isFetching ? <Skeleton /> : plan?.regional.nombre}</dd>
+          <dt className="col-sm-3">Area</dt>
+          <dd className="col-sm-9">{cargar.isFetching ? <Skeleton /> : plan?.area.nombre}</dd>
           <dt className="col-sm-3">Objetivo general</dt>
           <dd className="col-sm-9">{cargar.isFetching ? <Skeleton /> : plan?.objetivoGeneral }</dd>
           <dt className="col-sm-3">Avance</dt>

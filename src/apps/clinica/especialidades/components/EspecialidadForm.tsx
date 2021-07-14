@@ -83,7 +83,7 @@ export const EspecialidadForm = ()=>{
       })}
     >
       {guardar.status == "error" || guardar.status == "success"  ? <Alert variant={guardar.isError ? "danger" : "success"}>
-        {guardar.isError ? guardar.error.response?.data?.message || guardar.error.message : "Guardado"}
+        {guardar.isError ? (guardar.error as AxiosError).response?.data?.message || (guardar.error as AxiosError).message : "Guardado"}
       </Alert> : null}
       <Form.Group>
         <Form.Label>Nombre</Form.Label>

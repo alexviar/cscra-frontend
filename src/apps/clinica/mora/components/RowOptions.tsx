@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { Dropdown } from "react-bootstrap"
-import { useMutation, useQuery, useQueryClient, QueryKey } from "react-query"
+import { useMutation, useQueryClient, QueryKey } from "react-query"
 import { VerticalEllipsisDropdownToggle } from "../../../../commons/components"
 import { useModal } from "../../../../commons/reusable-modal"
 import { ProtectedContent } from "../../../../commons/auth/components"
@@ -13,10 +13,7 @@ type Props = {
 }
 export const RowOptions = ({item, queryKey}: Props) => {
 
-  const modal = useModal<{
-    state: "loading" | "error"
-    error?: Error
-  }>("queryLoader")
+  const modal = useModal("queryLoader")
 
   const queryClient = useQueryClient()
 

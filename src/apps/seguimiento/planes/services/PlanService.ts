@@ -31,7 +31,15 @@ export type Actividad = {
 export type Plan = {
   id: number
   regionalId: number
+  regional: {
+    id:number
+    nombre:string
+  }
   areaId: number
+  area: {
+    id:number
+    nombre:string
+  }
   objetivoGeneral: string
   avance: number
   avanceEsperado: number

@@ -16,5 +16,13 @@ export const planFactory = PlanFactory.define(({sequence, associations}) => ({
   avance: 0,
   avanceEsperado: 0,
   usuarioId: 1,
+  regional: {
+    id: 1,
+    nombre: "La Paz"
+  },
+  area: {
+    id: 1,
+    nombre: "Contabilidad"
+  },
   actividades: associations.actividades || actividadFactory.buildList(5)
 }))

@@ -121,8 +121,8 @@ export const MedicosForm = ()=>{
         })
     },
     onError: (error) => {
-      if(error?.response?.status == 422){
-        const {errors} = error.response?.data
+      if((error as AxiosError)?.response?.status == 422){
+        const {errors} = (error as AxiosError).response?.data
         Object.keys(errors).forEach((key: any)=>{
           let localKey = key
           setError(localKey, {type: "serverError", message: errors[key]})

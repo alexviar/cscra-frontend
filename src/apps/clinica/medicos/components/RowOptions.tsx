@@ -1,6 +1,5 @@
 import { useEffect } from "react"
 import { Dropdown } from "react-bootstrap"
-// import { FaEdit } from "react-icons/fa"
 import { QueryKey, useMutation, useQueryClient } from "react-query"
 import { Link } from "react-router-dom"
 import { VerticalEllipsisDropdownToggle } from "../../../../commons/components"
@@ -15,10 +14,7 @@ type Props = {
 }
 export const RowOptions = ({medico, queryKey}: Props) => {
 
-  const modal = useModal<{
-    state: "loading" | "error"
-    error?: Error
-  }>("queryLoader")
+  const modal = useModal("queryLoader")
 
   const queryClient = useQueryClient()
 
