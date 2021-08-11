@@ -12,7 +12,6 @@ import { useMutation } from "react-query"
 import { Asegurado, Medico, SolicitudesAtencionExternaService } from "../services"
 import { Regional, RegionalesTypeahead } from "../../../../commons/components"
 import { useModal } from "../../../../commons/reusable-modal"
-// import { Dm11Viewer } from "./Dm11Viewer"
 import { Permisos } from "../../../../commons/auth/constants"
 import { useLoggedUser } from "../../../../commons/auth/hooks"
 import { EstadosAfi, EstadosEmp } from "../utils"
@@ -282,6 +281,5 @@ export const SolicitudAtencionExternaForm = ()=>{
         Guardar
       </Button>
     </Form>
-    {/* <Dm11Viewer /> */}
   </FormProvider>
 }

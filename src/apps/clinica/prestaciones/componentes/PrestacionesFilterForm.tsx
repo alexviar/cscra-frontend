@@ -9,7 +9,7 @@ type Props = {
 export const PrestacionesFilterForm = (props: Props) =>{
   const { register, handleSubmit } = useForm<{nombre: string}>()
   return <Form onSubmit={handleSubmit(({nombre})=>{
-    props.onSearch(nombre)
+    props.onSearch(nombre?.trim())
   })} >
     <Form.Row className="flex-nowrap">
       <Col>

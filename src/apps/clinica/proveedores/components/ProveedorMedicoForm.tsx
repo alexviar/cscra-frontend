@@ -29,9 +29,9 @@ type Props = {
 }
 
 const schema = yup.object().shape({
-  nit: yup.number().label("NIT")
-    .emptyStringToNull()
-    .typeError("El ${path} no es un numero valido")
+  nit: yup.string().label("NIT")
+    .trim()
+    .matches(/^[0-9]*$/, "Este campo solo admite números")
     .nullable()
     .notRequired(),
   ci: yup.number().label("número de carnet")

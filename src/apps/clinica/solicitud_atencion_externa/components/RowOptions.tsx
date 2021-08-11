@@ -11,7 +11,7 @@ type Props = {
 }
 export const RowOptions = ({solicitud}: Props) => {
 
-  const modal = useModal("dm11Viewer")
+  const modal = useModal("pdfModal")
 
   return   <Dropdown style={{position: "initial"}}>
     <Dropdown.Toggle as={VerticalEllipsisDropdownToggle}
@@ -20,6 +20,7 @@ export const RowOptions = ({solicitud}: Props) => {
     <Dropdown.Menu >
       <Dropdown.Item href="#" onClick={() => {
         modal.open({
+          title: "Formulario D.M. - 11",
           url: solicitud.urlDm11
         })
       }}>Ver D.M. - 11</Dropdown.Item>

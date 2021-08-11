@@ -13,7 +13,7 @@ export type Inputs = {
 }
 
 const schema = yup.object().shape({
-  nombre: yup.string().required().min(3).max(150)
+  nombre: yup.string().trim().required().min(3).max(150)
 })
 
 export const PrestacionForm = ()=>{

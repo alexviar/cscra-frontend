@@ -8,7 +8,6 @@ import { Pagination } from "../../../../commons/components"
 import { Page } from "../../../../commons/services/Page"
 import { SolicitudesAtencionExternaFilter as Filter, SolicitudesAtencionExternaService } from "../services/SolicitudesAtencionExternaService"
 import { SolicitudAtencionExternaFilterForm } from "./SolicitudAtencionExternaFilterForm"
-import { Dm11Viewer } from "./Dm11Viewer"
 import { Permisos } from "../../../../commons/auth/constants"
 import { useLoggedUser } from "../../../../commons/auth/hooks"
 import { ProtectedContent } from "../../../../commons/auth/components/ProtectedContent"
@@ -191,6 +190,5 @@ export const SolicitudAtencionExternaIndex = ()=>{
         />
       </div> : null}
     </ProtectedContent>
-    <Dm11Viewer />
   </div>
 }

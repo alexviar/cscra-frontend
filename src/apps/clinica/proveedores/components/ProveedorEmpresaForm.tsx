@@ -22,13 +22,13 @@ type Props = {
 }
 
 const schema = yup.object().shape({
-  nit: yup.number().label("NIT")
-  .emptyStringTo()
-  .typeError("El ${path} no es un numero valido")
+  nit: yup.string().label("NIT")
+  .trim()
+  .matches(/^[0-9]*$/, "Este campo solo admite números")
   .required(),
   // .nullable()
-  // .notRequired(),
-  nombre: yup.string().required().max(150),  
+  // .notRequired('),
+  nombre: yup.string().trim().required().max(150),  
   regional: yup.array().length(1, "Debe indicar una regional")
 })
 
