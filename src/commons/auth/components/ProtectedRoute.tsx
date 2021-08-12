@@ -7,9 +7,10 @@ type Props = {
   children: React.ReactNode
 } & RouteProps
 export const ProtectedRoute = ({ children, authorize, ...rest }: Props) => {
-  const { pathname: url, state: { ignoreAuthorization } = {} } = useLocation<{
+  const { pathname: url, state } = useLocation<{
     ignoreAuthorization?: boolean
   }>()
+  const ignoreAuthorization = state?.ignoreAuthorization
   const loggedUser = useLoggedUser()
 
   console.log(loggedUser)

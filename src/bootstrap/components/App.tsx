@@ -18,6 +18,7 @@ import { AuthService } from '../../commons/auth/services';
 import { apiClient } from '../../commons/services';
 import { unauthorized } from '../../commons/auth/actions';
 import { ToggleSidebar } from './ToggleSidebar'
+import { Home } from './Home'
 import "../../configs/yup"
 import '../../App.css'
 
@@ -148,6 +149,9 @@ export default ()=>{
         </ProtectedRoute>
         <Route exact path="/login">
           <Login></Login>
+        </Route>        
+        <Route path="/">
+          <Home />
         </Route>
       </Switch>
     </Suspense>
