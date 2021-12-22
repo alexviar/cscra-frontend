@@ -2,17 +2,19 @@ import React from "react"
 import { Button, Col, Form } from 'react-bootstrap'
 import { useForm, Controller }  from 'react-hook-form'
 import { SolicitudesAtencionExternaFilter } from "../services/SolicitudesAtencionExternaService"
-import { Medico, MedicosTypeahead } from "./MedicosTypeahead"
-import { Proveedor, ProveedoresTypeahead } from "./ProveedoresTypeahead"
+// import { Medico, MedicosTypeahead } from "./MedicosTypeahead"
+// import { Proveedor, ProveedoresTypeahead } from "./ProveedoresTypeahead"
 
 type Inputs = {
   numero: string
   desde: string
   hasta: string
-  numeroPatronal: string,
-  matricula: string,
-  medico: Medico[]
-  proveedor: Proveedor[]
+  numeroPatronal: string
+  matricula: string
+  // medico: Medico[]
+  medico: string
+  // proveedor: Proveedor[]
+  proveedor: string
 }
 
 type Props = {
@@ -27,8 +29,8 @@ export const SolicitudAtencionExternaFilterForm = (props: Props)=>{
     reset
   } = useForm<Inputs>({
     defaultValues: {
-      medico: [],
-      proveedor: []
+      medico: "",
+      proveedor: ""
     }
   })
   console.log(formState)
@@ -41,8 +43,8 @@ export const SolicitudAtencionExternaFilterForm = (props: Props)=>{
       matriculaAsegurado: input.matricula,
       desde: input.desde,
       hasta: input.hasta,
-      medicoId: input.medico.length && input.medico[0].id,
-      proveedorId: input.proveedor.length && input.proveedor[0].id
+      medico: input.medico,
+      proveedor: input.proveedor
     })
   })}>
     <Form.Row>
@@ -62,33 +64,15 @@ export const SolicitudAtencionExternaFilterForm = (props: Props)=>{
     <Form.Row>
       <Form.Group as={Col}>
         <Form.Label>Médico</Form.Label>
-        <Controller
-          control={control}
-          name="medico"
-          render={({field})=>{
-            return <MedicosTypeahead
-              id="solicitud-atencion-externa-filter/medicos"
-              selected={field.value}
-              onBlur={field.onBlur}
-              onChange={field.onChange}
-            />
-          }}
+        <Form.Control
+          {...register("medico")}
         />
       </Form.Group>
       <Form.Group as={Col}>
         <Form.Label>Proveedor</Form.Label>
-        <Controller
-          control={control}
-          name="proveedor"
-          render={({field})=>{
-            return <ProveedoresTypeahead
-              id="solicitud-atencion-externa-filter/proveedores"
-              selected={field.value}
-              onBlur={field.onBlur}
-              onChange={field.onChange}
-            />
-          }}
-        />
+        <Form.Control
+            {...register("proveedor")}
+          />
       </Form.Group>
     </Form.Row>
     <Form.Row>

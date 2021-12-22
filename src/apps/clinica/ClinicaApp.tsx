@@ -56,37 +56,37 @@ export const ClinicaApp = ()=>{
         icon: <BiTransfer />
       })
     }
-    if(MedicoPolicy.index(loggedUser)){
-      items.push({
-        id: "medicos",
-        path: `${url}/medicos`,
-        title: "Medicos",
-        icon: <FaUserMd />,
-      })
-    }
-    if(ProveedorPolicy.index(loggedUser)){
-      items.push({
-        id: "proveedores",
-        path: `${url}/proveedores`,
-        title: "Proveedores",
-        icon: <FaHandshake />
-      })
-    }
+    // if(MedicoPolicy.index(loggedUser)){
+    //   items.push({
+    //     id: "medicos",
+    //     path: `${url}/medicos`,
+    //     title: "Medicos",
+    //     icon: <FaUserMd />,
+    //   })
+    // }
+    // if(ProveedorPolicy.index(loggedUser)){
+    //   items.push({
+    //     id: "proveedores",
+    //     path: `${url}/proveedores`,
+    //     title: "Proveedores",
+    //     icon: <FaHandshake />
+    //   })
+    // }
 
-    items.push(
-          {
-            id: "especialidades",
-            path: `${url}/especialidades`,
-            title: "Especialidades",
-            icon: <GiRodOfAsclepius />,
-          },
-          {
-            id: "prestaciones",
-            path: `${url}/prestaciones`,
-            title: "Prestaciones",
-            icon: <FaProcedures />,
-          }
-    )
+    // items.push(
+    //       {
+    //         id: "especialidades",
+    //         path: `${url}/especialidades`,
+    //         title: "Especialidades",
+    //         icon: <GiRodOfAsclepius />,
+    //       },
+    //       {
+    //         id: "prestaciones",
+    //         path: `${url}/prestaciones`,
+    //         title: "Prestaciones",
+    //         icon: <FaProcedures />,
+    //       }
+    // )
     return items
   }, [loggedUser])
 
@@ -111,7 +111,7 @@ export const ClinicaApp = ()=>{
       >
         <SolicitudAtencionExternaForm />
       </ProtectedRoute>
-      <ProtectedRoute exact path={`${url}/medicos`}
+      {/* <ProtectedRoute exact path={`${url}/medicos`}
         authorize={MedicoPolicy.index}
       >
         <MedicosIndex />
@@ -165,15 +165,15 @@ export const ClinicaApp = ()=>{
       </Route>
       <Route path={`${url}/prestaciones`}>
         <PrestacionesIndex />
-      </Route>
+      </Route> */}
     </Switch>
     
-    <Route exact path={[`${url}/prestaciones/registrar`, `${url}/prestaciones/:id/editar`]}>
+    {/* <Route exact path={[`${url}/prestaciones/registrar`, `${url}/prestaciones/:id/editar`]}>
       <PrestacionForm />
     </Route>
     <Route exact path={[`${url}/especialidades/registrar`, `${url}/especialidades/:id/editar`]}>
       <EspecialidadForm />
-    </Route>
+    </Route> */}
   </SidebarLayout>
 }
 

@@ -6,10 +6,9 @@ import moment from "moment"
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from "yup"
 import { AseguradoCard, AseguradoInputs } from "./AseguradoCard"
-import { MedicosTypeahead } from "./MedicosTypeahead"
 import { PrestacionesSolicitadasInputs, PrestacionesSolicitadasCard } from "./PrestacionesSolicitadasCard"
 import { useMutation } from "react-query"
-import { Asegurado, Medico, SolicitudesAtencionExternaService } from "../services"
+import { Asegurado, SolicitudesAtencionExternaService } from "../services"
 import { Regional, RegionalesTypeahead } from "../../../../commons/components"
 import { useModal } from "../../../../commons/reusable-modal"
 import { Permisos } from "../../../../commons/auth/constants"
@@ -18,7 +17,8 @@ import { EstadosAfi, EstadosEmp } from "../utils"
 
 type Inputs = AseguradoInputs & PrestacionesSolicitadasInputs & {
   regional: Regional[]
-  medico?: Medico[]
+  medico: string
+  especialidad: string
 }
 
 const hoy = moment()
@@ -76,7 +76,7 @@ const schema = yup.object().shape({
           estado: estadoAfiSchema,
           fechaValidezSeguro: validezSchema
         }).validateSync(value, {context: {asegurado: asegurado.titular}})
-      } catch (e){
+      } catch (e: any){
         return e
       }
     }
@@ -97,11 +97,10 @@ const schema = yup.object().shape({
     aportes: yup.lazy(value => value ? yup.string().oneOf(["No"], "El empleador esta en mora") : yup.string())
   }),
   regional: yup.array().length(1, "Debe seleccionar una regional"),
-  medico: yup.array().length(1, "Debe seleccionar un medico"),
-  proveedor: yup.array().length(1, "Debe seleccionar un proveedor"),
+  medico: yup.string().required(),
+  proveedor: yup.string().required(),
   prestacionesSolicitadas: yup.array().of(yup.object().shape({
-    prestacion: yup.array().length(1, "Debe seleccionar una prestacion"),
-    nota: yup.string().label("nota").nullable().notRequired().max(150)
+    prestacion: yup.string().required("Debe indicar una prestacion")
   })).min(1, "Debe solicitar un servicio").max(1, "Solo puede solicitar un servicio por solicitud")
 })
 
@@ -116,12 +115,11 @@ export const SolicitudAtencionExternaForm = ()=>{
     resolver: yupResolver(schema),
     defaultValues: {
       regional: [],
-      medico: [],
-      proveedor: [],
+      medico: "",
+      proveedor: "",
       prestacionesSolicitadas: [{
         id: 0,
-        prestacion: [],
-        nota: ""
+        prestacion: ""
       }],
       asegurado: {},
       titular: {},
@@ -129,6 +127,7 @@ export const SolicitudAtencionExternaForm = ()=>{
     }
   })
   const {
+    register,
     handleSubmit,
     formState,
     control,
@@ -141,19 +140,15 @@ export const SolicitudAtencionExternaForm = ()=>{
   const dm11Viewer = useModal("pdfModal")
 
   const loggedUser = useLoggedUser()
-
-  console.log("Errors", watch(), formState.errors)
   
   const registrar = useMutation((values: Inputs)=>{
     return SolicitudesAtencionExternaService.registrar(
       values.regional![0].id,
       asegurado!.id,
-      values.medico![0].id,
-      values.proveedor![0].id,
-      values.prestacionesSolicitadas.map(({prestacion, nota})=>({
-        prestacion_id: prestacion![0].id,
-        nota
-      }))
+      values.medico,
+      values.especialidad,
+      values.proveedor!,
+      values.prestacionesSolicitadas.map(({prestacion})=>({prestacion}))
     )
   }, {
     onSuccess: ({data: {urlDm11, regionalId}}) => {
@@ -229,8 +224,8 @@ export const SolicitudAtencionExternaForm = ()=>{
                         selected={field.value}
                         onBlur={field.onBlur}
                         onChange={(regional)=>{
-                          setValue("medico", [])
-                          setValue("proveedor", [])
+                          setValue("medico", "")
+                          setValue("proveedor", "")
                           field.onChange(regional)
                         }}
                       />
@@ -250,26 +245,20 @@ export const SolicitudAtencionExternaForm = ()=>{
               <Form.Row>
                 <Form.Group as={Col}>
                   <Form.Label>Nombre</Form.Label>
-                  <Controller 
-                    control={control}
-                    name="medico"
-                    render={({field, fieldState})=>{
-                      return <><MedicosTypeahead
-                        id="solicitud-atencion-externa-form/medicos"
-                        filter={{
-                          estado: 1
-                        }}
-                        filterBy={(medico) => medico.regionalId == watch("regional.0.id")}
-                        className={fieldState.error ? "is-invalid" : ""}
-                        isInvalid={!!formState.errors.medico}
-                        selected={field.value}
-                        onBlur={field.onBlur}
-                        onChange={field.onChange}
-                      />
-                      <Form.Control.Feedback type="invalid">{fieldState.error?.message}</Form.Control.Feedback></>
-                    }}
+                  <Form.Control
+                    isInvalid={!!formState.errors.medico}
+                    {...register("medico")}
                   />
-                </Form.Group> 
+                  <Form.Control.Feedback type="invalid">{formState.errors?.medico?.message}</Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group as={Col}>
+                  <Form.Label>Especialidad</Form.Label>
+                  <Form.Control
+                    isInvalid={!!formState.errors.especialidad}
+                    {...register("especialidad")}
+                  />
+                  <Form.Control.Feedback type="invalid">{formState.errors?.especialidad?.message}</Form.Control.Feedback>
+                </Form.Group>
               </Form.Row>
             </Card.Body>
           </Accordion.Collapse>
