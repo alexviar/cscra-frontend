@@ -10,22 +10,6 @@ import { FcDebt } from '../../commons/components/icons/FcDebt';
 import { SolicitudAtencionExternaIndex } from './solicitud_atencion_externa/components/SolicitudAtencionExternaIndex';
 import { SolicitudAtencionExternaForm } from './solicitud_atencion_externa/components/SolicitudAtencionExternaForm';
 import { SolicitudATPolicy } from './solicitud_atencion_externa/policies';
-import { EspecialidadesIndex, EspecialidadForm } from './especialidades/components';
-import { PrestacionesIndex, PrestacionForm } from './prestaciones/componentes';
-import { MedicosIndex, MedicoView, MedicosForm, MedicoPolicy } from './medicos';
-import { 
-  ProveedoresIndex,
-  ProveedorView,
-  ProveedorWizard,
-  ProveedorForm,
-  ContactoForm,
-  ProveedorPolicy
-} from './proveedores';
-import {
-  ContratoForm,
-  ContratoView,
-  ContratoPolicy
-} from './contratos'
 import { Permisos, ProtectedRoute, useLoggedUser } from '../../commons/auth';
 import { ListaMoraPolicy } from "./mora/policies";
 import { Image } from "react-bootstrap";

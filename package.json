@@ -46,7 +46,7 @@
     "build": "react-scripts build",
     "typecheck": "tsc",
     "typecheck:watch": "tsc -w",
-    "postbuild": "rmdir /s /q ..\\backend\\public\\build 2>null & rmdir /s /q ..\\backend\\public\\static 2>null & xcopy /s /i /y build ..\\backend\\public\\build & move /Y ..\\backend\\public\\build\\static ..\\backend\\public & move ..\\backend\\public\\build\\favicon.ico ..\\backend\\public\\favicon.ico",
+    "postbuild": "rmdir /s /q ..\\backend\\public\\build 2>null & rmdir /s /q ..\\backend\\public\\static 2>null & xcopy /s /i /y build ..\\backend\\public\\build & move /Y ..\\backend\\public\\build\\static ..\\backend\\public & move ..\\backend\\public\\build\\favicon.ico ..\\backend\\public\\favicon.ico & move ..\\backend\\public\\build\\logo.png ..\\backend\\public\\logo.png",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

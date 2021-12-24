@@ -1,5 +1,4 @@
 import { rest } from 'msw'
-import { regionalFactory } from '../../apps/seguimiento/planes/__factories__'
 import { apiEndpoint } from '../../configs/app'
 
 const route = (path: string)=>{

@@ -1,6 +1,0 @@
-export * from "./ProveedoresIndex"
-export * from "./ProveedorView"
-export * from "./ProveedorWizard"
-export { ProveedorForm } from "./ProveedorForm"
-export { ContactoForm } from "./ContactoForm"
-export { ContratoForm } from "../../contratos/components/ContratoForm"

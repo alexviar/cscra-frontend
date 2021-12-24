@@ -26,14 +26,14 @@ export const Home = () => {
             </MenuItem>
           </div>
         </Col>
-        <Col>
+        {/* <Col>
           <div className="d-flex justify-content-center">
             <MenuItem to="/seguimiento" className="text-center text-light">
               <FaCalendar size={96}/>
               <span className="d-block my-2">Seguimiento</span>
             </MenuItem>
           </div>
-        </Col>
+        </Col> */}
       </Row>
     </div>
   </div>
