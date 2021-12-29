@@ -35,7 +35,7 @@ const estadoAfiSchema = yup.string().label("estado").oneOf(Object.values(Estados
   }
   if(value == EstadosAfi[2] && !context.parent.tieneBaja){
     return context.createError({
-      message: "El asegurado figura como dado de baja, aunque no se encontraron registros de la baja"
+      message: "El asegurado figura como dado de baja, aunque no se encontraron registros de la baja."
     })
   }
   return true
@@ -97,10 +97,11 @@ const schema = yup.object().shape({
     aportes: yup.lazy(value => value ? yup.string().oneOf(["No"], "El empleador esta en mora") : yup.string())
   }),
   regional: yup.array().length(1, "Debe seleccionar una regional"),
-  medico: yup.string().required(),
-  proveedor: yup.string().required(),
+  medico: yup.string().trim().uppercase().required(),
+  especialidad: yup.string().trim().uppercase().required(),
+  proveedor: yup.string().trim().uppercase().required(),
   prestacionesSolicitadas: yup.array().of(yup.object().shape({
-    prestacion: yup.string().required("Debe indicar una prestacion")
+    prestacion: yup.string().trim().uppercase().required("Debe indicar una prestacion")
   })).min(1, "Debe solicitar un servicio").max(1, "Solo puede solicitar un servicio por solicitud")
 })
 
@@ -214,6 +215,11 @@ export const SolicitudAtencionExternaForm = ()=>{
                     name="regional"
                     render={({field, fieldState})=>{
                       return <RegionalesTypeahead
+                        //@ts-ignore
+                        style={{textTransform: "uppercase"}}                        
+                        inputProps={{
+                          style: {textTransform: "uppercase"}
+                        }}
                         id="solicitud-atencion-externa-form/regionales"
                         filterBy={(regional: Regional)=>{
                           return (loggedUser?.can(Permisos.REGISTRAR_SOLICITUDES_DE_ATENCION_EXTERNA) ? true : 
@@ -246,6 +252,7 @@ export const SolicitudAtencionExternaForm = ()=>{
                 <Form.Group as={Col}>
                   <Form.Label>Nombre</Form.Label>
                   <Form.Control
+                    style={{textTransform: "uppercase"}}
                     isInvalid={!!formState.errors.medico}
                     {...register("medico")}
                   />
@@ -254,6 +261,7 @@ export const SolicitudAtencionExternaForm = ()=>{
                 <Form.Group as={Col}>
                   <Form.Label>Especialidad</Form.Label>
                   <Form.Control
+                    style={{textTransform: "uppercase"}}
                     isInvalid={!!formState.errors.especialidad}
                     {...register("especialidad")}
                   />
@@ -266,8 +274,8 @@ export const SolicitudAtencionExternaForm = ()=>{
         <PrestacionesSolicitadasCard />
       </Accordion>
       <Button className="mt-3" type="submit">
-        {registrar.isLoading ? <Spinner animation="border" size="sm"/> : null}
-        Guardar
+        {registrar.isLoading ? <Spinner className="mr-2" animation="border" size="sm"/> : null}
+        <span>Guardar</span>
       </Button>
     </Form>
   </FormProvider>

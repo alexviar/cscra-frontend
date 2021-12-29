@@ -46,6 +46,7 @@ export const PrestacionesSolicitadasCard = () => {
                 <td>{index + 1}</td>
                 <td>
                   <Form.Control 
+                    style={{textTransform: "uppercase"}}
                     isInvalid={!!(formState.errors.prestacionesSolicitadas && formState.errors.prestacionesSolicitadas[index]?.prestacion)}
                     {...register(`prestacionesSolicitadas.${index}.prestacion` as const)}
                   />
@@ -56,6 +57,7 @@ export const PrestacionesSolicitadasCard = () => {
                 </td>
                 <td>
                   <Form.Control
+                    style={{textTransform: "uppercase"}}
                     isInvalid={!!formState.errors.proveedor}
                     {...register("proveedor")}
                   />
