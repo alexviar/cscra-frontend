@@ -58,7 +58,7 @@ export default () => {
       const { error } = buscar
       return <tr>
         <td className="bg-danger text-light text-center" colSpan={100}>
-          {(error as AxiosError).response?.data?.message || (error as AxiosError).message}
+          {(error as AxiosError<any>).response?.data?.message || (error as AxiosError).message}
         </td>
       </tr>
     }

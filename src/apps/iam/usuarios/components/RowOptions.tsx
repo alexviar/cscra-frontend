@@ -51,7 +51,7 @@ export const RowOptions = ({user}: Props) => {
     else if(cambiarEstado.status == "error"){
       modal.open({
         state: "error",
-        error: cambiarEstado.error
+        error: cambiarEstado.error as Error
       })
     }
   }, [cambiarEstado.status])

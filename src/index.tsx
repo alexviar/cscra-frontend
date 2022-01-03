@@ -3,6 +3,7 @@ import 'core-js/es/set';
 import 'core-js/es/string';
 import 'core-js/es/object';
 import 'core-js/es/promise';
+import "abort-controller/polyfill"
 import ReactDOM from 'react-dom';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary'
 import { Alert, Button } from 'react-bootstrap'

@@ -14,10 +14,11 @@ import { useModal } from "../../../../commons/reusable-modal"
 import { Permisos } from "../../../../commons/auth/constants"
 import { useLoggedUser } from "../../../../commons/auth/hooks"
 import { EstadosAfi, EstadosEmp } from "../utils"
+import { MedicosTypeahead } from "./MedicosTypeahead"
 
 type Inputs = AseguradoInputs & PrestacionesSolicitadasInputs & {
   regional: Regional[]
-  medico: string
+  medico: {label: string}[]
   especialidad: string
 }
 
@@ -97,7 +98,7 @@ const schema = yup.object().shape({
     aportes: yup.lazy(value => value ? yup.string().oneOf(["No"], "El empleador esta en mora") : yup.string())
   }),
   regional: yup.array().length(1, "Debe seleccionar una regional"),
-  medico: yup.string().trim().uppercase().required(),
+  medico: yup.array().length(1, "Debe indicar un medico"),
   especialidad: yup.string().trim().uppercase().required(),
   proveedor: yup.string().trim().uppercase().required(),
   prestacionesSolicitadas: yup.array().of(yup.object().shape({
@@ -107,7 +108,6 @@ const schema = yup.object().shape({
 
 export const SolicitudAtencionExternaForm = ()=>{
   const [asegurado, setAsegurado] = useState<Asegurado|null>(null)
-  console.log("Asegurado", asegurado)
   const formMethods = useForm<Inputs>({
     mode: "onBlur",
     context: {
@@ -116,8 +116,9 @@ export const SolicitudAtencionExternaForm = ()=>{
     resolver: yupResolver(schema),
     defaultValues: {
       regional: [],
-      medico: "",
+      medico: [],
       proveedor: "",
+      especialidad: "",
       prestacionesSolicitadas: [{
         id: 0,
         prestacion: ""
@@ -146,7 +147,7 @@ export const SolicitudAtencionExternaForm = ()=>{
     return SolicitudesAtencionExternaService.registrar(
       values.regional![0].id,
       asegurado!.id,
-      values.medico,
+      values.medico![0].label.trim().toUpperCase(),
       values.especialidad,
       values.proveedor!,
       values.prestacionesSolicitadas.map(({prestacion})=>({prestacion}))
@@ -230,7 +231,7 @@ export const SolicitudAtencionExternaForm = ()=>{
                         selected={field.value}
                         onBlur={field.onBlur}
                         onChange={(regional)=>{
-                          setValue("medico", "")
+                          setValue("medico", [])
                           setValue("proveedor", "")
                           field.onChange(regional)
                         }}
@@ -251,12 +252,30 @@ export const SolicitudAtencionExternaForm = ()=>{
               <Form.Row>
                 <Form.Group as={Col}>
                   <Form.Label>Nombre</Form.Label>
-                  <Form.Control
+                  {/* <Form.Control
                     style={{textTransform: "uppercase"}}
                     isInvalid={!!formState.errors.medico}
                     {...register("medico")}
+                  /> */}
+                  <Controller
+                    name="medico"
+                    control={control}
+                    render={({field: {value, onChange}, fieldState})=>(<>
+                      <MedicosTypeahead
+                        //@ts-ignore
+                        style={{textTransform: "uppercase"}}                        
+                        inputProps={{
+                          style: {textTransform: "uppercase"}
+                        }}
+                        className={!!fieldState.error ? "is-invalid" : ""} 
+                        selected={value}
+                        onChange={(value)=>{
+                          onChange(value)
+                        }}
+                      />
+                      <Form.Control.Feedback type="invalid">{fieldState.error?.message}</Form.Control.Feedback>
+                    </>)}
                   />
-                  <Form.Control.Feedback type="invalid">{formState.errors?.medico?.message}</Form.Control.Feedback>
                 </Form.Group>
                 <Form.Group as={Col}>
                   <Form.Label>Especialidad</Form.Label>

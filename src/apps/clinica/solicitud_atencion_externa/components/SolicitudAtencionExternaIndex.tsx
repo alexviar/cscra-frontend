@@ -42,7 +42,6 @@ export const SolicitudAtencionExternaIndex = ()=>{
   const [filter, setFilter] = useState<Filter>(getDefaultFilter)
 
   const buscar = useQuery(["solicitudesAtencionExterna.buscar", page, filter], ()=>{
-    console.log({...filter, ...getDefaultFilter()})
     return SolicitudesAtencionExternaService.buscar({...filter, ...getDefaultFilter()}, page)
   }, {
     enabled: loggedUser?.canAny([
