@@ -68,6 +68,10 @@ dt::after {
   right: 0;
 }
 
+input {
+  text-transform: inherit;
+}
+
 input[type="date"]:read-only::-webkit-inner-spin-button,
 input[type="date"]:read-only::-webkit-calendar-picker-indicator {
     display: none;

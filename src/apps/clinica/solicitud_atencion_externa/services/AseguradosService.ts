@@ -1,4 +1,3 @@
-import { AxiosTransformer } from "axios"
 import { apiClient, Page, PaginatedResponse } from "../../../../commons/services"
 
 // export type Titular = {

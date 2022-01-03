@@ -1,4 +1,4 @@
-import axios, { AxiosTransformer } from 'axios'
+import axios, { AxiosResponseTransformer } from 'axios'
 import {apiEndpoint} from '../../configs/app'
 import Qs from 'qs'
 import { keysToCamel } from '../utils'
@@ -10,7 +10,7 @@ export const apiClient = axios.create({
     "Accept": "application/json"
   },
   transformResponse: [
-    ...axios.defaults.transformResponse as AxiosTransformer[],
+    ...axios.defaults.transformResponse as AxiosResponseTransformer[],
     (data)=>{
       const result = keysToCamel(data)
       console.log("TransformedResponse", result)
@@ -22,6 +22,9 @@ export const apiClient = axios.create({
 apiClient.defaults.withCredentials = true
 
 apiClient.interceptors.request.use(config => {
+  if(!config.headers){
+    config.headers = {}
+  }
   config.headers.Accept = "application/json"
   config.paramsSerializer = params => {
     // Qs is not included in the Axios package
