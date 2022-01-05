@@ -9,7 +9,7 @@ import { Page } from "../../../../commons/services/Page"
 import { SolicitudesAtencionExternaFilter as Filter, SolicitudesAtencionExternaService } from "../services/SolicitudesAtencionExternaService"
 import { SolicitudAtencionExternaFilterForm } from "./SolicitudAtencionExternaFilterForm"
 import { Permisos } from "../../../../commons/auth/constants"
-import { useLoggedUser } from "../../../../commons/auth/hooks"
+import { useUser } from "../../../../commons/auth/hooks"
 import { ProtectedContent } from "../../../../commons/auth/components/ProtectedContent"
 import { RowOptions } from "./RowOptions"
 import { SolicitudATPolicy } from "../policies"
@@ -22,7 +22,7 @@ export const SolicitudAtencionExternaIndex = ()=>{
     size: 10
   })
 
-  const loggedUser = useLoggedUser();
+  const loggedUser = useUser();
 
   const [filterFormVisible, showFilterForm] = useState(false)
 

@@ -5,7 +5,7 @@ import { FaFilter, FaSync, FaPlus } from "react-icons/fa"
 import { useQuery } from "react-query"
 import { Link } from "react-router-dom"
 import {Pagination} from "../../../../commons/components"
-import { useLoggedUser, ProtectedContent, Permisos } from "../../../../commons/auth"
+import { useUser, ProtectedContent, Permisos } from "../../../../commons/auth"
 import { ListaMoraService, ListaMoraFilter as Filter } from "../services"
 import { ListaMoraFilterForm } from "./ListaMoraFilterForm"
 import { RowOptions } from "./RowOptions"
@@ -17,13 +17,13 @@ export default () => {
     size: 10
   })
 
-  const loggedUser = useLoggedUser();
+  const user = useUser();
   
   const getDefaultFilter = ()=>{
     const filter: Filter = {}
-    if(!loggedUser?.can(Permisos.VER_LISTA_DE_MORA)){
-      if(loggedUser?.can(Permisos.VER_LISTA_DE_MORA_REGIONAL)){
-        filter.regionalId = loggedUser.regionalId;
+    if(!user?.can(Permisos.VER_LISTA_DE_MORA)){
+      if(user?.can(Permisos.VER_LISTA_DE_MORA_REGIONAL)){
+        filter.regionalId = user.regionalId;
       }
     }
     return filter
@@ -37,7 +37,7 @@ export default () => {
   const buscar = useQuery(queryKey, () => {
     return ListaMoraService.buscar(filter, page)
   }, {
-    enabled: ListaMoraPolicy.view(loggedUser),
+    enabled: ListaMoraPolicy.view(user),
     // refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false

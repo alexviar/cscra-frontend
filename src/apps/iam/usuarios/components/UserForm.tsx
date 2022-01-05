@@ -11,7 +11,7 @@ import { RolesCheckList } from './RolesCheckList'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Permisos } from '../../../../commons/auth/constants'
-import { useLoggedUser } from '../../../../commons/auth/hooks'
+import { useUser } from '../../../../commons/auth/hooks'
 
 
 type Inputs = {
@@ -33,7 +33,7 @@ type Inputs = {
 
 export const UserForm = () => {
 
-  const loggedUser = useLoggedUser()
+  const loggedUser = useUser()
 
   const { id } = useParams<{
     id?: string

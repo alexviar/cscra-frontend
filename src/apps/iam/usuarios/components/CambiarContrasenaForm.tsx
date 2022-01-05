@@ -7,7 +7,7 @@ import { useHistory, useParams } from 'react-router-dom'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { UserService } from '../services'
-import { useLoggedUser } from '../../../../commons/auth'
+import { useUser } from '../../../../commons/auth'
 
 type Inputs = {
   oldPassword: string
@@ -23,7 +23,7 @@ export const CambiarContrasenaForm = ()=>{
 
   const history = useHistory()
 
-  const user = useLoggedUser()
+  const user = useUser()
 
   const schema = useMemo(()=>{
     return yup.object().shape({
