@@ -10,7 +10,7 @@ export const authClient = axios.create({
     ...axios.defaults.transformResponse as AxiosResponseTransformer[],
     (data)=>{
       const result = keysToCamel(data)
-      console.log("TransformedResponse", result)
+      // console.log("TransformedResponse", result)
       return result
     }
   ]

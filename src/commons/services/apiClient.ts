@@ -13,7 +13,7 @@ export const apiClient = axios.create({
     ...axios.defaults.transformResponse as AxiosResponseTransformer[],
     (data)=>{
       const result = keysToCamel(data)
-      console.log("TransformedResponse", result)
+      // console.log("TransformedResponse", result)
       return result
     }
   ]
@@ -39,7 +39,7 @@ apiClient.interceptors.request.use(config => {
       }
     });
   };
-  console.log("Axios config", config)
+  
   return config;
 });
 

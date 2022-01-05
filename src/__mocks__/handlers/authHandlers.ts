@@ -5,8 +5,6 @@ const route = (path: string)=>{
   return authEndpoint.trimEnd() + path
 }
 
-console.log(route('login'))
-
 export const authHandlers = [
   rest.post(route('login'), (req, res, ctx) => {
     return res(
