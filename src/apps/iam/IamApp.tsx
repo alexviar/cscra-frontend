@@ -3,7 +3,7 @@ import { useRouteMatch, Switch, Route, Redirect } from 'react-router-dom'
 import { FaTasks, FaUsers } from 'react-icons/fa'
 import SidebarLayout from '../../commons/components/layouts/SidebarLayout'
 import { ProtectedRoute } from '../../commons/auth/components'
-import { useLoggedUser } from '../../commons/auth/hooks'
+import { useUser } from '../../commons/auth/hooks'
 import {UserIndex, UserView, UserForm, CambiarContrasenaForm } from './usuarios/components'
 import {RolIndex, RolView, RolForm} from './roles/components'
 import { UsuarioPolicy } from './usuarios/policies'
@@ -12,7 +12,7 @@ import { Image } from 'react-bootstrap'
 
 export const IamApp = ()=>{
   const { url } = useRouteMatch()
-  const loggedUser = useLoggedUser()
+  const loggedUser = useUser()
 
   const sidebarItems = useMemo(()=>{
     const items = [] as any[]

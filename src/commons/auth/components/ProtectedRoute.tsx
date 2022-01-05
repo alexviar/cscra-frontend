@@ -1,6 +1,6 @@
 import React from 'react'
 import { Redirect, Route, RouteProps, useLocation } from 'react-router';
-import { User, useLoggedUser } from '../hooks';
+import { User, useUser } from '../hooks';
 
 type Props = {
   authorize?: (user: User, url: string) => boolean | undefined
@@ -11,11 +11,9 @@ export const ProtectedRoute = ({ children, authorize, ...rest }: Props) => {
     ignoreAuthorization?: boolean
   }>()
   const ignoreAuthorization = state?.ignoreAuthorization
-  const loggedUser = useLoggedUser()
-
-  console.log(loggedUser)
+  const loggedUser = useUser()
   
-  if(loggedUser === undefined) return null
+  if(loggedUser == null) return null
 
   return (
     <Route

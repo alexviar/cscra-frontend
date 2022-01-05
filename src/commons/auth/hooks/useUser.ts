@@ -1,15 +1,22 @@
 import { useMemo } from "react"
+import { useQuery } from "react-query"
 import { useSelector } from "react-redux"
 import { getUser, getIsAuthenticated } from "../selectors/inputSelectors"
+import { AuthService } from "../services"
 import { User as TUser } from "../state"
 
-export const useLoggedUser = () => {
-  const user = useSelector(getUser) as TUser | null
-  const isAuthenticated = useSelector(getIsAuthenticated) as TUser | null
+export const useUser = () => {
+  const fetchUser = useQuery(["user"], ()=>{
+    return AuthService.fetch()
+  }, {
+    keepPreviousData: true
+  })
 
-  const loggedUser = useMemo(()=>{
-    if(isAuthenticated !== null){
-      return user && {
+  const user = fetchUser.data?.data
+
+  return useMemo(()=>{
+    if(user){
+      return user ? {
         ...user,
         can: function(permission: string | string[], allowSuperUser: boolean = true) {
           if(typeof permission === "string") permission = [permission]
@@ -24,11 +31,9 @@ export const useLoggedUser = () => {
         isSuperUser: function() {
           return this.hasRole("super user")
         }
-      }
+      } : null
     }
-  }, [user, isAuthenticated])
-
-  return loggedUser
+  }, [user])
 }
 
-export type User = ReturnType<typeof useLoggedUser>
+export type User = ReturnType<typeof useUser>

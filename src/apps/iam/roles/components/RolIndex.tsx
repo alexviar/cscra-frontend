@@ -8,14 +8,14 @@ import { Page, PaginatedResponse } from "../../../../commons/services"
 import { RolFilterForm } from "./RolFilterForm"
 import { Pagination, VerticalEllipsisDropdownToggle } from "../../../../commons/components"
 import { ProtectedContent } from "../../../../commons/auth/components"
-import { useLoggedUser } from "../../../../commons/auth/hooks"
+import { useUser } from "../../../../commons/auth/hooks"
 import { Rol, RolService, RolFilter } from "../services"
 import { RolPolicy } from "../policies"
 import { RowOptions } from "./RowOptions"
 
 export const RolIndex = ()=>{
 
-  const loggedUser = useLoggedUser()
+  const loggedUser = useUser()
 
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState<Page>({

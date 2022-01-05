@@ -1,4 +1,4 @@
-import { authClient } from "../../../commons/services"
+import { authClient, apiClient } from "../../../commons/services"
 import { User } from "../state"
 
 export const AuthService = {
@@ -12,5 +12,8 @@ export const AuthService = {
   },
   logout: () => {
     return authClient.post("logout")
+  },
+  fetch: () => {
+    return apiClient.get<User>("user")
   }
 }
