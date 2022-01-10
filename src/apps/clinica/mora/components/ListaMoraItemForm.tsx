@@ -40,8 +40,6 @@ export default ()=>{
   })
 
   const formErrors = formState.errors
-  
-  console.log("Vlues", watch(), formErrors)
 
   const history = useHistory()
 

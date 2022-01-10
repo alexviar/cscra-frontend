@@ -18,26 +18,20 @@ export default () => {
   })
 
   const user = useUser();
-  
-  const getDefaultFilter = ()=>{
-    const filter: Filter = {}
-    if(!user?.can(Permisos.VER_LISTA_DE_MORA)){
-      if(user?.can(Permisos.VER_LISTA_DE_MORA_REGIONAL)){
-        filter.regionalId = user.regionalId;
-      }
-    }
-    return filter
+
+  const [filter, setFilter] = useState<Filter>({})
+
+  if(ListaMoraPolicy.verPorRegional(user)){
+    filter.regionalId = user?.regionalId;
   }
 
-  const [filter, setFilter] = useState<Filter>(getDefaultFilter)
-
-  const [filterFormVisible, showFilterForm] = useState(false)
+  const [ showFilterForm, setShowFilterForm] = useState(false)
 
   const queryKey = ["listaMora.buscar", filter, page]
   const buscar = useQuery(queryKey, () => {
     return ListaMoraService.buscar(filter, page)
   }, {
-    enabled: ListaMoraPolicy.view(user),
+    enabled: !!ListaMoraPolicy.view(user),
     // refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false
@@ -58,7 +52,7 @@ export default () => {
       const { error } = buscar
       return <tr>
         <td className="bg-danger text-light text-center" colSpan={100}>
-          {(error as AxiosError).response?.data?.message || (error as AxiosError).message}
+          {(error as AxiosError).response?.data?.message || "Error de red"}
         </td>
       </tr>
     }
@@ -99,13 +93,13 @@ export default () => {
           authorize={ListaMoraPolicy.view}
         >
           <Col xs="auto" >
-            <Button className="my-2" onClick={() => {
+            <Button aria-label="Actualizar" className="my-2" onClick={() => {
               buscar.refetch()
             }}><FaSync /></Button>
           </Col>
           <Col xs="auto" >
-            <Button className="my-2" onClick={() => {
-              showFilterForm(visible => !visible)
+            <Button aria-label={`${showFilterForm ? "Ocultar" : "Mostrar"} formulario de busqueda`} className="my-2" onClick={() => {
+              setShowFilterForm(visible => !visible)
             }}><FaFilter /></Button>
           </Col>
         </ProtectedContent>
@@ -127,8 +121,8 @@ export default () => {
     <ProtectedContent
       authorize={ListaMoraPolicy.view}
     >
-      <Collapse in={filterFormVisible}>
-        <div>
+      <Collapse in={showFilterForm}>
+        <div data-testid="filterFormContainer">
           <ListaMoraFilterForm
             onApply={(filter) => {
               setFilter(filter)
@@ -141,12 +135,13 @@ export default () => {
         <div className="ml-auto mb-2">
           <div className="d-flex flex-row flex-nowrap align-items-center">
             <span>Mostrar</span>
-            <Form.Control className="mx-2" as="select" value={page.size} onChange={(e) => {
+            <Form.Label htmlFor="pageSizeSelector" srOnly>Tamaño de pagina</Form.Label>
+            <Form.Control id="pageSizeSelector" className="mx-2" as="select" value={page.size} onChange={(e) => {
               const value = e.target.value
-              setPage((page) => ({
-                ...page,
+              setPage({
+                current: 1,
                 size: parseInt(value)
-              }))
+              })
             }}>
               <option value={10}>10</option>
               <option value={20}>20</option>
@@ -175,7 +170,7 @@ export default () => {
           <span className="mr-auto">{`Se encontraron ${total} resultados`}</span>
           <Pagination
             current={page.current}
-            total={Math.ceil((total - page.size) / page.size) + 1}
+            total={Math.ceil(total / page.size)}
             onChange={(current) => setPage((page) => ({ ...page, current }))}
           />
         </div> : null}

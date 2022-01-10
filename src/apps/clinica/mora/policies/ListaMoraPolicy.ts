@@ -23,6 +23,11 @@ export const ListaMoraPolicy = {
       VER_LISTA_DE_MORA_REGIONAL
     ])
   },
+  verPorRegional: (user: User) => {
+    return user?.canAny([
+      VER_LISTA_DE_MORA_REGIONAL
+    ])
+  },
   agregar: (user: User) => {
     return user?.canAny([
       AGREGAR_EMPLEADOR_EN_MORA,
