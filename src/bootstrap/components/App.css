@@ -78,6 +78,23 @@ input[type="date"]:read-only::-webkit-calendar-picker-indicator {
     -webkit-appearance: none;
 }
 
+.overflow-visible {
+  overflow: visible !important;
+}
+
+.accordion > .card .card-header  {
+  border-radius: 0;
+  margin-bottom: -1px;
+}
+
+.card > .overflow-hidden {
+  border-radius: inherit;
+}
+
+.position-unset {
+  position: unset !important;
+}
+
 .form-label {
   text-overflow: ellipsis;
   overflow: hidden;

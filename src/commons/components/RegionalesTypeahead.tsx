@@ -37,13 +37,13 @@ export const RegionalesTypeahead = ({isInvalid, feedback, filterBy, ...props}: {
     return []
   }, [buscar.data?.data])
 
-  return <InputGroup hasValidation>
+  return <InputGroup hasValidation className="position-unset" >
     <Typeahead
       clearButton
       emptyLabel="No se encontraron resultados"
       align="left"
       {...props}
-      className={(buscar.isError || isInvalid) ? "is-invalid" : ""}
+      className={`position-unset${(buscar.isError || isInvalid) ? " is-invalid" : ""}`} 
       isInvalid={buscar.isError || isInvalid}
       filterBy={(regional, props)=>{
         return (!props.text || isMatch(regional.nombre, props)) 
@@ -54,6 +54,7 @@ export const RegionalesTypeahead = ({isInvalid, feedback, filterBy, ...props}: {
       options={options}
       labelKey="nombre"
     />
+
     {buscar.isError ? <>
       <InputGroup.Append>
         <Button variant="outline-danger" onClick={()=>buscar.refetch()}><FaSync /></Button>
