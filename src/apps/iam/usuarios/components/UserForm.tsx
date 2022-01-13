@@ -64,7 +64,7 @@ export const UserForm = () => {
         const { parent: { password } } = this
         return value === password
       }),
-      regional: yup.array().length(1),
+      regional: yup.array().label("regional").length(1, "Debe seleccionar una regional"),
       roles: yup.array().label("roles").min(1, "Debe seleccionar al menos un rol")
     })
   }), [])

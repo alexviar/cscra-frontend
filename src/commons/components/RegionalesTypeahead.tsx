@@ -55,13 +55,9 @@ export const RegionalesTypeahead = ({isInvalid, feedback, filterBy, ...props}: {
       labelKey="nombre"
     />
 
-    {buscar.isError ? <>
-      <InputGroup.Append>
-        <Button variant="outline-danger" onClick={()=>buscar.refetch()}><FaSync /></Button>
-      </InputGroup.Append>
-      <Form.Control.Feedback type="invalid">{(buscar.error as any)?.response?.message || (buscar.error as any)?.message}</Form.Control.Feedback>
-    </>
-    : null}
-    {feedback ? <Form.Control.Feedback type="invalid">{feedback}</Form.Control.Feedback> : null}
+    {buscar.isError ? <InputGroup.Append>
+      <Button variant="outline-danger" onClick={()=>buscar.refetch()}><FaSync /></Button>
+    </InputGroup.Append> : null}
+    <Form.Control.Feedback type="invalid">{(buscar.error as any)?.response?.message || (buscar.error as any)?.message ||feedback}</Form.Control.Feedback>
   </InputGroup>
 }

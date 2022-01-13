@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react"
-import { Accordion, Card, Form, Col, InputGroup, FormControl, Button, Spinner } from "react-bootstrap"
+import { Accordion, Alert, Card, Form, Col, InputGroup, FormControl, Button, Spinner } from "react-bootstrap"
 import { useFormContext } from "react-hook-form"
 import { FaSearch } from "react-icons/fa"
 import { useQuery } from "react-query"
@@ -8,7 +8,6 @@ import { Asegurado, AseguradosService } from "../services/AseguradosService"
 import moment from 'moment';
 
 export type AseguradoInputs = {
-  regionalId: number
   asegurado: {
     matricula: string
     apellidoPaterno: string
@@ -16,7 +15,9 @@ export type AseguradoInputs = {
     nombres: string
     parentesco: string
     estado: string
-    fechaValidezSeguro: string
+    baja: {
+      fechaValidezSeguro: string
+    }
     fechaExtincion: string
   }
   titular: {
@@ -25,7 +26,9 @@ export type AseguradoInputs = {
     apellidoMaterno: string
     nombres: string
     estado: string
-    fechaValidezSeguro: string
+    baja: {
+      fechaValidezSeguro: string
+    }
   }
   empleador: {
     numeroPatronal: string
@@ -87,18 +90,17 @@ export const AseguradoCard = (props: {
 
   useEffect(()=>{
     const empleador = asegurado?.empleador
-    console.log("empleador", empleador)
     // setValue("asegurado.matricula", asegurado?.matricula || "")
     setValue("asegurado.apellidoPaterno", asegurado?.apellidoPaterno || "")
     setValue("asegurado.apellidoMaterno", asegurado?.apellidoMaterno || "")
     setValue("asegurado.nombres", asegurado?.nombres || "")
     setValue("asegurado.estado", asegurado?.estadoText || "")
-    const valSeguro = asegurado?.afiliacion?.baja?.fechaValidezSeguro
-    setValue("asegurado.fechaValidezSeguro", valSeguro ? moment(valSeguro).format('L') : "")
+    // const valSeguro = asegurado?.afiliacion?.baja?.fechaValidezSeguro
+    if(asegurado?.afiliacion?.baja?.fechaValidezSeguro) setValue("asegurado.baja.fechaValidezSeguro",  moment(asegurado?.afiliacion?.baja?.fechaValidezSeguro).format('L'))
     setValue("empleador.numeroPatronal", empleador?.numeroPatronal || "")
     setValue("empleador.nombre", empleador?.nombre || "")
     setValue("empleador.estado", empleador?.estadoText || "")
-    setValue("empleador.fechaBaja", empleador?.fechaBaja || "")
+    setValue("empleador.fechaBaja", empleador?.fechaBaja ? moment(empleador?.fechaBaja).format("L") : "")
     setValue("empleador.enMora", empleador?.enMora ? "Sí" : empleador?.enMora === false ? "No" : "")
 
     if(asegurado?.tipo == 2) {
@@ -113,8 +115,8 @@ export const AseguradoCard = (props: {
       setValue("titular.apellidoMaterno", titular?.apellidoMaterno || "")
       setValue("titular.nombres", titular?.nombres || "")
       setValue("titular.estado", titular?.estadoText)
-      const valSeguroTit = titular?.afiliacion?.baja?.fechaValidezSeguro
-      setValue("titular.fechaValidezSeguro", valSeguroTit ? moment(valSeguroTit).format('L') : "")
+      // const valSeguroTit = titular?.afiliacion?.baja?.fechaValidezSeguro
+      if(titular?.afiliacion?.baja?.fechaValidezSeguro) setValue("titular.baja.fechaValidezSeguro", moment(titular?.afiliacion?.baja?.fechaValidezSeguro).format('L'))
     }
   }, [asegurado])
 
@@ -158,92 +160,104 @@ export const AseguradoCard = (props: {
     </Accordion.Toggle>
     <Accordion.Collapse eventKey="0">
       <Card.Body>
-        <Form.Row>
-          <Col lg={3} md={6}>
-            <Form.Label htmlFor="asegurado-matricula">
-              Matrícula
-            </Form.Label>
-            <InputGroup hasValidation className="mb-2">
-              <FormControl id="asegurado-matricula"
-                isInvalid={!!formErrors.asegurado?.matricula /*|| !!formErrors.asegurado?.id*/}
-                className="text-uppercase" {...register("asegurado.matricula")} />
-              <InputGroup.Append >
-                <Button variant="outline-secondary" onClick={buscarAseguradoHandler}>
-                  {buscar.isFetching ? <Spinner animation="border" size="sm" /> : <FaSearch />}
-                </Button>
-              </InputGroup.Append>
-              <Form.Control.Feedback type="invalid">{formErrors.asegurado?.matricula?.message}</Form.Control.Feedback>
-            </InputGroup>
-          </Col>
-          <Form.Group as={Col} lg={3} md={6}>
-            <Form.Label>Apellido Paterno</Form.Label>
-            <Form.Control
-              readOnly
-              {...register("asegurado.apellidoPaterno")}
-            />
-          </Form.Group>
-          <Form.Group as={Col} lg={3} md={6}>
-            <Form.Label>Apellido Materno</Form.Label>
-            <Form.Control
-              readOnly
-              {...register("asegurado.apellidoMaterno")}
-            />
-          </Form.Group>
-          <Form.Group as={Col} lg={3} md={6}>
-            <Form.Label>Nombre</Form.Label>
-            <Form.Control
-              readOnly
-              {...register("asegurado.nombres")}
-            />
-          </Form.Group>
-        </Form.Row>
-        <Form.Row>
-          <Form.Group as={Col} sm={4}>
-            <Form.Label>Estado</Form.Label>
-            <Form.Control
-              readOnly
-              isInvalid={!!formErrors.asegurado?.estado}
-              {...register("asegurado.estado")}
-            >
-            </Form.Control>
-            <Form.Control.Feedback type="invalid">{formErrors.asegurado?.estado?.message}</Form.Control.Feedback>
-          </Form.Group>
-          {asegurado?.tipo == 2 && <Form.Group as={Col} sm={4}>
-            <Form.Label>Parentesco</Form.Label>
-            <Form.Control
-              readOnly
-              isInvalid={!!formErrors.asegurado?.fechaValidezSeguro}
-              {...register("asegurado.parentesco")}
-            />
-            <Form.Control.Feedback type="invalid">{
-              formErrors.asegurado?.fechaValidezSeguro?.message
-            }</Form.Control.Feedback>
-          </Form.Group>}
-          {asegurado?.afiliacion?.baja && <Form.Group as={Col} sm={4}>
-            <Form.Label>Validez del seguro</Form.Label>
-            <Form.Control
-              readOnly
-              isInvalid={!!formErrors.asegurado?.fechaValidezSeguro}
-              {...register("asegurado.fechaValidezSeguro")}
-            />
-            <Form.Control.Feedback type="invalid">{
-              formErrors.asegurado?.fechaValidezSeguro?.message
-            }</Form.Control.Feedback>
-          </Form.Group>}
-          {asegurado?.tipo == 2 ? <Form.Group as={Col} sm={4}>
-            <Form.Label>Fecha de extinción</Form.Label>
-            <Form.Control
-              readOnly
-              isInvalid={!!formErrors.asegurado?.fechaExtincion}
-              {...register("asegurado.fechaExtincion")}
-            />
-            <Form.Control.Feedback type="invalid">{formErrors.asegurado?.fechaExtincion?.message}</Form.Control.Feedback>
-          </Form.Group> : null}
-        </Form.Row>
+        <div>
+          {(formErrors.asegurado as any)?.message ? <Alert variant="danger">
+            {(formErrors.asegurado as any)?.message}
+          </Alert> : null}
+          <Form.Row>
+            <Form.Group as={Col} lg={3} md={6}>
+              <Form.Label htmlFor="asegurado-matricula">
+                Matrícula
+              </Form.Label>
+              <InputGroup hasValidation>
+                <FormControl id="asegurado-matricula"
+                  isInvalid={!!formErrors.asegurado?.matricula || buscar.isError}
+                  className="text-uppercase" {...register("asegurado.matricula")}
+                  aria-describedby="matriculaHelpBlock" />
+                <InputGroup.Append >
+                  <Button variant={(formErrors.asegurado?.matricula || buscar.isError) ? "outline-danger" : "outline-secondary"} onClick={buscarAseguradoHandler}>
+                    {buscar.isFetching ? <Spinner animation="border" size="sm" /> : <FaSearch />}
+                  </Button>
+                </InputGroup.Append>
+                <Form.Control.Feedback type="invalid">{
+                    (buscar.error as any)?.response?.message || (buscar.error as any)?.message
+                    || formErrors.asegurado?.matricula?.message
+                  }
+                </Form.Control.Feedback>
+              </InputGroup>            
+              {!formErrors.asegurado?.matricula ? <Form.Text id="matriculaHelpBlock" muted>Ej: 98-0824-ABC</Form.Text> : null}
+            </Form.Group>
+            <Form.Group as={Col} lg={3} md={6}>
+              <Form.Label>Apellido Paterno</Form.Label>
+              <Form.Control
+                readOnly
+                {...register("asegurado.apellidoPaterno")}
+              />
+            </Form.Group>
+            <Form.Group as={Col} lg={3} md={6}>
+              <Form.Label>Apellido Materno</Form.Label>
+              <Form.Control
+                readOnly
+                {...register("asegurado.apellidoMaterno")}
+              />
+            </Form.Group>
+            <Form.Group as={Col} lg={3} md={6}>
+              <Form.Label>Nombre</Form.Label>
+              <Form.Control
+                readOnly
+                {...register("asegurado.nombres")}
+              />
+            </Form.Group>
+          </Form.Row>
+          <Form.Row>
+            {!!asegurado && <Form.Group as={Col} sm={3}>
+              <Form.Label>Estado</Form.Label>
+              <Form.Control
+                readOnly
+                className="text-uppercase"
+                isInvalid={!!formErrors.asegurado?.estado}
+                {...register("asegurado.estado")}
+              >
+              </Form.Control>
+              <Form.Control.Feedback type="invalid">{formErrors.asegurado?.estado?.message}</Form.Control.Feedback>
+            </Form.Group>}
+            {asegurado?.tipo == 2 && <Form.Group as={Col} sm={3}>
+              <Form.Label>Parentesco</Form.Label>
+              <Form.Control
+                readOnly
+                className="text-uppercase"
+                {...register("asegurado.parentesco")}
+              />
+            </Form.Group>}
+            {asegurado?.afiliacion?.baja && <Form.Group as={Col} sm={3}>
+              <Form.Label>Validez del seguro</Form.Label>
+              <Form.Control
+                readOnly
+                isInvalid={!!formErrors.asegurado?.baja?.fechaValidezSeguro}
+                {...register("asegurado.baja.fechaValidezSeguro")}
+              />
+              <Form.Control.Feedback type="invalid">{
+                formErrors.asegurado?.baja?.fechaValidezSeguro?.message
+              }</Form.Control.Feedback>
+            </Form.Group>}
+            {asegurado?.tipo == 2 ? <Form.Group as={Col} sm={3}>
+              <Form.Label>Fecha de extinción</Form.Label>
+              <Form.Control
+                readOnly
+                isInvalid={!!formErrors.asegurado?.fechaExtincion}
+                {...register("asegurado.fechaExtincion")}
+              />
+              <Form.Control.Feedback type="invalid">{formErrors.asegurado?.fechaExtincion?.message}</Form.Control.Feedback>
+            </Form.Group> : null}
+          </Form.Row>
+        </div>
         {asegurado?.tipo == 2 && <div /*className={asegurado.tipo == 2 ? "" : "d-none"}*/ >
           {/* {watch("titular.id") ? <> */}
           <hr />
-          <h2 style={{ fontSize: "1.25rem" }}>Titular</h2>
+          <h2 style={{ fontSize: "1.25rem" }}>Titular</h2>          
+          {(formErrors.titular as any)?.message ? <Alert variant="danger">
+            {(formErrors.titular as any)?.message}
+          </Alert> : null}
           <Form.Row>
             <Form.Group as={Col} lg={3} md={6}>
               <Form.Label>Matricula</Form.Label>
@@ -279,6 +293,7 @@ export const AseguradoCard = (props: {
               <Form.Label>Estado</Form.Label>
               <Form.Control
                 readOnly
+                className="text-uppercase"
                 isInvalid={!!formErrors.titular?.estado}
                 {...register("titular.estado")}
               />
@@ -288,63 +303,69 @@ export const AseguradoCard = (props: {
               <Form.Label>Validez del seguro</Form.Label>
               <Form.Control
                 readOnly
-                isInvalid={!!formErrors.titular?.fechaValidezSeguro}
-                {...register("titular.fechaValidezSeguro")}
+                isInvalid={!!formErrors.titular?.baja?.fechaValidezSeguro}
+                {...register("titular.baja.fechaValidezSeguro")}
               />
-              <Form.Control.Feedback type="invalid">{formErrors.titular?.fechaValidezSeguro?.message}</Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">{formErrors.titular?.baja?.fechaValidezSeguro?.message}</Form.Control.Feedback>
             </Form.Group>}
           </Form.Row>
-          {/* </> : null} */}
         </div>}
-        <hr />
-        <h2 style={{ fontSize: "1.25rem"}}>Empleador</h2>
-        <Form.Row>
-          <Form.Group as={Col} md={4}>
-            <Form.Label>Nº Patronal</Form.Label>
-            <Form.Control
-              readOnly
-              isInvalid={!!formErrors.empleador?.numeroPatronal}
-              {...register("empleador.numeroPatronal")}
-            />
-            <Form.Control.Feedback type="invalid">{formErrors.empleador?.numeroPatronal?.message}</Form.Control.Feedback>
-          </Form.Group>
-          <Form.Group as={Col} md={8}>
-            <Form.Label>Nombre</Form.Label>
-            <Form.Control
-              readOnly
-              {...register("empleador.nombre")}
-            />
-          </Form.Group>
-        </Form.Row>
-        <Form.Row>
-          <Form.Group as={Col} sm={4}>
-            <Form.Label>Estado</Form.Label>
-            <Form.Control
-              readOnly
-              isInvalid={!!formErrors.empleador?.estado}
-              {...register("empleador.estado")}
-            />
-            <Form.Control.Feedback type="invalid">{formErrors.empleador?.estado?.message}</Form.Control.Feedback>
-          </Form.Group>
-          <Form.Group as={Col} sm={4}>
-            <Form.Label>Fecha de baja</Form.Label>
-            <Form.Control
-              readOnly
-              isInvalid={!!formErrors.empleador?.fechaBaja}
-              {...register("empleador.fechaBaja")}
-            />
-            <Form.Control.Feedback type="invalid">{formErrors.empleador?.fechaBaja?.message}</Form.Control.Feedback>
-          </Form.Group>
-          <Form.Group as={Col} sm={4}>
-            <Form.Label>En mora</Form.Label>
-            <Form.Control
-              readOnly
-              isInvalid={!!formErrors.empleador?.enMora}
-              {...register("empleador.enMora")}
-            />
-            <Form.Control.Feedback type="invalid">{formErrors.empleador?.enMora?.message}</Form.Control.Feedback>
-          </Form.Group>
-        </Form.Row>
+        {!!asegurado && <div>
+          <hr />
+          <h2 style={{ fontSize: "1.25rem"}}>Empleador</h2>
+          {(formErrors.empleador as any)?.message ? <Alert variant="danger">
+            {(formErrors.empleador as any)?.message}
+          </Alert> : null}
+          <Form.Row>
+            <Form.Group as={Col} md={3}>
+              <Form.Label>Nº Patronal</Form.Label>
+              <Form.Control
+                readOnly
+                isInvalid={!!formErrors.empleador?.numeroPatronal}
+                {...register("empleador.numeroPatronal")}
+              />
+              <Form.Control.Feedback type="invalid">{formErrors.empleador?.numeroPatronal?.message}</Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group as={Col} md={9}>
+              <Form.Label>Nombre</Form.Label>
+              <Form.Control
+                readOnly
+                {...register("empleador.nombre")}
+              />
+            </Form.Group>
+          </Form.Row>
+          <Form.Row>
+            <Form.Group as={Col} sm={3}>
+              <Form.Label>Estado</Form.Label>
+              <Form.Control
+                readOnly
+                className="text-uppercase"
+                isInvalid={!!formErrors.empleador?.estado}
+                {...register("empleador.estado")}
+              />
+              <Form.Control.Feedback type="invalid">{formErrors.empleador?.estado?.message}</Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group as={Col} sm={3}>
+              <Form.Label>Fecha de baja</Form.Label>
+              <Form.Control
+                readOnly
+                isInvalid={!!formErrors.empleador?.fechaBaja}
+                {...register("empleador.fechaBaja")}
+              />
+              <Form.Control.Feedback type="invalid">{formErrors.empleador?.fechaBaja?.message}</Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group as={Col} sm={3}>
+              <Form.Label>En mora</Form.Label>
+              <Form.Control
+                readOnly
+                className="text-uppercase"
+                isInvalid={!!formErrors.empleador?.enMora}
+                {...register("empleador.enMora")}
+              />
+              <Form.Control.Feedback type="invalid">{formErrors.empleador?.enMora?.message}</Form.Control.Feedback>
+            </Form.Group>
+          </Form.Row>
+        </div>}
         <AseguradoChooser
           title="Resultados"
           show={aseguradoChooserVisible}
