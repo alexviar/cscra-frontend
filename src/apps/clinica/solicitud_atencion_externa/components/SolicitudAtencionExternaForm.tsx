@@ -26,13 +26,29 @@ const hoy = moment()
 const estadoAfiSchema = function(asegurado: any, schema: any) {
   schema.oneOf(Object.values(EstadosAfi), "Estado desconocido")
   if(asegurado.afiliacion.baja)
-    return schema.notOneOf([EstadosAfi[1]], `El asegurado figura como activo, pero hay un registro de su baja con fecha ${asegurado.afiliacion.baja.regDate}.`)
+    return schema.notOneOf([EstadosAfi[1]], `El asegurado figura como activo, pero hay un registro de su baja con fecha ${asegurado.afiliacion.baja.fechaRegistro}.`)
   else
-    return schema.notOneOf([EstadosAfi[2]], `El asegurado figura como dado de baja, aunque no se encontraron registros de la baja.`)
+    return schema.notOneOf([EstadosAfi[2]], `El asegurado figura como dado de baja, aunque no se encontraron registros de la misma.`)
+}
+
+const bajaAfiSchema = function(asegurado: any, schema: any) {
+  return asegurado.afiliacion.baja ? schema.shape({
+    fechaValidezSeguro: yup.date().format().emptyStringTo(null).nullable()
+      .min(hoy, "El seguro ya no tiene validez")
+      .required("Fecha sin especificar, se asume que el seguro ya no tiene validez")
+  }) : schema
+}
+
+const estadoEmpSchema = function(empleador: any, schema: any) {
+  schema.oneOf(Object.values(EstadosEmp), "Estado desconocido")
+  if(empleador.fechaBaja){
+    schema.notOneOf(EstadosEmp[1], "El empleador figura como activo, pero tiene fecha de baja")
+  }
+  return schema
 }
 
 const schema = yup.object().shape({
-  asegurado: yup.object().when(["$asegurado"], function(asegurado: any, schema: any){
+  asegurado: yup.object().when("$asegurado", function(asegurado: any, schema: any) {
     if(!asegurado) return schema.test("", "", function(value: any, context: any){
       return context.createError({
         message: "Debe proporcionar los datos del afiliado"
@@ -41,13 +57,9 @@ const schema = yup.object().shape({
     else return schema.shape({
       matricula: yup.string().label("matricula").trim().uppercase().required(),  // .matches(/^\d{2}-\d{4}-[a-zA-ZñÑ]{2,3}$/, "Formato incorrecto."),
       estado: estadoAfiSchema(asegurado, yup.string().label("estado")),
-      fechaExtincion: yup.date().format().label("fecha de extinsion").nullable().notRequired()
+      fechaExtincion: yup.date().format().emptyStringTo(null).nullable().label("fecha de extinsion").notRequired()
         .min(hoy.toDate(), "Fecha de extinsion alcanzada"),
-      baja: yup.object().shape({
-        fechaValidezSeguro: yup.date().format().emptyStringTo(null).nullable()
-          .min(hoy, "El seguro ya no tiene validez")
-          .required("Fecha sin especificar, se asume que el seguro ya no tiene validez")
-      }).nullable().default(null)
+      baja: bajaAfiSchema(asegurado, yup.object())
     })
   }),
   titular: yup.object().when("$asegurado", function(asegurado: any, schema: any){
@@ -58,32 +70,23 @@ const schema = yup.object().shape({
       if(asegurado?.afiliacion?.parentesco != 8)
         return schema.shape({
           estado: estadoAfiSchema(asegurado.titular, yup.string().label("estado")),
-          baja: yup.object().shape({
-            fechaValidezSeguro: yup.date().format().emptyStringTo(null).nullable()
-              .min(hoy, "El seguro ya no tiene validez")
-              .required("Fecha sin especificar, se asume que el seguro ya no tiene validez")
-          }).nullable().default(null)
+          baja: bajaAfiSchema(asegurado, yup.object())
         })
     }
   }),
-  empleador: yup.object().when("$asegurado", function(asegurado, schema){
-    if(asegurado?.empleador){
-      return schema.shape({
-        estado: yup.string().label("estado").oneOf(Object.values(EstadosEmp), "Estado desconocido")
-        .test("estado-incoherente", "El empleador figura como activo, pero tiene fecha de baja", function(value, context) {
-          const empleador = context.options.context?.asegurado?.empleador
-          return empleador.estado != 1 || !empleador.fechaBaja
-        }),
-        fechaBaja: yup.mixed().when("estado", {
+  empleador: yup.object().when("$asegurado", function(asegurado: any, schema: any){
+    if(asegurado){
+      const empleador = asegurado.empleador
+      return !!empleador ? schema.shape({
+        estado: estadoEmpSchema(empleador, yup.string().label("estado")),
+        fechaBaja: yup.date().format().emptyStringTo(null).nullable().when("estado", {
           is: (estado: string) => estado == EstadosEmp[2] || estado == EstadosEmp[3],
-          then: yup.date().format().emptyStringTo(null).nullable()
-                   .required("Fecha sin especificar, se asume que el seguro ya no tiene validez")
+          then: (schema) => schema.required("Fecha sin especificar, se asume que el seguro ya no tiene validez")
                    .min(hoy.subtract(2, "months").toDate(), "Han pasado mas de 2 meses desde la baja, el seguro ya no tiene validez")
         }),
         enMora: yup.string().oneOf(["No"], "El empleador esta en mora")
-      })
+      }) : schema.oneOf([NaN], "No se encontraron datos del empleador")
     }
-    return schema.oneOf([NaN], "No se encontraron datos del empleador")
   }),
   regional: yup.array().length(1, "Debe seleccionar una regional"),
   medico: yup.string().trim().uppercase().required(),
@@ -91,12 +94,12 @@ const schema = yup.object().shape({
   proveedor: yup.string().trim().uppercase().required(),
   prestacionesSolicitadas: yup.array().of(yup.object().shape({
     prestacion: yup.string().trim().uppercase().required("Debe indicar una prestacion")
-  })).min(1, "Debe solicitar un servicio").max(1, "Solo puede solicitar un servicio por solicitud")
+  })).min(1, "Debe solicitar un servicio").max(1, "Solo puede solicitar un servicio")
 })
 
 export const SolicitudAtencionExternaForm = ()=>{
   const [asegurado, setAsegurado] = useState<Asegurado|null>(null)
-  console.log("Asegurado", asegurado)
+  
   const formMethods = useForm<Inputs>({
     mode: "onBlur",
     context: {
@@ -148,6 +151,7 @@ export const SolicitudAtencionExternaForm = ()=>{
       ]) || (loggedUser?.can(Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL) && regionalId == loggedUser?.regionalId)){
         dm11Viewer.open({url: urlDm11, title: "Formulario D.M. - 11"})
         reset()
+        setAsegurado(null)
       }
     }
   })
@@ -155,14 +159,13 @@ export const SolicitudAtencionExternaForm = ()=>{
   const formErrors = formState.errors
   const registrarError = registrar.error as AxiosError
 
-  console.log("FormErrors", formErrors)
-
   useEffect(()=>{
     if(registrarError?.response?.status == 422){
       const {errors} = registrarError.response?.data
       Object.keys(errors).forEach((key: any)=>{
         let localKey = key
         if(key == "asegurado.id") localKey = "asegurado.matricula"
+        if(key == "empleador.aportes") localKey = "empleador.enMora"
         setError(localKey, {type: "serverError", message: errors[key]})
       })
     }
@@ -171,13 +174,13 @@ export const SolicitudAtencionExternaForm = ()=>{
   const renderAlert = ()=>{
     if(registrar.isSuccess){
       return <Alert variant="success">
-      La operacion se realizó exitosamente
-    </Alert>
+        La operacion se realizó exitosamente
+      </Alert>
     }
     if(registrar.isError){
-      return registrarError.response?.status != 422 ? <Alert variant="danger">
-        {registrarError ? registrarError.response?.data?.message || registrarError.message : ""}
-      </Alert> : null
+      return <Alert variant="danger">
+        Ocurrio un error al procesar la solicitud
+      </Alert>
     }
     return null
   }

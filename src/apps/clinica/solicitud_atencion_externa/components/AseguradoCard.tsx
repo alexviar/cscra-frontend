@@ -132,7 +132,6 @@ export const AseguradoCard = (props: {
   const buscarAseguradoHandler = () => {
     trigger("asegurado.matricula")
       .then((validation) => {
-        console.log("Matricula validation", validation)
         if (!formErrors.asegurado?.matricula) {
           if (formState.dirtyFields.asegurado?.matricula)
             delete formState.dirtyFields.asegurado.matricula
@@ -185,7 +184,7 @@ export const AseguradoCard = (props: {
                   }
                 </Form.Control.Feedback>
               </InputGroup>            
-              {!formErrors.asegurado?.matricula ? <Form.Text id="matriculaHelpBlock" muted>Ej: 98-0824-ABC</Form.Text> : null}
+              {!formErrors.asegurado?.matricula && !buscar.isError ? <Form.Text id="matriculaHelpBlock" muted>Ej: 98-0824-ABC</Form.Text> : null}
             </Form.Group>
             <Form.Group as={Col} lg={3} md={6}>
               <Form.Label>Apellido Paterno</Form.Label>

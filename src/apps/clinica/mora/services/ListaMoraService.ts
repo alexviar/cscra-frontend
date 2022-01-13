@@ -29,7 +29,6 @@ export const ListaMoraService = {
     })
   },
   quitar: (idEmpleador: number) =>{
-    console.log(idEmpleador)
     return apiClient.post<ListaMoraItem>("lista-mora/quitar", {
       empleador_id: idEmpleador
     })

@@ -49,8 +49,6 @@ export const Login = () => {
     }
   })
 
-  console.log(isAuthenticated)
-
   return isAuthenticated !== false ? 
     <Redirect to={state?.from || "/"} /> :
     <div className="auth-wrapper bg-light">

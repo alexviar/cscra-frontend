@@ -12,8 +12,6 @@ export const ProtectedRoute = ({ children, authorize, ...rest }: Props) => {
   }>()
   const ignoreAuthorization = state?.ignoreAuthorization
   const loggedUser = useLoggedUser()
-
-  console.log(loggedUser)
   
   if(loggedUser === undefined) return null
 

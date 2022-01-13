@@ -33,10 +33,10 @@ export const SolicitudAtencionExternaFilterForm = (props: Props)=>{
       proveedor: ""
     }
   })
-  console.log(formState)
+  
   return <Form className={"mb-2"} onSubmit={handleSubmit((input)=>{
     const filter: SolicitudesAtencionExternaFilter = {}
-    console.log(input)
+    
     props.onFilter({
       numero: parseInt(input.numero),
       numeroPatronal: input.numeroPatronal,

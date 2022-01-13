@@ -9,7 +9,6 @@ type Props = Omit<ModalProps, "children"> & {
 }
 
 export const AseguradoChooser = (props: Props) => {
-  console.log(props.asegurados.length)
   return <Modal {...props} >
     <Modal.Header>
       {props.title}
@@ -33,7 +32,6 @@ export const AseguradoChooser = (props: Props) => {
               <td>{asegurado.nombreCompleto}</td>
               <td className={asegurado.estadoText ? "" : "bg-ligth"}>{asegurado.estadoText || "Desconocido"}</td>
               <td><Button onClick={()=>{
-                console.log(asegurado)
                 props.onSelect(asegurado)
               }}
               >Seleccionar</Button></td>

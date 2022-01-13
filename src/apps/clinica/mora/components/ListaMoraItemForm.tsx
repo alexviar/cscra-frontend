@@ -40,15 +40,12 @@ export default ()=>{
   })
 
   const formErrors = formState.errors
-  
-  console.log("Vlues", watch(), formErrors)
 
   const history = useHistory()
 
   const queryClient = useQueryClient()
   
   const onBuscarEmpleadorSuccess = ({data}: any) => {
-    console.log("Nombre",data.nombre)
     setValue("nombre", data.nombre)
   }
   const numeroPatronal = watch("numeroPatronal")
@@ -69,25 +66,46 @@ export default ()=>{
   })
 
   useEffect(()=>{
-    if(buscarEmpleador.isError){
-      const error = buscarEmpleador.error as AxiosError
-      setError("numeroPatronal", {
+    const error = buscarEmpleador.error as any
+    if(error?.response?.status == 404) {
+        setError("numeroPatronal", {
+          type: "searchError",
+          message:  "Empleador no encontrado"
+        })
+    }
+    else if(error){
+      console.error(error)
+        setError("numeroPatronal", {
         type: "searchError",
-        message: error.response?.status == 404 ? "Empleador no encontrado" : "Ocurrio un error"
+        message:  "Ocurrio un error al realizar la busqueda"
       })
     }
   }, [buscarEmpleador.isError])
 
+  useEffect(()=>{
+    const error = guardar.error as any
+    if(error?.response?.status == 422) {
+      const {errors} = error?.response?.data
+      Object.keys(errors).forEach((key: any)=>{
+        let localKey = key
+        if(key == "empleadorId") localKey = "numeroPatronal"
+        setError(localKey, {type: "serverError", message: errors[key]})
+      })
+    }
+    else if(error){
+      console.error(error)
+    }
+  }, [guardar.isError])
+
   const renderAlert = ()=>{
     if(guardar.isSuccess){
       return <Alert variant="success">
-      La operacion se realizó exitosamente
-    </Alert>
+        La operacion se realizó exitosamente
+      </Alert>
     }
     if(guardar.isError){
-      const guardarError = guardar.error as AxiosError
       return <Alert variant="danger">
-        {guardarError.response?.data?.message || guardarError.message}
+        Ocurrio un error al procesar la solicitud
       </Alert>
     }
     return null
@@ -115,9 +133,7 @@ export default ()=>{
               .then((valid)=>{
                 if(!formErrors.numeroPatronal){
                   clearErrors()
-                  if(!buscarEmpleador.data){
-                    buscarEmpleador.refetch()
-                  }
+                  buscarEmpleador.refetch()
                 }
               })
             }}>

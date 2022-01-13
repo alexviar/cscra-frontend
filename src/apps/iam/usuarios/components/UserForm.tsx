@@ -138,7 +138,6 @@ export const UserForm = () => {
   }, [loggedUser])
 
   const user = cargar.data?.data || history.location.state?.user
-  console.log(user)
 
   useEffect(()=>{
     if(user && regionales.length) {

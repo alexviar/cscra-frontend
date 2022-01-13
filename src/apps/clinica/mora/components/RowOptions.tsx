@@ -44,7 +44,7 @@ export const RowOptions = ({item, queryKey}: Props) => {
       })
     }
     else if(quitar.status == "error"){
-      console.log(quitar.error)
+      console.error(quitar.error)
       modal.open({
         state: "error",
         error: quitar.error

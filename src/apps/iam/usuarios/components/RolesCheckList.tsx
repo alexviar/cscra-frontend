@@ -9,8 +9,6 @@ type Props = {
   onChange?: (roles: Rol[])=>void
 }
 
-let count = 1
-
 export const RolesCheckList = React.memo(({
   isInvalid,
   selected=[],
@@ -23,8 +21,6 @@ export const RolesCheckList = React.memo(({
     // refetchOnMount: false,
     refetchOnWindowFocus: false
   })
-
-  console.log("Render count", count++)
 
   const roles = (buscar.data?.data || []) as Rol[]
 
