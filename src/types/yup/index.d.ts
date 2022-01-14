@@ -11,5 +11,6 @@ declare module "yup" {
   }
   interface DateSchema {
     emptyStringTo(val?: Date | null): DateSchema;
+    format(format?: string): DateSchema;
   }
 }

@@ -18,12 +18,12 @@ import { AuthService } from '../../commons/auth/services';
 import { apiClient } from '../../commons/services';
 import { unauthorized } from '../../commons/auth/actions';
 import { ToggleSidebar } from './ToggleSidebar'
+import { Home } from './Home'
 import "../../configs/yup"
-import '../../App.css'
+import './App.css'
 
 const IamApp = React.lazy(()=>import("../../apps/iam/IamApp"))
 const ClinicaApp = React.lazy(()=>import("../../apps/clinica/ClinicaApp"))
-const SeguimientoApp = React.lazy(()=>import("../../apps/seguimiento/SeguimientoApp"))
 
 export default ()=>{
   const dispatch = useDispatch()
@@ -73,7 +73,7 @@ export default ()=>{
                 <Row>
                   <Col className="text-center"><Link to="/iam"><FaUserCircle className="d-block mx-auto" size={48} /><span >IAM</span></Link></Col>
                   <Col className="text-center"><Link to="/clinica" ><FaClinicMedical className="d-block mx-auto"  size={48} /><span>Clínica</span></Link></Col>
-                  <Col className="text-center"><Link to="/seguimiento" ><FaCalendar className="d-block mx-auto"  size={48} /><span>Planes</span></Link></Col>
+                  {/* <Col className="text-center"><Link to="/seguimiento" ><FaCalendar className="d-block mx-auto"  size={48} /><span>Planes</span></Link></Col> */}
                </Row>
               </Popover.Content>
             </Popover>
@@ -143,11 +143,11 @@ export default ()=>{
         <ProtectedRoute path="/clinica">
           <ClinicaApp />
         </ProtectedRoute>
-        <ProtectedRoute path="/seguimiento">
-          <SeguimientoApp />
-        </ProtectedRoute>
         <Route exact path="/login">
           <Login></Login>
+        </Route>        
+        <Route path="/">
+          <Home />
         </Route>
       </Switch>
     </Suspense>

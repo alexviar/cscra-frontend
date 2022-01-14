@@ -64,7 +64,7 @@ export const UserForm = () => {
         const { parent: { password } } = this
         return value === password
       }),
-      regional: yup.array().length(1),
+      regional: yup.array().label("regional").length(1, "Debe seleccionar una regional"),
       roles: yup.array().label("roles").min(1, "Debe seleccionar al menos un rol")
     })
   }), [])
@@ -138,7 +138,6 @@ export const UserForm = () => {
   }, [loggedUser])
 
   const user = cargar.data?.data || history.location.state?.user
-  console.log(user)
 
   useEffect(()=>{
     if(user && regionales.length) {
@@ -166,145 +165,149 @@ export const UserForm = () => {
         {guardar.isError ? (guardar.error as AxiosError).response?.data?.message || (guardar.error as AxiosError).message : "Guardado"}
       </Alert> : null}
       <Accordion className="mb-2" defaultActiveKey="0">
-        <Card>
-          <Accordion.Toggle as={Card.Header} className={["text-light",
-            formErrors.informacionPersonal ? "bg-danger" : "bg-primary"
-          ].join(" ")} eventKey="0">
-            Información personal
-            </Accordion.Toggle>
-          <Accordion.Collapse eventKey="0">
-            <Card.Body>
-              <Form.Row>
-                <Form.Group as={Col} xs={8} md={4}>
-                  <Form.Label title="Numero raiz del carnet de identidad">Carnet de identidad</Form.Label>
-                  <Form.Control type="number"
-                    isInvalid={!!formState.errors.informacionPersonal?.ci}
-                    {...register("informacionPersonal.ci")}
-                  ></Form.Control>
-                  <Form.Control.Feedback type="invalid">{formErrors.informacionPersonal?.ci?.message}</Form.Control.Feedback>
-                </Form.Group>
-                <Form.Group as={Col} xs={4} md={2}>
-                  <Form.Label title="Complemento del carnet de identiad">Complemento</Form.Label>
-                  <Form.Control
-                    isInvalid={!!formErrors.informacionPersonal?.ciComplemento}
-                    {...register("informacionPersonal.ciComplemento")}
-                  ></Form.Control>
-                  <Form.Control.Feedback type="invalid">{formErrors.informacionPersonal?.ciComplemento?.message}</Form.Control.Feedback>
-                </Form.Group>
-              </Form.Row>
-              <Form.Row>
-                <Form.Group as={Col} lg={4}>
-                  <Form.Label>Apellido Paterno</Form.Label>
-                  <Form.Control
-                    isInvalid={!!formErrors.informacionPersonal?.apellidoPaterno}
-                    {...register("informacionPersonal.apellidoPaterno")}
-                    onChange={(e)=>{
-                      register("informacionPersonal.apellidoPaterno").onChange(e)
-                      formState.isSubmitted && trigger("informacionPersonal.apellidoMaterno")
-                    }}
-                  />
-                  <Form.Control.Feedback type="invalid">{formErrors.informacionPersonal?.apellidoPaterno?.message}</Form.Control.Feedback>
-                </Form.Group>
-                <Form.Group as={Col} lg={4}>
-                  <Form.Label>Apellido Materno</Form.Label>
-                  <Form.Control
-                    isInvalid={!!formErrors.informacionPersonal?.apellidoMaterno}
-                    {...register("informacionPersonal.apellidoMaterno")}
-                    onChange={(e)=>{
-                      register("informacionPersonal.apellidoPaterno").onChange(e)
-                      formState.isSubmitted && trigger("informacionPersonal.apellidoMaterno")
-                    }}
-                  />
-                  <Form.Control.Feedback type="invalid">{formErrors.informacionPersonal?.apellidoMaterno?.message}</Form.Control.Feedback>
-                </Form.Group>
-                <Form.Group as={Col} lg={4}>
-                  <Form.Label>Nombres</Form.Label>
-                  <Form.Control
-                    isInvalid={!!formState.errors.informacionPersonal?.nombres}
-                    {...register("informacionPersonal.nombres")}
-                  />
-                  <Form.Control.Feedback type="invalid">{formState.errors.informacionPersonal?.nombres?.message}</Form.Control.Feedback>
-                </Form.Group>
-              </Form.Row>
-            </Card.Body>
-          </Accordion.Collapse>
-        </Card>
-        <Card>
-          <Accordion.Toggle as={Card.Header} className={["text-light", formErrors.informacionUsuario ? "bg-danger" : "bg-primary"].join(" ")} eventKey="1">
-            Informacion de usuario
-            </Accordion.Toggle>
-          <Accordion.Collapse eventKey="1">
-            <Card.Body>
-              <Form.Row>
-                <Form.Group controlId="username" as={Col} md={4}>
-                  <Form.Label >Usuario</Form.Label>
-                  <Form.Control
-                    disabled={!!id}
-                    isInvalid={!!formState.errors.informacionUsuario?.username}
-                    {...register("informacionUsuario.username")}
-                  ></Form.Control>
-                  <Form.Control.Feedback type="invalid">{formState.errors.informacionUsuario?.username?.message}</Form.Control.Feedback>
-                </Form.Group>
-                {id ? null : <><Form.Group as={Col} md={4}>
-                  <Form.Label>Contraseña</Form.Label>
-                  <Form.Control type="password"
-                    isInvalid={!!formState.errors.informacionUsuario?.password}
-                    {...register("informacionUsuario.password")}
-                  ></Form.Control>
-                  <Form.Control.Feedback type="invalid">{formState.errors.informacionUsuario?.password?.message}</Form.Control.Feedback>
-                </Form.Group>
-                <Form.Group as={Col} md={4}>
-                  <Form.Label>Confirmar contraseña</Form.Label>
-                  <Form.Control type="password"
-                    isInvalid={!!formState.errors.informacionUsuario?.passwordRepeat}
-                    {...register("informacionUsuario.passwordRepeat", {
-                      required: { value: true, message: "Este campo es requerido" },
-                      validate: {
-                        matchPassword: (value) => value === watch('informacionUsuario.password') || "Las contraseñas no coinciden"
-                      }
-                    })}
-                  ></Form.Control>
-                  <Form.Control.Feedback type="invalid">{formState.errors.informacionUsuario?.passwordRepeat?.message}</Form.Control.Feedback>
-                </Form.Group></>}
-              </Form.Row>
-              <Form.Group>
-                <Form.Label>Regional</Form.Label>
-                <Controller
-                  name="informacionUsuario.regional"
-                  control={control}
-                  render={({ field, fieldState }) => {
-                    return <RegionalesTypeahead
-                      id="usuario/regionales-typeahead"
-                      onLoad={setRegionales}
-                      isInvalid={!!fieldState.error}
-                      feedback={fieldState.error?.message}
-                      filterBy={filterRegional}
-                      selected={field.value}
-                      onBlur={field.onBlur}
-                      onChange={field.onChange}
+        <Card className="overflow-visible">
+          <div className="overflow-hidden">
+            <Accordion.Toggle as={Card.Header} className={["text-light",
+              formErrors.informacionPersonal ? "bg-danger" : "bg-primary"
+            ].join(" ")} eventKey="0">
+              Información personal
+              </Accordion.Toggle>
+            <Accordion.Collapse eventKey="0">
+              <Card.Body>
+                <Form.Row>
+                  <Form.Group as={Col} xs={8} md={4}>
+                    <Form.Label title="Numero raiz del carnet de identidad">Carnet de identidad</Form.Label>
+                    <Form.Control type="number"
+                      isInvalid={!!formState.errors.informacionPersonal?.ci}
+                      {...register("informacionPersonal.ci")}
+                    ></Form.Control>
+                    <Form.Control.Feedback type="invalid">{formErrors.informacionPersonal?.ci?.message}</Form.Control.Feedback>
+                  </Form.Group>
+                  <Form.Group as={Col} xs={4} md={2}>
+                    <Form.Label title="Complemento del carnet de identiad">Complemento</Form.Label>
+                    <Form.Control
+                      isInvalid={!!formErrors.informacionPersonal?.ciComplemento}
+                      {...register("informacionPersonal.ciComplemento")}
+                    ></Form.Control>
+                    <Form.Control.Feedback type="invalid">{formErrors.informacionPersonal?.ciComplemento?.message}</Form.Control.Feedback>
+                  </Form.Group>
+                </Form.Row>
+                <Form.Row>
+                  <Form.Group as={Col} lg={4}>
+                    <Form.Label>Apellido Paterno</Form.Label>
+                    <Form.Control
+                      isInvalid={!!formErrors.informacionPersonal?.apellidoPaterno}
+                      {...register("informacionPersonal.apellidoPaterno")}
+                      onChange={(e)=>{
+                        register("informacionPersonal.apellidoPaterno").onChange(e)
+                        formState.isSubmitted && trigger("informacionPersonal.apellidoMaterno")
+                      }}
                     />
-                  }}
-                />
-              </Form.Group>
-              <Form.Row>
-                <Form.Group as={Col}>
-                  <Form.Label>Roles</Form.Label>
+                    <Form.Control.Feedback type="invalid">{formErrors.informacionPersonal?.apellidoPaterno?.message}</Form.Control.Feedback>
+                  </Form.Group>
+                  <Form.Group as={Col} lg={4}>
+                    <Form.Label>Apellido Materno</Form.Label>
+                    <Form.Control
+                      isInvalid={!!formErrors.informacionPersonal?.apellidoMaterno}
+                      {...register("informacionPersonal.apellidoMaterno")}
+                      onChange={(e)=>{
+                        register("informacionPersonal.apellidoPaterno").onChange(e)
+                        formState.isSubmitted && trigger("informacionPersonal.apellidoMaterno")
+                      }}
+                    />
+                    <Form.Control.Feedback type="invalid">{formErrors.informacionPersonal?.apellidoMaterno?.message}</Form.Control.Feedback>
+                  </Form.Group>
+                  <Form.Group as={Col} lg={4}>
+                    <Form.Label>Nombres</Form.Label>
+                    <Form.Control
+                      isInvalid={!!formState.errors.informacionPersonal?.nombres}
+                      {...register("informacionPersonal.nombres")}
+                    />
+                    <Form.Control.Feedback type="invalid">{formState.errors.informacionPersonal?.nombres?.message}</Form.Control.Feedback>
+                  </Form.Group>
+                </Form.Row>
+              </Card.Body>
+            </Accordion.Collapse>
+          </div>
+        </Card>
+        <Card className="overflow-visible">
+          <div className="overflow-hidden">
+            <Accordion.Toggle as={Card.Header} className={["text-light", formErrors.informacionUsuario ? "bg-danger" : "bg-primary"].join(" ")} eventKey="1">
+              Informacion de usuario
+              </Accordion.Toggle>
+            <Accordion.Collapse eventKey="1">
+              <Card.Body>
+                <Form.Row>
+                  <Form.Group controlId="username" as={Col} md={4}>
+                    <Form.Label >Usuario</Form.Label>
+                    <Form.Control
+                      disabled={!!id}
+                      isInvalid={!!formState.errors.informacionUsuario?.username}
+                      {...register("informacionUsuario.username")}
+                    ></Form.Control>
+                    <Form.Control.Feedback type="invalid">{formState.errors.informacionUsuario?.username?.message}</Form.Control.Feedback>
+                  </Form.Group>
+                  {id ? null : <><Form.Group as={Col} md={4}>
+                    <Form.Label>Contraseña</Form.Label>
+                    <Form.Control type="password"
+                      isInvalid={!!formState.errors.informacionUsuario?.password}
+                      {...register("informacionUsuario.password")}
+                    ></Form.Control>
+                    <Form.Control.Feedback type="invalid">{formState.errors.informacionUsuario?.password?.message}</Form.Control.Feedback>
+                  </Form.Group>
+                  <Form.Group as={Col} md={4}>
+                    <Form.Label>Confirmar contraseña</Form.Label>
+                    <Form.Control type="password"
+                      isInvalid={!!formState.errors.informacionUsuario?.passwordRepeat}
+                      {...register("informacionUsuario.passwordRepeat", {
+                        required: { value: true, message: "Este campo es requerido" },
+                        validate: {
+                          matchPassword: (value) => value === watch('informacionUsuario.password') || "Las contraseñas no coinciden"
+                        }
+                      })}
+                    ></Form.Control>
+                    <Form.Control.Feedback type="invalid">{formState.errors.informacionUsuario?.passwordRepeat?.message}</Form.Control.Feedback>
+                  </Form.Group></>}
+                </Form.Row>
+                <Form.Group>
+                  <Form.Label>Regional</Form.Label>
                   <Controller
-                    name="informacionUsuario.roles"
+                    name="informacionUsuario.regional"
                     control={control}
                     render={({ field, fieldState }) => {
-                      return <><RolesCheckList
+                      return <RegionalesTypeahead
+                        id="usuario/regionales-typeahead"
+                        onLoad={setRegionales}
                         isInvalid={!!fieldState.error}
-                        onChange={field.onChange}
+                        feedback={fieldState.error?.message}
+                        filterBy={filterRegional}
                         selected={field.value}
+                        onBlur={field.onBlur}
+                        onChange={field.onChange}
                       />
-                      <Form.Control.Feedback type="invalid">{fieldState.error?.message}</Form.Control.Feedback></>
                     }}
                   />
                 </Form.Group>
-              </Form.Row>
-            </Card.Body>
-          </Accordion.Collapse>
+                <Form.Row>
+                  <Form.Group as={Col}>
+                    <Form.Label>Roles</Form.Label>
+                    <Controller
+                      name="informacionUsuario.roles"
+                      control={control}
+                      render={({ field, fieldState }) => {
+                        return <><RolesCheckList
+                          isInvalid={!!fieldState.error}
+                          onChange={field.onChange}
+                          selected={field.value}
+                        />
+                        <Form.Control.Feedback type="invalid">{fieldState.error?.message}</Form.Control.Feedback></>
+                      }}
+                    />
+                  </Form.Group>
+                </Form.Row>
+              </Card.Body>
+            </Accordion.Collapse>
+          </div>
         </Card>
       </Accordion>
       <Form.Row>

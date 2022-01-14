@@ -68,10 +68,31 @@ dt::after {
   right: 0;
 }
 
+input {
+  text-transform: inherit;
+}
+
 input[type="date"]:read-only::-webkit-inner-spin-button,
 input[type="date"]:read-only::-webkit-calendar-picker-indicator {
     display: none;
     -webkit-appearance: none;
+}
+
+.overflow-visible {
+  overflow: visible !important;
+}
+
+.accordion > .card .card-header  {
+  border-radius: 0;
+  margin-bottom: -1px;
+}
+
+.card > .overflow-hidden {
+  border-radius: inherit;
+}
+
+.position-unset {
+  position: unset !important;
 }
 
 .form-label {

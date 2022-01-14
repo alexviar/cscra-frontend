@@ -19,9 +19,9 @@ export const RolForm = () => {
 
   const schema = useMemo(()=>{
     return yup.object().shape({
-      name: yup.string().label("nombre").trim()/*.lowercase()*/.required().max(50),
-      description: yup.string().label("descripcion").trim().nullable().optional().max(250),
-      permissions: yup.array().label("permisos").min(1)
+      name: yup.string().label("nombre").trim()/*.lowercase()*/.required("El nombre es requerido").max(50, "Ha excedido el limite de $max caracteres"),
+      description: yup.string().label("descripcion").max(250, "Ha excedido el limite de $max caracteres"),
+      permissions: yup.array().label("permisos").min(1, "Debe marcar al menos 1 permiso")
     })
   }, [])
   

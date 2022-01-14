@@ -22,7 +22,6 @@ export const Pagination = ({current, total, onChange}: Props)=>{
   rd = Math.min(2+2-Math.min(2,ld), rd)
   const minimum = current - ld
   const maximum=current + rd
-  console.log("pag.", current, total, minimum,maximum)
   const pageItems = []
   if(maximum > 1 ) for(let i = minimum; i <= maximum; i++){
     if(current == i)

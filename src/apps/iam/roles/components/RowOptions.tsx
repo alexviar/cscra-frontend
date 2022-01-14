@@ -50,7 +50,7 @@ export const RowOptions = ({rol, queryKey}: Props) => {
     else if(eliminar.status == "error"){
       modal.open({
         state: "error",
-        error: eliminar.error
+        error: eliminar.error as any
       })
     }
   }, [eliminar.status])
