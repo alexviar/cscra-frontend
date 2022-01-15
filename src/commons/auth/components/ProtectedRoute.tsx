@@ -11,11 +11,7 @@ export const ProtectedRoute = ({ children, authorize, ...rest }: Props) => {
     ignoreAuthorization?: boolean
   }>()
   const ignoreAuthorization = state?.ignoreAuthorization
-<<<<<<< HEAD
-  const loggedUser = useLoggedUser()
-=======
   const loggedUser = useUser()
->>>>>>> add_tests
   
   if(loggedUser == null) return null
 
