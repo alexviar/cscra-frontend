@@ -36,7 +36,7 @@ export const MedicosIndex = () => {
 
   const queryKey = ["medicos.buscar", filter, page];
   const buscar = useQuery(queryKey, () => {
-    return MedicosService.buscar(filter, page) as AxiosPromise<PaginatedResponse<Medico>>
+    return MedicosService.buscar(page, filter) as AxiosPromise<PaginatedResponse<Medico>>
   }, {
     enabled: MedicoPolicy.view(loggedUser),
     // refetchOnMount: false,
@@ -78,7 +78,7 @@ export const MedicosIndex = () => {
             {index + 1}
           </th>
           <td>
-            {medico.ciText}
+            {medico.ci.texto}
           </td>
           <td>
             {medico.nombreCompleto}
@@ -87,7 +87,7 @@ export const MedicosIndex = () => {
             {medico.especialidad}
           </td>
           <td>
-            {medico.estadoText}
+            {medico.estado == 1 ? "Alta" : medico.estado == 2 ? "Baja" : ""}
           </td>
           <td>
             <RowOptions queryKey={queryKey} medico={medico} />

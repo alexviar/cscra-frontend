@@ -7,7 +7,7 @@ import { Link, useLocation } from "react-router-dom"
 import { Pagination } from "../../../../commons/components"
 import { ProtectedContent, useLoggedUser, Permisos } from "../../../../commons/auth"
 import { ProveedorPolicy } from "../policies"
-import { ProveedoresService, Filter } from "../services"
+import { Medico, ProveedoresService, Filter } from "../services"
 import { ProveedoresFilterForm } from "./ProveedoresFilterForm"
 import { RowOptions } from "./RowOptions"
 
@@ -37,7 +37,7 @@ export const ProveedoresIndex = () => {
 
   const queryKey = ["proveedores.buscar", filter, page]
   const buscar = useQuery(queryKey, () => {
-    return ProveedoresService.buscar(filter, page)
+    return ProveedoresService.buscar(page, filter)
   }, {
     enabled: ProveedorPolicy.view(loggedUser),
     // refetchOnMount: false,
@@ -75,14 +75,14 @@ export const ProveedoresIndex = () => {
       }
       return records.map((item, index) => {
         return <tr key={item.id}>
-          <th scope="row" style={{ width: 1, lineHeight: "26px" }}>
+          <th scope="row" style={{ width: 1 }}>
             {index + 1}
           </th>
-          <td style={{ lineHeight: "26px" }}>
-            {item.nombre || item.nombreCompleto}
+          <td>
+            {item.tipo == 1 ? item.nombre : item.nombreCompleto}
           </td>
-          <td style={{ lineHeight: "26px" }}>
-            {item.tipo}
+          <td>
+            {item.tipo == 1 ? "Empresa" : "Medico"}
           </td>
           <td>
             <RowOptions proveedor={item} queryKey={queryKey} />

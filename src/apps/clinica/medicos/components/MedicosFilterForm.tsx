@@ -1,14 +1,12 @@
 import { Button, Col, Form } from "react-bootstrap"
 import { useForm, Controller } from "react-hook-form"
-import { Especialidad, EspecialidadesTypeahead } from "./EspecialidadesTypeahead"
 import { MedicoFilter as Filter } from "../services"
 
 type Inputs = {
-  numCi: string
-  compCi: string
-  nombre: string
-  especialidad: Especialidad[]
-  tipo: string
+  numCi?: string
+  compCi?: string
+  nombre?: string
+  especialidad?: string
 }
 
 type Props = {
@@ -21,31 +19,16 @@ export const MedicosFilterForm = (props: Props) => {
     handleSubmit,
     register,
     reset
-  } = useForm<Inputs>({
-    defaultValues: {
-      tipo: "",
-      especialidad: []
-    }
-  })
+  } = useForm<Inputs>()
+  
   return <Form onSubmit={handleSubmit((data) => {
     const filter: Filter = {}
     if(data.numCi) filter.ci = data.numCi
     if(data.compCi) filter.ciComplemento = data.compCi
     if(data.nombre) filter.nombre = data.nombre
-    if(data.especialidad) filter.especialidadId = data.especialidad.length && data.especialidad[0].id
-    if(data.tipo) filter.tipo = parseInt(data.tipo)
+    if(data.especialidad) filter.especialidad = data.especialidad
     props.onFilter(filter)
   })}>
-    <Form.Row>
-      <Form.Group as={Col}>
-        <Form.Label>Tipo</Form.Label>
-        <div>
-          <Form.Check inline type="radio" value="" label="Todos" {...register("tipo")} />
-          <Form.Check inline type="radio" value="1" label="Empleados" {...register("tipo")} />
-          <Form.Check inline type="radio" value="2" label="Proveedores" {...register("tipo")} />
-        </div>
-      </Form.Group>
-    </Form.Row>
     <Form.Row>
       <Form.Group as={Col} sm={4} lg={3}>
         <Form.Label>Nº Carnet</Form.Label>
@@ -63,16 +46,8 @@ export const MedicosFilterForm = (props: Props) => {
     <Form.Row>
       <Form.Group as={Col}>
         <Form.Label>Especialidad</Form.Label>
-        <Controller
-          control={control}
-          name="especialidad"
-          render={({field: {ref, value, ...field}})=>{
-            return <EspecialidadesTypeahead
-              id="medicos-filter/especialidades"
-              selected={value}
-              {...field}
-            />
-          }}
+        <Form.Control
+          {...register("especialidad")}
         />
       </Form.Group>
     </Form.Row>

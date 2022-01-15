@@ -10,21 +10,19 @@ import { useHistory, useParams } from 'react-router'
 import { Regional, RegionalesTypeahead } from '../../../../commons/components'
 import { Permisos, useLoggedUser } from '../../../../commons/auth'
 import { useModal } from '../../../../commons/reusable-modal'
-import { Especialidad, EspecialidadesTypeahead } from './EspecialidadesTypeahead'
+// import { Especialidad, EspecialidadesTypeahead } from './EspecialidadesTypeahead'
 
 type Inputs = {
-  tipo: string
   ci: string
   ciComplemento: string
   apellidoPaterno: string
   apellidoMaterno: string
   nombres: string
-  especialidad: Especialidad[]
+  especialidad: string
   regional: Regional[]
 }
 
 const schema = yup.object().shape({
-  tipo: yup.number().label("tipo").oneOf([1, 2]),
   ci: yup.number().label("número de carnet").typeError("El ${path} no es un numero valido"),
   ciComplemento: yup.string().label("número complemento").transform(value => value === "" ? null : value).trim()
     .uppercase().nullable().notRequired()
@@ -60,7 +58,6 @@ export const MedicosForm = ()=>{
   const loggedUser = useLoggedUser()
 
   const [regionales, setRegionales] = useState<Regional[]>([])
-  const [especialidades, setEspecialidades] = useState<Especialidad[]>([])
 
   const continueRef = useRef<boolean>(false)
 
@@ -78,39 +75,35 @@ export const MedicosForm = ()=>{
     mode: "onBlur",
     resolver: yupResolver(schema),
     defaultValues: {
-      especialidad: [],
       regional: []
     }
   })
 
-  console.log("Errors", watch())
-
   const queryClient = useQueryClient()
 
-  const guardar = useMutation((inputs: Inputs)=>{ 
-    return id ? MedicosService.actualizar(parseInt(id), 
-      parseInt(inputs.tipo),
-      {
+  const guardar = useMutation((inputs: Inputs)=>{
+    return id ? MedicosService.actualizar({
+      id: parseInt(id),
+      ci: {
         raiz: parseInt(inputs.ci),
         complemento: inputs.ciComplemento
       },
-      inputs.apellidoPaterno,
-      inputs.apellidoMaterno,
-      inputs.nombres,
-      inputs.especialidad![0].id,
-      inputs.regional![0].id
-    ) : MedicosService.registrar(
-      parseInt(inputs.tipo),
-      {
+      apellidoPaterno: inputs.apellidoPaterno,
+      apellidoMaterno: inputs.apellidoMaterno,
+      nombres: inputs.nombres,
+      especialidad: inputs.especialidad,
+      regionalId: inputs.regional![0].id
+    }) : MedicosService.registrar({
+      ci: {
         raiz: parseInt(inputs.ci),
         complemento: inputs.ciComplemento
       },
-      inputs.apellidoPaterno,
-      inputs.apellidoMaterno,
-      inputs.nombres,
-      inputs.especialidad![0].id,
-      inputs.regional![0].id
-    )
+      apellidoPaterno: inputs.apellidoPaterno,
+      apellidoMaterno: inputs.apellidoMaterno,
+      nombres: inputs.nombres,
+      especialidad: inputs.especialidad,
+      regionalId: inputs.regional![0].id
+    })
   }, {
     onSuccess: ()=>{
       reset()
@@ -153,7 +146,6 @@ export const MedicosForm = ()=>{
 
   useEffect(()=>{
     if(medico){
-      setValue("tipo", String(medico.tipo))
       setValue("ci", String(medico.ci.raiz))
       setValue("ciComplemento", medico.ci.complemento)
       setValue("apellidoPaterno", medico.apellidoPaterno)
@@ -176,12 +168,6 @@ export const MedicosForm = ()=>{
     }
   }, [medico, regionales])
 
-  useEffect(()=>{
-    if(medico && especialidades.length){
-      setValue("especialidad", especialidades.filter(r=>r.id == medico.especialidadId))
-    }
-  }, [medico, especialidades])
-
   return <Form id="medico-form"
     onSubmit={handleSubmit((inputs)=>{
       guardar.mutate(inputs)
@@ -191,15 +177,6 @@ export const MedicosForm = ()=>{
     {guardar.status == "error" || guardar.status == "success"  ? <Alert variant={guardar.isError ? "danger" : "success"}>
       {guardar.isError ? (guardar.error as AxiosError).response?.data?.message || (guardar.error as AxiosError).message : "Guardado"}
     </Alert> : null}
-    <Form.Row>
-      <Form.Group as={Col}>
-        <Form.Label>Tipo</Form.Label>
-        <div>
-          <Form.Check inline type="radio" value="1" label="Empleado" {...register("tipo")} />
-          <Form.Check inline type="radio" value="2" label="Proveedor" {...register("tipo")} />
-        </div>
-      </Form.Group>
-    </Form.Row>
     <Form.Row>
       <Form.Group as={Col} md={4} xs={8}>
         <Form.Label>Carnet de identidad</Form.Label>
@@ -246,23 +223,11 @@ export const MedicosForm = ()=>{
     </Form.Row>
     <Form.Row>
       <Form.Group as={Col} md={8}>
-        <Form.Label>Especialidad</Form.Label>
-        <Controller
-          name="especialidad"
-          control={control}
-          render={({field, fieldState})=>{
-            return <>
-              <EspecialidadesTypeahead
-                id="medicos-form/especialidades-typeahead"
-                onLoad={(especialidades)=>setEspecialidades(especialidades)}
-                feedback={fieldState.error?.message}
-                isInvalid={!!fieldState.error}
-                selected={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-              />
-            </>
-          }}
+        <Form.Label htmlFor="medico-especialidad">Especialidad</Form.Label>
+        <Form.Control
+          id="medico-especialidad"
+          isInvalid={!!formState.errors.especialidad}
+          {...register("especialidad")}
         />
       </Form.Group>
       <Form.Group as={Col} md={4}>
@@ -315,7 +280,6 @@ export const MedicosForm = ()=>{
         type="reset"
         onClick={()=>{
           setValue("regional", [])
-          setValue("especialidad", [])
           clearErrors()
         }}
       >Limpiar</Button>

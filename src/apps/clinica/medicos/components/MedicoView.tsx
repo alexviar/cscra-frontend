@@ -50,7 +50,7 @@ export const MedicoView = ()=>{
         <tbody>
           <tr>
             <th style={{width: 1}}>Carnet de identidad</th>
-            <td>: {medico?.ciText}</td>
+            <td>: {medico?.ci.texto}</td>
           </tr>
           <tr>
             <th style={{width: 1}}>Nombre</th>

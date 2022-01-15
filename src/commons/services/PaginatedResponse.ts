@@ -1,6 +1,7 @@
 export type PaginatedResponse<T> = {
   meta: {
-    total: number
+    total: number,
+    nextPage: number
   }
   records: T[]
 }

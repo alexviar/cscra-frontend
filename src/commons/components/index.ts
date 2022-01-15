@@ -7,3 +7,5 @@ export * from './VerticalEllipsisDropdownToggle'
 export * from './PdfModal'
 
 export * from './RegionalesTypeahead'
+
+export * from './LocationInput'
