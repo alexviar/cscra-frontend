@@ -10,18 +10,18 @@ import { FcDebt } from '../../commons/components/icons/FcDebt';
 import { SolicitudAtencionExternaIndex } from './solicitud_atencion_externa/components/SolicitudAtencionExternaIndex';
 import { SolicitudAtencionExternaForm } from './solicitud_atencion_externa/components/SolicitudAtencionExternaForm';
 import { SolicitudATPolicy } from './solicitud_atencion_externa/policies';
-import { Permisos, ProtectedRoute, useLoggedUser } from '../../commons/auth';
+import { Permisos, ProtectedRoute, useUser } from '../../commons/auth';
 import { ListaMoraPolicy } from "./mora/policies";
 import { Image } from "react-bootstrap";
 
 export const ClinicaApp = ()=>{
   const { url } = useRouteMatch()
-  const loggedUser = useLoggedUser()
+  const user = useUser()
 
   const sidebarItems = useMemo(()=>{
     const items = [] as any[]
 
-    if(ListaMoraPolicy.index(loggedUser)){
+    if(ListaMoraPolicy.index(user)){
       items.push(
         {
           id: "lista-mora",
@@ -32,7 +32,7 @@ export const ClinicaApp = ()=>{
       )
     }
 
-    if(SolicitudATPolicy.index(loggedUser)) {
+    if(SolicitudATPolicy.index(user)) {
       items.push({
         id: "atencion-externa",
         path: `${url}/atencion-externa`,
@@ -72,7 +72,7 @@ export const ClinicaApp = ()=>{
     //       }
     // )
     return items
-  }, [loggedUser])
+  }, [user])
 
   return <SidebarLayout sidebar={{
     header: <div className="d-flex justify-content-center"><Image src="/logo-lg.png" /></div>,

@@ -12,7 +12,7 @@ import { Asegurado, SolicitudesAtencionExternaService } from "../services"
 import { Regional, RegionalesTypeahead } from "../../../../commons/components"
 import { useModal } from "../../../../commons/reusable-modal"
 import { Permisos } from "../../../../commons/auth/constants"
-import { useLoggedUser } from "../../../../commons/auth/hooks"
+import { useUser } from "../../../../commons/auth/hooks"
 import { EstadosAfi, EstadosEmp } from "../utils"
 
 type Inputs = AseguradoInputs & PrestacionesSolicitadasInputs & {
@@ -132,7 +132,7 @@ export const SolicitudAtencionExternaForm = ()=>{
 
   const dm11Viewer = useModal("pdfModal")
 
-  const loggedUser = useLoggedUser()
+  const user = useUser()
   
   const registrar = useMutation((values: Inputs)=>{
     return SolicitudesAtencionExternaService.registrar(
@@ -145,10 +145,10 @@ export const SolicitudAtencionExternaForm = ()=>{
     )
   }, {
     onSuccess: ({data: {urlDm11, regionalId}}) => {
-      if(loggedUser?.canAny([
+      if(user?.canAny([
         Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA,
         Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA_REGISTRADO_POR
-      ]) || (loggedUser?.can(Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL) && regionalId == loggedUser?.regionalId)){
+      ]) || (user?.can(Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL) && regionalId == user?.regionalId)){
         dm11Viewer.open({url: urlDm11, title: "Formulario D.M. - 11"})
         reset()
         setAsegurado(null)
@@ -217,8 +217,8 @@ export const SolicitudAtencionExternaForm = ()=>{
                           }}
                           id="solicitud-atencion-externa-form/regionales"
                           filterBy={(regional: Regional)=>{
-                            return (loggedUser?.can(Permisos.REGISTRAR_SOLICITUDES_DE_ATENCION_EXTERNA) ? true : 
-                              (regional.id == loggedUser?.regionalId))
+                            if(user?.can(Permisos.REGISTRAR_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL)) return regional.id == user?.regionalId
+                            return true
                           }}
                           isInvalid={!!fieldState.error}
                           feedback={fieldState.error?.message}

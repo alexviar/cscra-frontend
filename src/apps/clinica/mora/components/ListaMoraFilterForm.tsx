@@ -26,12 +26,12 @@ export const ListaMoraFilterForm = (props: Props)=>{
   })}>
     <Form.Row>
       <Form.Group as={Col} sm={4}>
-        <Form.Label>Nº Patronal</Form.Label>
-        <Form.Control {...register("numeroPatronal")} />
+        <Form.Label htmlFor="numeroPatronal">N.º Patronal</Form.Label>
+        <Form.Control id="numeroPatronal" {...register("numeroPatronal")} />
       </Form.Group>
       <Form.Group as={Col} sm={8}>
-        <Form.Label>Nombre</Form.Label>
-        <Form.Control {...register("nombre")} />
+        <Form.Label htmlFor="nombre">Nombre</Form.Label>
+        <Form.Control id="nombre" {...register("nombre")} />
       </Form.Group>
     </Form.Row>
     <Form.Row>

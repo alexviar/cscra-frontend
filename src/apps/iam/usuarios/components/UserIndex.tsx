@@ -8,7 +8,7 @@ import { Page } from "../../../../commons/services"
 import { Pagination } from "../../../../commons/components"
 import { ProtectedContent } from "../../../../commons/auth/components"
 import { Permisos } from "../../../../commons/auth/constants"
-import { useLoggedUser } from "../../../../commons/auth/hooks"
+import { useUser } from "../../../../commons/auth/hooks"
 import { UserService, UserFilter } from "../services"
 import { UsuarioPolicy } from "../policies"
 import { UserFilterForm } from "./UserFilterForm"
@@ -17,7 +17,7 @@ import { RowOptions } from "./RowOptions"
 
 export const UserIndex = ()=>{
 
-  const loggedUser = useLoggedUser()
+  const loggedUser = useUser()
 
   const [page, setPage] = useState<Page>({
     current: 1,

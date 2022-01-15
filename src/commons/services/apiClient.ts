@@ -39,7 +39,7 @@ apiClient.interceptors.request.use(config => {
       }
     });
   };
-  // console.log("Axios config", config)
+  
   return config;
 });
 
