@@ -1,7 +1,7 @@
 import apiClient from "../../../../commons/services/apiClient"
 
 type Empleador = {
-  id: number,
+  id: string,
   numeroPatronal: string,
   nombre: string
 }

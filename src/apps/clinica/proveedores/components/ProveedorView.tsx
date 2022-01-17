@@ -1,24 +1,25 @@
-import { useEffect, useRef } from 'react'
-import { Button, Col, Form, Row, Tab, Tabs, Table } from 'react-bootstrap'
+import { useEffect } from 'react'
+import { Breadcrumb, Button, Col, Form, Row } from 'react-bootstrap'
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet"
+import Skeleton from "react-loading-skeleton"
 import { LatLngExpression } from "leaflet"
 import { Proveedor, ProveedoresService } from '../services'
 import { useQuery } from 'react-query'
 import { Link, useLocation, useParams } from 'react-router-dom'
-import { useLoggedUser, ProtectedContent } from "../../../../commons/auth"
+import { useUser, ProtectedContent } from "../../../../commons/auth"
 import { useModal } from "../../../../commons/reusable-modal"
 import { ProveedorPolicy } from "../policies"
+import 'react-loading-skeleton/dist/skeleton.css'
 
 export const ProveedorView = ()=>{
   const { pathname, state: locationState } = useLocation<{
-    proveedor?: Proveedor,
-    tab?: string
+    proveedor?: Proveedor
   }>()
   const { id } = useParams<{
     id: string
   }>()
 
-  const loggedUser = useLoggedUser()
+  const loggedUser = useUser()
 
   const loader = useModal("queryLoader")
 
@@ -47,46 +48,46 @@ export const ProveedorView = ()=>{
     }
   }, [cargar.isFetching])
 
-
-  const renderGeneralInfo = ()=>{
-    return <dl className="form-row">
-        <dt className="col-sm-3 col-md-2">Tipo</dt>
-        <dd className="col-sm-9 col-md-10">{proveedor?.tipo == 2 ? "Médico" : proveedor?.tipo == 1 ? "Empresa" : null}</dd>
-        <dt className="col-sm-3 col-md-2" style={{width: '1px'}}>NIT</dt>
-        <dd className="col-sm-9 col-md-10">{proveedor?.nit}</dd>
-      {proveedor?.tipo == 2 ? 
-        <>
-            <dt className="col-sm-3 col-md-2" style={{width: 1}}>Carnet de identidad</dt>
-            <dd className="col-sm-9 col-md-10">{proveedor?.ci.texto}</dd>
-            <dt className="col-sm-3 col-md-2" style={{width: 1}}>Nombre</dt>
-            <dd className="col-sm-9">{proveedor?.nombreCompleto}</dd>
-            <dt className="col-sm-3 col-md-2">Especialidad</dt>
-            <dd className="col-sm-9 col-md-10">{proveedor?.especialidad}</dd>
-        </> : (proveedor?.tipo == 1 ? <>
-          <dt className="col-sm-3 col-md-2" style={{width: 1}}>Nombre</dt>
-          <dd className="col-sm-9 col-md-10">{proveedor?.nombre}</dd>
-        </> : null)}
-        <dt className="col-sm-3 col-md-2">Regional</dt>
-        <dd className="col-sm-9 col-md-10">{proveedor?.regional?.nombre}</dd>
-    </dl>
-  }
-
-  const renderContactInfo = ()=>{
-    if(!proveedor) return null
-    const position: LatLngExpression | null = proveedor.ubicacion && [proveedor.ubicacion.latitud, proveedor.ubicacion.longitud]
-    return <Row className="px-2 py-3">
-      <Col sm={6}>
+  const position: LatLngExpression | null | undefined = proveedor?.ubicacion && [proveedor.ubicacion.latitud, proveedor.ubicacion.longitud]
+    
+  return <div>
+    <Breadcrumb>
+      <Breadcrumb.Item linkAs={Link} linkProps={{to: "/clinica/proveedores"}}>Proveedores</Breadcrumb.Item>
+      <Breadcrumb.Item active>{id}</Breadcrumb.Item>
+      <Breadcrumb.Item active>Detalles</Breadcrumb.Item>
+    </Breadcrumb>
+    <Row>
+      <Col lg={5} md={4}>
         <dl className="form-row">
-          <dt className="col-lg-5 col-xl-4">Dirección</dt>
-          <dd className="col-lg-7 col-xl-8">{proveedor.direccion || 'No proporcionado'}</dd>
-          <dt className="col-lg-5 col-xl-4">Teléfono 1</dt>
-          <dd className="col-lg-7 col-xl-8">{proveedor.telefono1 || 'No proporcionado'}</dd>
-          <dt className="col-lg-5 col-xl-4">Teléfono 2</dt>
-          <dd className="col-lg-7 col-xl-8">{proveedor.telefono2 || 'No proporcionado'}</dd>
+          <dt className="col-lg-5 col-md-12 col-sm-5">Tipo</dt>
+          <dd className="col-lg-7 col-md-12 col-sm-7">{proveedor ? (proveedor.tipo == 1 ? "Médico" : proveedor?.tipo == 2 ? "Empresa" : null) : <Skeleton />}</dd>
+          <dt className="col-lg-5 col-md-12 col-sm-5">NIT</dt>
+          <dd className="col-lg-7 col-md-12 col-sm-7">{proveedor? proveedor.nit : <Skeleton />}</dd>
+          {
+            proveedor?.tipo == 1 ? <>
+                <dt className="col-lg-5 col-md-12 col-sm-5">Carnet de identidad</dt>
+                <dd className="col-lg-7 col-md-12 col-sm-7">{proveedor?.ci.texto}</dd>
+                <dt className="col-lg-5 col-md-12 col-sm-5">Nombre</dt>
+                <dd className="col-lg-7 col-md-12 col-sm-7">{proveedor?.nombreCompleto}</dd>
+                <dt className="col-lg-5 col-md-12 col-sm-5">Especialidad</dt>
+                <dd className="col-lg-7 col-md-12 col-sm-7">{proveedor?.especialidad}</dd>
+            </> : (proveedor?.tipo == 2 ? <>
+              <dt className="col-lg-5 col-md-12 col-sm-5">Nombre</dt>
+              <dd className="col-lg-7 col-md-12 col-sm-7">{proveedor?.nombre}</dd>
+            </> : null)
+          }
+          <dt className="col-lg-5 col-md-12 col-sm-5">Regional</dt>
+          <dd className="col-lg-7 col-md-12 col-sm-7">{proveedor ? proveedor.regional?.nombre : <Skeleton />}</dd>
+          <dt className="col-lg-5 col-md-12 col-sm-5">Dirección</dt>
+          <dd className="col-lg-7 col-md-12 col-sm-7">{proveedor ? proveedor.direccion : <Skeleton />}</dd>
+          <dt className="col-lg-5 col-md-12 col-sm-5">Teléfono 1</dt>
+          <dd className="col-lg-7 col-md-12 col-sm-7">{proveedor ? proveedor.telefono1 : <Skeleton />}</dd>
+          <dt className="col-lg-5 col-md-12 col-sm-5">Teléfono 2</dt>
+          <dd className="col-lg-7 col-md-12 col-sm-7">{proveedor ? proveedor.telefono2 || 'No proporcionado' : <Skeleton />}</dd>
         </dl>
       </Col>
-      <Col sm={6}>
-        <MapContainer center={position||undefined} zoom={14} dragging={false} scrollWheelZoom={false} doubleClickZoom={false} style={{minHeight: 200, height: "100%"}}>
+      <Col lg={7} md={8}>
+        {position !== undefined ? <MapContainer center={position||[-17.78629, -63.18117]} zoom={14} dragging={false} scrollWheelZoom={false} doubleClickZoom={false} style={{minHeight: 480, height: "100%"}}>
           <TileLayer
             attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -96,19 +97,9 @@ export const ProveedorView = ()=>{
               <a href={`geo:${position.join(",")}`}>Abrir con</a>
             </Popup>
           </Marker> : null}
-        </MapContainer>
+        </MapContainer> : <Skeleton style={{minHeight: 480}} />}
       </Col>
     </Row>
-  }
-  
-  return <>
-    <div id="general-info">
-      <h2 style={{fontSize: "1.75rem"}}>Proveedor</h2>
-      {renderGeneralInfo()}
-    </div>
-    <div id="contact-info">
-      {renderContactInfo()}    
-    </div>
     {proveedor ? <Form.Row>
       <ProtectedContent
         authorize={ProveedorPolicy.edit}
@@ -123,5 +114,5 @@ export const ProveedorView = ()=>{
         </Col>
       </ProtectedContent>
     </Form.Row> : null}
-  </>
+  </div>
 }

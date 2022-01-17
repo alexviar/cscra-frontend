@@ -54,16 +54,6 @@ export const ContactoFieldset = () => {
     </Form.Row>
     <Form.Row>
       <Form.Group as={Col}>
-        <Form.Label>Horario de atención</Form.Label>
-        <Form.Control as="textarea"
-          isInvalid={!!formErrors.horario}
-          {...register("horario")}
-        />
-        <Form.Control.Feedback type="invalid">{formErrors.horario?.message}</Form.Control.Feedback>
-      </Form.Group>
-    </Form.Row>
-    <Form.Row>
-      <Form.Group as={Col}>
         <Form.Label>Ubicación</Form.Label>
         <Controller
           name="ubicacion"

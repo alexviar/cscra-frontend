@@ -35,14 +35,13 @@ export const SolicitudesAtencionExternaService = {
   generarDm11: (solicitud_id: number) => {
     return apiClient.put<{url: string}>(`solicitudes-atencion-externa/${solicitud_id}/generar-dm11`)
   },
-  registrar: (regional_id: number, asegurado_id: string, medico: string, especialidad: string, proveedor: string, prestaciones_solicitadas: { prestacion: string }[]) => {
+  registrar: (regional_id: number, asegurado_id: string, medico_id: number, proveedor_id: number, prestacion: string) => {
     return apiClient.post("solicitudes-atencion-externa", {
       regional_id,
       asegurado_id,
-      medico,
-      especialidad,
-      proveedor,
-      prestaciones_solicitadas
+      medico_id,
+      proveedor_id,
+      prestacion
     })
   }
 }

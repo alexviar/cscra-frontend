@@ -5,11 +5,11 @@ import { Controller, useFormContext } from 'react-hook-form'
 import { useParams } from 'react-router'
 import * as yup from 'yup'
 import { Regional, RegionalesTypeahead } from '../../../../commons/components'
-import { Permisos, useLoggedUser } from '../../../../commons/auth'
+import { Permisos, useUser } from '../../../../commons/auth'
 import { Proveedor } from '../services'
 
 export type Inputs = {
-  tipo?: 2
+  tipo?: 1
   nit?: string
   ci?: number
   ciComplemento?: string
@@ -58,7 +58,7 @@ export const ProveedorMedicoFieldset = ()=>{
     id?: string
   }>()
 
-  const loggedUser = useLoggedUser()
+  const loggedUser = useUser()
 
   const {
     register,

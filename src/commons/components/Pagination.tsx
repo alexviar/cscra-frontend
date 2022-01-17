@@ -23,7 +23,7 @@ export const Pagination = ({current, total, onChange}: Props)=>{
   while(page <= total){
     if(pageItems.length == 1 && total > n && current - Math.floor(n/2) > 1){
       pageItems.push(<BSPagination.Ellipsis key={"left-ellipsis"} disabled />)
-      page = current - Math.floor(n/4)
+      page = Math.min(current - Math.floor(n/4), total - (n - 3))
     }
     else if(pageItems.length == n - 2 ){
       if(total > n && current + Math.floor(n/2) < total){

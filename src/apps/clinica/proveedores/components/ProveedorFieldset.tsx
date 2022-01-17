@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react"
 import { Form, Col } from "react-bootstrap"
-import { useFormContext } from "react-hook-form"
+import { Controller, useFormContext } from "react-hook-form"
 import { useHistory, useParams } from "react-router"
 import { useQuery } from "react-query"
 import { useModal } from "../../../../commons/reusable-modal"
@@ -16,6 +16,7 @@ export const ProveedorFieldset = () => {
   const { id } = useParams<{ id?: string }>()
 
   const {
+    control,
     register,
     watch
   } = useFormContext<Inputs>()
@@ -33,17 +34,53 @@ export const ProveedorFieldset = () => {
   const tipoField = register("tipo")
 
   return <fieldset>
-    <legend>Registro de proveedores</legend>
-    <Form.Group as={Form.Row}>
-      <Form.Label column sm={"auto"}>Tipo de proveedor</Form.Label>
-      <Col className="d-flex" xs={"auto"}>
-        <Form.Check disabled={!!id} inline type="radio" label="Médico" {...tipoField}></Form.Check>
-        <Form.Check disabled={!!id} inline type="radio" label="Empresa" {...tipoField} onChange={(e) => {
-          if (e.target.checked && !id)
-            tipoField.onChange(e)
-        }} ></Form.Check>
-      </Col>
-    </Form.Group>
+    <legend>Información general</legend>
+    <Form.Row>
+      <Form.Group as={Col} sm={4}>
+        <Form.Label>Tipo de proveedor</Form.Label>
+        <Controller
+          control={control}
+          name="tipo"
+          render={({field, fieldState})=>{
+            return <>
+              <Form.Row className={fieldState.error ? "is-invalid" : ""}>
+                <Col>
+                  <Form.Check 
+                    disabled={!!id}
+                    type="radio"
+                    value={1}
+                    checked={field.value == 1}
+                    label="Médico"
+                    isInvalid={!!fieldState.error}
+                    {...tipoField}
+                    onChange={(e) => {
+                    if (e.target.checked && !id)
+                      tipoField.onChange(e)
+                    }} 
+                  />
+                </Col>
+                <Col>
+                  <Form.Check
+                    disabled={!!id}
+                    type="radio"
+                    value={2}
+                    checked={field.value == 2}
+                    label="Empresa" 
+                    isInvalid={!!fieldState.error}
+                    {...tipoField} 
+                    onChange={(e) => {
+                    if (e.target.checked && !id)
+                      tipoField.onChange(e)
+                    }} 
+                  />
+                </Col>
+              </Form.Row>
+              <Form.Control.Feedback type="invalid">{fieldState.error?.message}</Form.Control.Feedback>
+            </>
+          }}
+        />        
+      </Form.Group>
+    </Form.Row>
     {renderSpecificFieldset()}
   </fieldset>
 }

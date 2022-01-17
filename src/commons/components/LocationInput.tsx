@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useRef } from "react"
 import { Button, FormControl, InputGroup } from "react-bootstrap"
 import { FaSearch } from "react-icons/fa"
-import L, { LatLngExpression, Marker as LeafletMarker, Map } from "leaflet"
+import { LatLngExpression, Marker as LeafletMarker, Map } from "leaflet"
 import { MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents, ZoomControl } from "react-leaflet"
 import { latLngExpressionToString } from "../utils"
 import "leaflet/dist/leaflet.css";
@@ -21,11 +21,9 @@ const POSITION_CLASSES = {
 }
 
 const InputLocationControl = ({
-  position,
   value,
   onChange
-}: { 
-  position: keyof typeof POSITION_CLASSES
+}: {
   value: LatLngExpression | null
   onChange: (value: LatLngExpression | null) => void 
 }) => {
@@ -38,47 +36,45 @@ const InputLocationControl = ({
     setSearch(latLngExpressionToString(value))
   }, [value])
 
-  return <InputGroup className="leaflet-control bg-white"
-    ref={(instance: HTMLDivElement)=>{
-      if(instance){
-        instance.onclick = (e:any)=>{
-          e.stopPropagation()
-        }
-        instance.onmousemove = (e:any)=>{
-          console.log("OnMove")
-          e.stopPropagation()
-        }
-        instance.ondblclick = (e:any)=>{
-          e.stopPropagation()
-        }
-      }
-    }}
-  >          
-    <FormControl
-      value={search}
-      onChange={(e)=>{
-        setSearch(e.target.value)
-      }}
-    />
-    <InputGroup.Append>
-      <Button variant="outline-secondary"
-        onClick={()=>{
-          const coords = search.split(",")
-          if(coords.length == 2){
-            const [rawLat, rawLng] = coords
-            const lat = parseFloat(rawLat)
-            const lng = parseFloat(rawLng)
-            if(Math.abs(lat) <= 90 && Math.abs(lng) <= 180){
-              map.setView([lat, lng], 13)
-              onChange([lat, lng])
-              return
-            }
+  return <div className="leaflet-control bg-white"
+      ref={(instance: HTMLDivElement)=>{
+        if(instance){
+          instance.onpointermove = (e:any)=>{
+            e.stopPropagation()
           }
-          onChange(null)
+          instance.ondblclick = (e:any)=>{
+            e.stopPropagation()
+          }
+        }
+      }}
+    >  
+    <InputGroup>          
+      <FormControl
+        value={search}
+        onChange={(e)=>{
+          setSearch(e.target.value)
         }}
-      ><FaSearch/></Button>
-    </InputGroup.Append>
-  </InputGroup>
+      />
+      <InputGroup.Append>
+        <Button variant="outline-secondary"
+          onClick={()=>{
+            const coords = search.split(",")
+            if(coords.length == 2){
+              const [rawLat, rawLng] = coords
+              const lat = parseFloat(rawLat)
+              const lng = parseFloat(rawLng)
+              if(Math.abs(lat) <= 90 && Math.abs(lng) <= 180){
+                map.setView([lat, lng], 13)
+                onChange([lat, lng])
+                return
+              }
+            }
+            onChange(null)
+          }}
+        ><FaSearch/></Button>
+      </InputGroup.Append>
+    </InputGroup>
+  </div>
 }
 
 const CustomMarker = (props: { position: LatLngExpression|null, onChange(position: LatLngExpression|null): void})=>{
@@ -126,15 +122,10 @@ const CustomMarker = (props: { position: LatLngExpression|null, onChange(positio
 
 export const LocationInput = (props: Props) => {
 
-  const [search, setSearch] = useState(()=>{
-    return latLngExpressionToString(props.value)
-  })
-  const mapRef = useRef<Map>(null)
-
   return <>
     <MapContainer
-      //@ts-ignore
-      whenCreated={ mapInstance => { mapRef.current = mapInstance } }
+      // //@ts-ignore
+      // whenCreated={ mapInstance => { mapRef.current = mapInstance } }
       center={props.center}
       zoom={13}
       zoomControl={false}
@@ -144,9 +135,14 @@ export const LocationInput = (props: Props) => {
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <InputLocationControl position="topleft" value={props.value} onChange={(position)=>{
-        props.onChange(position)
-      }} />
+      <div className="leaflet-control-container">
+        <div className={POSITION_CLASSES["topleft"]}>
+          <InputLocationControl value={props.value} onChange={(position)=>{
+            props.onChange(position)
+          }} />
+        </div>
+      </div>
+      
       <CustomMarker position={props.value} onChange={(position)=>{
         props.onChange(position)
       }} />

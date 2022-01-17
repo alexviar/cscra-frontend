@@ -5,7 +5,7 @@ export type Medico = {
   id: number
   ci: {
     raiz: number
-    complemento: string
+    complemento: string | null
     texto?: string
   },
   apellidoPaterno: string
@@ -28,6 +28,7 @@ export type MedicoFilter = {
   especialidad?: string
   regionalId?: number
   estado?: number
+  _busqueda?: string
 }
 
 export const MedicosService = {

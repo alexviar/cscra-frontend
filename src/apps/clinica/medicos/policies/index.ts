@@ -1,7 +1,7 @@
-import { Permisos, useLoggedUser } from "../../../../commons/auth";
+import { Permisos, User } from "../../../../commons/auth";
 
 export const MedicoPolicy = {
-  index: function(user: ReturnType<typeof useLoggedUser>){
+  index: function(user: User){
     return user?.canAny([
       Permisos.VER_MEDICOS,
       Permisos.VER_MEDICOS_REGIONAL,
@@ -9,25 +9,25 @@ export const MedicoPolicy = {
       Permisos.REGISTRAR_MEDICOS_REGIONAL
     ])
   },
-  register: function(user: ReturnType<typeof useLoggedUser>){
+  register: function(user: User){
     return user?.canAny([
       Permisos.REGISTRAR_MEDICOS,
       Permisos.REGISTRAR_MEDICOS_REGIONAL
     ])
   },
-  edit: function(user: ReturnType<typeof useLoggedUser>){
+  edit: function(user: User){
     return user?.canAny([
       Permisos.EDITAR_MEDICOS,
       Permisos.EDITAR_MEDICOS_REGIONAL
     ])
   },
-  view: function(user: ReturnType<typeof useLoggedUser>){
+  view: function(user: User){
     return user?.canAny([
       Permisos.VER_MEDICOS,
       Permisos.VER_MEDICOS_REGIONAL
     ])
   },
-  baja: function(user: ReturnType<typeof useLoggedUser>){
+  baja: function(user: User){
     return user?.canAny([
       Permisos.BAJA_MEDICOS,
       Permisos.BAJA_MEDICOS_REGIONAL

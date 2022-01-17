@@ -56,7 +56,7 @@ export default ()=>{
     onSuccess: onBuscarEmpleadorSuccess
   })
 
-  const guardar = useMutation((empleadorId: number)=>{
+  const guardar = useMutation((empleadorId: string)=>{
     return ListaMoraService.agregar(empleadorId)
   }, {
     onSuccess: () => {

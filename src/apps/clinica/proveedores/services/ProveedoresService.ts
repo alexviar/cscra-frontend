@@ -4,7 +4,7 @@ import { keysToUnderscore } from "../../../../commons/utils"
 
 export type Empresa = {
   id: number
-  tipo: 1
+  tipo: 2
   nit: string
   nombre: string  
   estado: 1 | 2
@@ -17,7 +17,7 @@ export type Empresa = {
 
 export type Medico = {
   id: number
-  tipo: 2
+  tipo: 1
   nit: string
   ci: {
     raiz: number
@@ -52,6 +52,7 @@ export type Proveedor = (Empresa | Medico) & InformacionContacto
 export type Filter = {
   tipos?: number[]
   nombre?: string
+  _busqueda?: string
   regionalId?: number
   activos?: number
 }

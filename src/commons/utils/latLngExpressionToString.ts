@@ -1,6 +1,6 @@
 import {LatLngExpression} from "leaflet"
 
-export const latLngExpressionToString = (value?: LatLngExpression|null) => {
+export const latLngExpressionToString = (value: LatLngExpression|null, round: number = 6) => {
   let lat, lng
   if(value){
     if(Array.isArray(value)){
@@ -9,7 +9,7 @@ export const latLngExpressionToString = (value?: LatLngExpression|null) => {
     else{
       ({lat, lng} = value)
     }
-    return `${lat.toFixed(8)}, ${lng.toFixed(8)}`
+    return `${lat.toFixed(round)}, ${lng.toFixed(round)}`
   }
   return ""
 }

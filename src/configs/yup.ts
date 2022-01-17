@@ -1,10 +1,15 @@
-import * as yup from 'yup'
-import { yup as yupMessages } from './messages.json'
+import {
+  mixed,
+  date,
+  setLocale,
+  addMethod
+} from 'yup'
+import messages from './messages.json'
 import moment from 'moment'
 
-yup.setLocale(yupMessages)
+setLocale(messages.yup)
 
-yup.addMethod(yup.mixed, 'emptyStringToNull', function () {
+addMethod(mixed, 'emptyStringToNull', function () {
   return this.transform(function (value, originalValue) {
     if (this.isType(value)) return value;
 
@@ -12,7 +17,7 @@ yup.addMethod(yup.mixed, 'emptyStringToNull', function () {
   });
 });
 
-yup.addMethod(yup.mixed, 'emptyStringTo', function (val) {
+addMethod(mixed, 'emptyStringTo', function (val) {
   return this.transform(function (value, originalValue) {
     if (this.isType(value)) return value;
 
@@ -20,7 +25,7 @@ yup.addMethod(yup.mixed, 'emptyStringTo', function (val) {
   });
 });
 
-yup.addMethod(yup.date, 'format', function(format="L"){
+addMethod(date, 'format', function(format="L"){
   return this.transform((value, originalValue, context) => {
     // check to see if the previous transform already parsed the date
     if (context.isType(value)) return value;

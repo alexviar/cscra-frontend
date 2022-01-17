@@ -5,11 +5,11 @@ import { useParams, useHistory } from "react-router"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
 import { Regional, RegionalesTypeahead } from '../../../../commons/components'
-import { Permisos, useLoggedUser } from '../../../../commons/auth'
+import { Permisos, useUser } from '../../../../commons/auth'
 import { Proveedor, ProveedoresService } from '../services'
 
 export type Inputs = {
-  tipo: 1
+  tipo: 2
   nit?: string,
   nombre?: string,
   regional?: Regional[]
@@ -38,7 +38,7 @@ export const ProveedorEmpresaFieldset = ()=>{
     register
   } = useFormContext<Inputs>()
 
-  const loggedUser = useLoggedUser()
+  const loggedUser = useUser()
 
   const formErrors = formState.errors
 

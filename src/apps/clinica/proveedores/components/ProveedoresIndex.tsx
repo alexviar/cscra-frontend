@@ -5,9 +5,9 @@ import { FaFilter, FaSync, FaPlus } from "react-icons/fa"
 import { useQuery } from "react-query"
 import { Link, useLocation } from "react-router-dom"
 import { Pagination } from "../../../../commons/components"
-import { ProtectedContent, useLoggedUser, Permisos } from "../../../../commons/auth"
+import { ProtectedContent, useUser, Permisos } from "../../../../commons/auth"
 import { ProveedorPolicy } from "../policies"
-import { Medico, ProveedoresService, Filter } from "../services"
+import { ProveedoresService, Filter } from "../services"
 import { ProveedoresFilterForm } from "./ProveedoresFilterForm"
 import { RowOptions } from "./RowOptions"
 
@@ -18,7 +18,7 @@ export const ProveedoresIndex = () => {
     size: 10
   })
 
-  const loggedUser = useLoggedUser(
+  const loggedUser = useUser(
 
   )
 
@@ -79,10 +79,10 @@ export const ProveedoresIndex = () => {
             {index + 1}
           </th>
           <td>
-            {item.tipo == 1 ? item.nombre : item.nombreCompleto}
+            {item.tipo == 1 ? item.nombreCompleto : item.nombre}
           </td>
           <td>
-            {item.tipo == 1 ? "Empresa" : "Medico"}
+            {item.tipo == 1 ? "Medico" : "Empresa"}
           </td>
           <td>
             <RowOptions proveedor={item} queryKey={queryKey} />
@@ -131,8 +131,8 @@ export const ProveedoresIndex = () => {
         <Collapse in={filterFormVisible}>
           <div>
             <ProveedoresFilterForm onFilter={(filter) => {
-              setFilter({...getDefaultFilter(), ...filter})
-              setPage(page=>({ ...page, current: 1 }))
+              setFilter({ ...getDefaultFilter(), ...filter })
+              setPage(page => ({ ...page, current: 1 }))
             }} />
           </div>
         </Collapse>
@@ -159,7 +159,7 @@ export const ProveedoresIndex = () => {
         </div>
       </div>
       <Table responsive>
-        <thead className="text-center">
+        <thead>
           <tr>
             <th style={{ width: 1 }}>#</th>
             <th>Nombre</th>
@@ -171,13 +171,17 @@ export const ProveedoresIndex = () => {
           {renderRows()}
         </tbody>
       </Table>
-      {buscar.status === "success" ? <div className="d-flex flex-row">
-        <span className="mr-auto">{`Se encontraron ${total} resultados`}</span>
-        <Pagination
-          current={page.current}
-          total={Math.ceil((total - page.size) / page.size) + 1}
-          onChange={(current) => setPage((page) => ({ ...page, current }))}
-        />
+      {buscar.status === "success" ? <div className="row">
+        <Col className="mr-auto">
+          {`Se encontraron ${total} resultados`}
+        </Col>
+        <Col xs="auto">
+          <Pagination
+            current={page.current}
+            total={Math.ceil(total / page.size)}
+            onChange={(current) => setPage((page) => ({ ...page, current }))}
+          />
+        </Col>
       </div> : null}
     </ProtectedContent>
   </div>

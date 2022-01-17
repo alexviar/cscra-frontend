@@ -13,12 +13,15 @@ import { Regional, RegionalesTypeahead } from "../../../../commons/components"
 import { useModal } from "../../../../commons/reusable-modal"
 import { Permisos } from "../../../../commons/auth/constants"
 import { useUser } from "../../../../commons/auth/hooks"
+import { Medico, MedicosTypeahead } from "../../medicos/components"
+import { Proveedor, ProveedoresTypeahead } from "../../proveedores/components"
 import { EstadosAfi, EstadosEmp } from "../utils"
 
-type Inputs = AseguradoInputs & PrestacionesSolicitadasInputs & {
+type Inputs = AseguradoInputs & {
   regional: Regional[]
-  medico: string
-  especialidad: string
+  medico: Medico[]
+  proveedor: Proveedor[]
+  prestacion: string
 }
 
 const hoy = moment()
@@ -89,12 +92,9 @@ const schema = yup.object().shape({
     }
   }),
   regional: yup.array().length(1, "Debe seleccionar una regional"),
-  medico: yup.string().trim().uppercase().required(),
-  especialidad: yup.string().trim().uppercase().required(),
-  proveedor: yup.string().trim().uppercase().required(),
-  prestacionesSolicitadas: yup.array().of(yup.object().shape({
-    prestacion: yup.string().trim().uppercase().required("Debe indicar una prestacion")
-  })).min(1, "Debe solicitar un servicio").max(1, "Solo puede solicitar un servicio")
+  medico: yup.array().length(1, "Debe indicar el medico que realiza la solicitud"),
+  proveedor: yup.array().length(1, "Debe indicar el proveedor que brindará el servicio"),
+  prestacion: yup.string().trim().uppercase().required("Debe indicar la prestacion que se solicita").max(100)
 })
 
 export const SolicitudAtencionExternaForm = ()=>{
@@ -107,16 +107,13 @@ export const SolicitudAtencionExternaForm = ()=>{
     },
     resolver: yupResolver(schema),
     defaultValues: {
-      regional: [],
-      medico: "",
-      proveedor: "",
-      prestacionesSolicitadas: [{
-        id: 0,
-        prestacion: ""
-      }],
       asegurado: {},
       titular: {},
-      empleador: {}
+      empleador: {},
+      regional: [],
+      medico: [],
+      proveedor: [],
+      prestacion: ""
     }
   })
   const {
@@ -138,10 +135,9 @@ export const SolicitudAtencionExternaForm = ()=>{
     return SolicitudesAtencionExternaService.registrar(
       values.regional![0].id,
       asegurado!.id,
-      values.medico,
-      values.especialidad,
-      values.proveedor!,
-      values.prestacionesSolicitadas.map(({prestacion})=>({prestacion}))
+      values.medico![0].id,
+      values.proveedor![0].id,
+      values.prestacion
     )
   }, {
     onSuccess: ({data: {urlDm11, regionalId}}) => {
@@ -217,7 +213,7 @@ export const SolicitudAtencionExternaForm = ()=>{
                           }}
                           id="solicitud-atencion-externa-form/regionales"
                           filterBy={(regional: Regional)=>{
-                            if(user?.can(Permisos.REGISTRAR_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL)) return regional.id == user?.regionalId
+                            if(user?.can(Permisos.REGISTRAR_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL, false)) return regional.id == user?.regionalId
                             return true
                           }}
                           isInvalid={!!fieldState.error}
@@ -225,8 +221,8 @@ export const SolicitudAtencionExternaForm = ()=>{
                           selected={field.value}
                           onBlur={field.onBlur}
                           onChange={(regional)=>{
-                            setValue("medico", "")
-                            setValue("proveedor", "")
+                            setValue("medico", [])
+                            setValue("proveedor", [])
                             field.onChange(regional)
                           }}
                         />
@@ -245,31 +241,100 @@ export const SolicitudAtencionExternaForm = ()=>{
             </Accordion.Toggle>
             <Accordion.Collapse eventKey="2">
               <Card.Body>
+                <Controller
+                  control={control}
+                  name="medico"
+                  render={({field, fieldState})=>{
+                    return <Form.Row>
+                      <Form.Group as={Col} sm={8} className="position-unset">
+                        <Form.Label>Nombre</Form.Label>
+                        <MedicosTypeahead
+                          id="medicos-typeahead"
+                          //@ts-ignore
+                          feedback={fieldState.error?.message}
+                          disabled={watch("regional").length == 0}
+                          filter={{regionalId: watch("regional").length && watch("regional")[0].id}}
+                          className="text-uppercase"
+                          isInvalid={!!fieldState.error}
+                          selected={field.value}
+                          onBlur={field.onBlur}
+                          onChange={field.onChange}
+                        />
+                      </Form.Group>
+                      <Form.Group as={Col} sm={4}>
+                        <Form.Label>Especialidad</Form.Label>
+                        <Form.Control
+                          readOnly
+                          style={{textTransform: "uppercase"}}
+                          // isInvalid={!!formState.errors.especialidad}
+                          value={field.value.length ? field.value[0].especialidad : ""}
+                        />
+                      </Form.Group>
+                    </Form.Row>
+                  }}
+                />
+              </Card.Body>
+            </Accordion.Collapse>
+          </div>
+        </Card>
+        
+        <Card className="overflow-visible">
+          <div className="overflow-hidden">
+            <Accordion.Toggle as={Card.Header}  className={"text-light " + (formErrors.medico ? "bg-danger" : "bg-primary")} eventKey="3">
+              Servicio solicitado
+            </Accordion.Toggle>
+            <Accordion.Collapse eventKey="3">
+              <Card.Body>
+                <Controller
+                  control={control}
+                  name="proveedor"
+                  render={({field, fieldState})=>{
+                    return <Form.Row>                  
+                      <Form.Group as={Col} sm={8} className="position-unset">
+                        <Form.Label>Proveedor</Form.Label>
+                        <ProveedoresTypeahead
+                            id="proveedores-typeahead"
+                            //@ts-ignore
+                            feedback={fieldState.error?.message}
+                            disabled={watch("regional").length == 0}
+                            filter={{regionalId: watch("regional").length && watch("regional")[0].id}}
+                            className="text-uppercase"
+                            isInvalid={!!fieldState.error}
+                            selected={field.value}
+                            onBlur={field.onBlur}
+                            onChange={field.onChange}
+                        />
+                      </Form.Group>
+                      {(field.value.length && field.value[0].tipo == 1) ? <Form.Group as={Col} sm={4}>
+                        <Form.Label>Especialidad</Form.Label>
+                        <Form.Control
+                          readOnly
+                          style={{textTransform: "uppercase"}}
+                          // isInvalid={!!formState.errors.especialidad}
+                          value={field.value[0].especialidad}
+                        />
+                      </Form.Group> : null}
+                    </Form.Row>
+                  }}
+                />
                 <Form.Row>
                   <Form.Group as={Col}>
-                    <Form.Label>Nombre</Form.Label>
+                    <Form.Label>Prestación</Form.Label>
                     <Form.Control
+                      as="textarea"
                       style={{textTransform: "uppercase"}}
-                      isInvalid={!!formState.errors.medico}
-                      {...register("medico")}
+                      isInvalid={!!formState.errors.prestacion}
+                      aria-describedby="prestacionHelpBlock"
+                      {...register("prestacion")}
                     />
-                    <Form.Control.Feedback type="invalid">{formState.errors?.medico?.message}</Form.Control.Feedback>
-                  </Form.Group>
-                  <Form.Group as={Col}>
-                    <Form.Label>Especialidad</Form.Label>
-                    <Form.Control
-                      style={{textTransform: "uppercase"}}
-                      isInvalid={!!formState.errors.especialidad}
-                      {...register("especialidad")}
-                    />
-                    <Form.Control.Feedback type="invalid">{formState.errors?.especialidad?.message}</Form.Control.Feedback>
+                    <Form.Control.Feedback type="invalid">{formState.errors.prestacion?.message}</Form.Control.Feedback>
+                    {!formState.errors.prestacion ? <Form.Text id="prestacionHelpBlock" muted>{`${watch("prestacion").length}/100` }</Form.Text> : null}
                   </Form.Group>
                 </Form.Row>
               </Card.Body>
             </Accordion.Collapse>
           </div>
         </Card>
-        <PrestacionesSolicitadasCard />
       </Accordion>
       <Button className="mt-3" type="submit">
         {registrar.isLoading ? <Spinner className="mr-2" animation="border" size="sm"/> : null}

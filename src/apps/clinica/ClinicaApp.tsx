@@ -10,6 +10,17 @@ import { FcDebt } from '../../commons/components/icons/FcDebt';
 import { SolicitudAtencionExternaIndex } from './solicitud_atencion_externa/components/SolicitudAtencionExternaIndex';
 import { SolicitudAtencionExternaForm } from './solicitud_atencion_externa/components/SolicitudAtencionExternaForm';
 import { SolicitudATPolicy } from './solicitud_atencion_externa/policies';
+import { 
+  MedicosIndex, 
+  MedicoView, 
+  MedicoForm, 
+  MedicoPolicy } from './medicos';
+import { 
+  ProveedoresIndex,
+  ProveedorView,
+  ProveedorWizard,
+  ProveedorPolicy
+} from './proveedores';
 import { Permisos, ProtectedRoute, useUser } from '../../commons/auth';
 import { ListaMoraPolicy } from "./mora/policies";
 import { Image } from "react-bootstrap";
@@ -40,22 +51,22 @@ export const ClinicaApp = ()=>{
         icon: <BiTransfer />
       })
     }
-    // if(MedicoPolicy.index(loggedUser)){
-    //   items.push({
-    //     id: "medicos",
-    //     path: `${url}/medicos`,
-    //     title: "Medicos",
-    //     icon: <FaUserMd />,
-    //   })
-    // }
-    // if(ProveedorPolicy.index(loggedUser)){
-    //   items.push({
-    //     id: "proveedores",
-    //     path: `${url}/proveedores`,
-    //     title: "Proveedores",
-    //     icon: <FaHandshake />
-    //   })
-    // }
+    if(MedicoPolicy.index(user)){
+      items.push({
+        id: "medicos",
+        path: `${url}/medicos`,
+        title: "Medicos",
+        icon: <FaUserMd />,
+      })
+    }
+    if(ProveedorPolicy.index(user)){
+      items.push({
+        id: "proveedores",
+        path: `${url}/proveedores`,
+        title: "Proveedores",
+        icon: <FaHandshake />
+      })
+    }
 
     // items.push(
     //       {
@@ -95,7 +106,7 @@ export const ClinicaApp = ()=>{
       >
         <SolicitudAtencionExternaForm />
       </ProtectedRoute>
-      {/* <ProtectedRoute exact path={`${url}/medicos`}
+      <ProtectedRoute exact path={`${url}/medicos`}
         authorize={MedicoPolicy.index}
       >
         <MedicosIndex />
@@ -103,7 +114,7 @@ export const ClinicaApp = ()=>{
       <ProtectedRoute exact path={[`${url}/medicos/registrar`, `${url}/medicos/:id/editar`]}
         authorize={(user, path) => path == `${url}/medicos/registrar` ? MedicoPolicy.register(user) : MedicoPolicy.edit(user) }
       >
-        <MedicosForm />
+        <MedicoForm />
       </ProtectedRoute>
       <ProtectedRoute exact path={`${url}/medicos/:id`}
         authorize={MedicoPolicy.view}
@@ -115,7 +126,7 @@ export const ClinicaApp = ()=>{
       >
         <ProveedoresIndex />
       </ProtectedRoute>
-      <ProtectedRoute exact path={`${url}/proveedores/registrar`}
+      <ProtectedRoute exact path={[`${url}/proveedores/registrar`, `${url}/proveedores/:id/editar`]}
         authorize={ProveedorPolicy.register}
       >
         <ProveedorWizard />
@@ -125,7 +136,7 @@ export const ClinicaApp = ()=>{
       >
         <ProveedorView />
       </ProtectedRoute>
-      <ProtectedRoute exact path={`${url}/proveedores/:id/editar`}
+      {/* <ProtectedRoute exact path={`${url}/proveedores/:id/editar`}
         authorize={ProveedorPolicy.edit}>
         <ProveedorForm />
       </ProtectedRoute>

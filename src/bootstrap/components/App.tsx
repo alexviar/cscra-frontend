@@ -106,7 +106,7 @@ export default ()=>{
           </Nav.Link>
         </OverlayTrigger> : null} */}
         {user ? <NavDropdown 
-          menuAlign="right"
+          // menuAlign="right"
           title={<>
             <FaUserCircle />
             <span className="d-none d-sm-inline ml-1">{user.username}</span>

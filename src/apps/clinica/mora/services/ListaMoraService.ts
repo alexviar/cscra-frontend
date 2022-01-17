@@ -23,12 +23,12 @@ export const ListaMoraService = {
       })
     })
   },
-  agregar: (idEmpleador: number) =>{
+  agregar: (idEmpleador: string) =>{
     return apiClient.post<ListaMoraItem>("lista-mora/agregar", {
       empleador_id: idEmpleador
     })
   },
-  quitar: (idEmpleador: number) =>{
+  quitar: (idEmpleador: string) =>{
     return apiClient.post<ListaMoraItem>("lista-mora/quitar", {
       empleador_id: idEmpleador
     })

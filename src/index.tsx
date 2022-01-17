@@ -19,10 +19,10 @@ import 'moment/locale/es'
 
 moment.locale('es')
 
-// if (process.env.NODE_ENV === 'development') {
-//   const { worker } = require('./__mocks__/browser')
-//   worker.start()
-// }
+if (process.env.NODE_ENV === 'development') {
+  const { worker } = require('./__mocks__/browser')
+  worker.start()
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {

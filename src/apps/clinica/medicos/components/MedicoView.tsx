@@ -3,7 +3,7 @@ import { Table } from 'react-bootstrap'
 import { Medico, MedicosService } from '../services'
 import { useQuery, useMutation } from 'react-query'
 import { useLocation, useParams } from 'react-router-dom'
-import { useLoggedUser } from "../../../../commons/auth"
+import { useUser } from "../../../../commons/auth"
 import { useModal } from "../../../../commons/reusable-modal"
 import { MedicoPolicy } from "../policies"
 
@@ -15,7 +15,7 @@ export const MedicoView = ()=>{
     id: string
   }>()
 
-  const loggedUser = useLoggedUser()
+  const loggedUser = useUser()
 
   const loader = useModal("queryLoader")
 

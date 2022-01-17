@@ -8,13 +8,13 @@ import * as yup from "yup"
 import { Medico, MedicosService } from '../services'
 import { useHistory, useParams } from 'react-router'
 import { Regional, RegionalesTypeahead } from '../../../../commons/components'
-import { Permisos, useLoggedUser } from '../../../../commons/auth'
+import { Permisos, useUser } from '../../../../commons/auth'
 import { useModal } from '../../../../commons/reusable-modal'
 // import { Especialidad, EspecialidadesTypeahead } from './EspecialidadesTypeahead'
 
 type Inputs = {
   ci: string
-  ciComplemento: string
+  ciComplemento: string | null
   apellidoPaterno: string
   apellidoMaterno: string
   nombres: string
@@ -43,7 +43,7 @@ const schema = yup.object().shape({
   regional: yup.array().length(1, "Debe indicar una regional")
 }, [["apellidoMaterno", "apellidoPaterno"]])
 
-export const MedicosForm = ()=>{
+export const MedicoForm = ()=>{
   const {id} = useParams<{
     id?: string
   }>()
@@ -55,7 +55,7 @@ export const MedicosForm = ()=>{
 
   const modal = useModal("queryLoader")
 
-  const loggedUser = useLoggedUser()
+  const loggedUser = useUser()
 
   const [regionales, setRegionales] = useState<Regional[]>([])
 
