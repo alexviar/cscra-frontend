@@ -1,15 +1,19 @@
 import { AxiosError } from "axios"
-import { useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { Button, Col, Collapse, Form, Spinner, Table } from "react-bootstrap"
+import Skeleton from "react-loading-skeleton"
 import { FaFilter, FaSync, FaPlus } from "react-icons/fa"
 import { useQuery } from "react-query"
 import { Link, useLocation } from "react-router-dom"
 import { Pagination } from "../../../../commons/components"
-import { ProtectedContent, useUser, Permisos } from "../../../../commons/auth"
-import { ProveedorPolicy } from "../policies"
+import { ProtectedContent, useUser } from "../../../../commons/auth"
+import { proveedorPolicy } from "../policies"
 import { ProveedoresService, Filter } from "../services"
 import { ProveedoresFilterForm } from "./ProveedoresFilterForm"
 import { RowOptions } from "./RowOptions"
+import { superUserPolicyEnhancer } from "../../../../commons/auth/utils"
+import { IndexTemplate } from "../../../../commons/components/IndexTemplate"
+import 'react-loading-skeleton/dist/skeleton.css'
 
 export const ProveedoresIndex = () => {
   const { pathname: path } = useLocation()
@@ -18,171 +22,97 @@ export const ProveedoresIndex = () => {
     size: 10
   })
 
-  const loggedUser = useUser(
+  const user = useUser()
 
-  )
+  const [filter, setFilter] = useState<Filter>({})
 
-  const getDefaultFilter = () => {
-    const filter: Filter = {}
-    if (!loggedUser?.can(Permisos.VER_PROVEEDORES)) {
-      if (loggedUser?.can(Permisos.VER_PROVEEDORES_REGIONAL)) {
-        filter.regionalId = loggedUser.regionalId;
-      }
-    }
-    return filter
+  if(proveedorPolicy.viewByRegionalOnly(user)) {
+    filter.regionalId = user?.regionalId;
   }
 
-  const [filter, setFilter] = useState<Filter>(getDefaultFilter)
-  const [filterFormVisible, showFilterForm] = useState(false)
+  const totalRef = useRef(0)
 
-  const queryKey = ["proveedores.buscar", filter, page]
+  const queryKey = ["proveedores", "buscar", filter, page]
   const buscar = useQuery(queryKey, () => {
     return ProveedoresService.buscar(page, filter)
   }, {
-    enabled: ProveedorPolicy.view(loggedUser),
-    // refetchOnMount: false,
+    enabled: !!superUserPolicyEnhancer(proveedorPolicy.view)(user),
     refetchOnWindowFocus: false,
-    refetchOnReconnect: false
+    refetchOnReconnect: false,
+    onSuccess: ({data}) =>{
+      totalRef.current = data.meta.total
+    }
   })
 
-  const total = buscar.data?.data?.meta?.total || 0
+  const loader = useMemo(()=>{
+    const rows = []
+    for(let i = 0; i < page.size; i++){
+      rows.push(<tr key={i}>
+        <th scope="row" style={{ width: 1 }}>
+          {i + 1}
+        </th>
+        <td>
+          <Skeleton />
+        </td>
+        <td style={{minWidth: 100}}>
+          <Skeleton />
+        </td>
+        <td>
+        </td>
+      </tr>)
+    }
+    return rows
+  }, [page.size])
 
-  const renderRows = () => {
-    if (buscar.isFetching) {
-      return <tr>
-        <td className="bg-light text-center" colSpan={100}>
-          <Spinner className="mr-2" variant="primary" animation="border" size="sm" />
-          Cargando
+  return <IndexTemplate
+    policy={proveedorPolicy}
+    page={page}
+    onPageChange={setPage}
+    total={totalRef.current}
+    onRefetch={buscar.refetch}
+    isLoading={buscar.isFetching}
+    hasError={buscar.isError}
+    data={buscar.data?.data.records}
+    renderData={(item, index) => {
+      return <tr key={item.id}>
+        <th scope="row" style={{ width: 1 }}>
+          {index + 1}
+        </th>
+        <td>
+          {item.tipo == 1 ? item.nombreCompleto : item.nombre}
+        </td>
+        <td style={{minWidth: 100}}>
+          {item.tipo == 1 ? "Medico" : "Empresa"}
+        </td>
+        <td>
+          <RowOptions proveedor={item} queryKey={queryKey} />
         </td>
       </tr>
-    }
-    else if (buscar.isError) {
-      const error = buscar.error as AxiosError
+    }}
+    renderDataHeaders={()=>{
       return <tr>
-        <td className="bg-danger text-light text-center" colSpan={100}>
-          {error.response?.data?.message || error.message}
-        </td>
+        <th style={{ width: 1 }}>#</th>
+        <th>Nombre</th>
+        <th style={{ width: 1 }}>Tipo</th>
+        <th style={{ width: 1 }}></th>
       </tr>
-    }
-    if (buscar.data) {
-      const records = buscar.data.data.records
-      if (records.length == 0) {
-        return <tr>
-          <td className="bg-light text-center" colSpan={100}>
-            No se encontraron resultados
-          </td>
-        </tr>
-      }
-      return records.map((item, index) => {
-        return <tr key={item.id}>
-          <th scope="row" style={{ width: 1 }}>
-            {index + 1}
-          </th>
-          <td>
-            {item.tipo == 1 ? item.nombreCompleto : item.nombre}
-          </td>
-          <td>
-            {item.tipo == 1 ? "Medico" : "Empresa"}
-          </td>
-          <td>
-            <RowOptions proveedor={item} queryKey={queryKey} />
-          </td>
-        </tr>
-      })
-    }
-  }
-
-  return <div className="px-1">
-    <h1 style={{ fontSize: "1.75rem" }}>Proveedores</h1>
-    <div className="d-flex my-2">
-      <Form.Row className="ml-auto flex-nowrap" >
-        <ProtectedContent
-          authorize={ProveedorPolicy.view}
-        >
-          <Col xs="auto" >
-            <Button onClick={() => {
-              buscar.refetch()
-            }}><FaSync /></Button>
-          </Col>
-          <Col xs="auto" >
-            <Button onClick={() => {
-              showFilterForm(visible => !visible)
-            }}><FaFilter /></Button>
-          </Col>
-        </ProtectedContent>
-        <ProtectedContent
-          authorize={ProveedorPolicy.register}
-        >
-          <Col xs="auto">
-            <Button
-              as={Link}
-              to={`${path}/registrar`}
-              className="d-flex align-items-center">
-              <FaPlus className="mr-1" /><span>Nuevo</span>
-            </Button>
-          </Col>
-        </ProtectedContent>
-      </Form.Row>
-    </div>
-    <ProtectedContent
-      authorize={ProveedorPolicy.view}
-    >
-      <div className="mb-2">
-        <Collapse in={filterFormVisible}>
-          <div>
-            <ProveedoresFilterForm onFilter={(filter) => {
-              setFilter({ ...getDefaultFilter(), ...filter })
-              setPage(page => ({ ...page, current: 1 }))
-            }} />
-          </div>
-        </Collapse>
-      </div>
-      <div className="d-flex">
-        <div className="ml-auto mb-2">
-          <div className="d-flex flex-row flex-nowrap align-items-center">
-            <span>Mostrar</span>
-            <Form.Control className="mx-2" as="select" value={page.size} onChange={(e) => {
-              const value = e.target.value
-              setPage((page) => ({
-                ...page,
-                size: parseInt(value)
-              }))
-            }}>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={30}>30</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </Form.Control>
-            <span>filas</span>
-          </div>
-        </div>
-      </div>
-      <Table responsive>
-        <thead>
-          <tr>
-            <th style={{ width: 1 }}>#</th>
-            <th>Nombre</th>
-            <th style={{ width: 1 }}>Tipo</th>
-            <th style={{ width: 1 }}></th>
-          </tr>
-        </thead>
-        <tbody>
-          {renderRows()}
-        </tbody>
-      </Table>
-      {buscar.status === "success" ? <div className="row">
-        <Col className="mr-auto">
-          {`Se encontraron ${total} resultados`}
-        </Col>
-        <Col xs="auto">
-          <Pagination
-            current={page.current}
-            total={Math.ceil(total / page.size)}
-            onChange={(current) => setPage((page) => ({ ...page, current }))}
-          />
-        </Col>
-      </div> : null}
-    </ProtectedContent>
-  </div>
+    }}
+    renderLoader={()=>{
+      return <>{loader}</>
+    }}
+    renderFilterForm={()=>{
+      return <ProveedoresFilterForm onFilter={(filter) => {
+        setFilter(filter)
+        setPage(page => ({ ...page, current: 1 }))
+      }} />
+    }}
+    renderCreateButton={()=>{
+      return <Button
+        as={Link}
+        to={`${path}/registrar`}
+        className="d-flex align-items-center">
+        <FaPlus className="mr-1" /><span>Nuevo</span>
+      </Button>
+    }}
+  />
 }
