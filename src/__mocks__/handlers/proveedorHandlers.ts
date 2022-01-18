@@ -22,5 +22,12 @@ export const proveedorHandlers = [
       },
       records: data
     }))
+  }),
+  rest.get(apiRoute("proveedores/:id"), (req, res, ctx) => {
+    
+    if(!proveedoresFactory.data.length) proveedoresFactory.buildList(100)
+    let { data } = proveedoresFactory
+  
+    return res(ctx.json(data.find(p => p.id == req.params.id)))
   })
 ]

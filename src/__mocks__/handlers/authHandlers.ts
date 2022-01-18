@@ -1,9 +1,5 @@
 import { rest } from 'msw'
-import { authEndpoint, apiEndpoint } from '../../configs/app'
-
-const route = (path: string)=>{
-  return authEndpoint.trimEnd() + path
-}
+import { authRoute, apiRoute } from '../routes'
 
 const admin = {
   id:1,
@@ -40,15 +36,27 @@ const admin = {
   permissions: []
 }
 
+let user: any = admin
 export const authHandlers = [
-  rest.post(route('login'), (req, res, ctx) => {
+  rest.post(authRoute('login'), (req, res, ctx) => {
+    user = admin
     return res(
       // Respond with a 200 status code
       ctx.status(200),
-      ctx.json(admin)
+      ctx.json(user)
     )
   }),
-  rest.get(apiEndpoint.trimEnd() + 'user', (req, res, ctx) => {
-    return res(ctx.json(admin))
+  rest.post(authRoute('logout'), (req, res, ctx) => {
+    user = null
+    return res(
+      // Respond with a 200 status code
+      ctx.status(200)
+    )
+  }),
+  rest.get(apiRoute('user'), (req, res, ctx) => {
+    return user ? res(ctx.json(user)) : res(ctx.status(401))
+  }),
+  rest.get(authRoute("sanctum/csrf-cookie"), (req, res, ctx) => {
+    return res(ctx.status(200))
   })
 ]

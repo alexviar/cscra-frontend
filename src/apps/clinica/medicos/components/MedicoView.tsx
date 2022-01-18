@@ -11,6 +11,7 @@ export const MedicoView = ()=>{
   const { pathname, state: locationState } = useLocation<{
     medico?: Medico
   }>()
+  
   const { id } = useParams<{
     id: string
   }>()

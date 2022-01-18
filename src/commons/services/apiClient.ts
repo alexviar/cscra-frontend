@@ -35,6 +35,7 @@ apiClient.interceptors.request.use(config => {
         if(typeof value === "boolean"){
           return value ? 1 : 0
         }
+        if(value === "") return undefined
         return value
       }
     });

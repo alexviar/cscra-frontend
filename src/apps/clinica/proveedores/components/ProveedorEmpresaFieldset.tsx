@@ -7,11 +7,18 @@ import * as yup from "yup"
 import { Regional, RegionalesTypeahead } from '../../../../commons/components'
 import { Permisos, useUser } from '../../../../commons/auth'
 import { Proveedor, ProveedoresService } from '../services'
+import { proveedorPolicy } from ".."
 
 export type Inputs = {
+  initialized: boolean
   tipo: 2
   nit?: string,
-  nombre?: string,
+  ci?: never
+  ciComplemento?: never
+  apellidoPaterno?: never
+  apellidoMaterno?: never
+  nombre?: string
+  especialidad?: never
   regional?: Regional[]
 }
 
@@ -33,12 +40,10 @@ export const ProveedorEmpresaFieldset = ()=>{
   const {
     control,
     formState,
-    handleSubmit,
-    setValue,
     register
   } = useFormContext<Inputs>()
 
-  const loggedUser = useUser()
+  const user = useUser()
 
   const formErrors = formState.errors
 
@@ -69,17 +74,13 @@ export const ProveedorEmpresaFieldset = ()=>{
               return <>
                 <RegionalesTypeahead
                   id="proveedor-form/regionales-typeahead"
-                  // onLoad={(regionales)=>setRegionales(regionales)}
                   filterBy={(regional) => { 
                     if(id){
-                      if(loggedUser?.can(Permisos.EDITAR_PROVEEDORES_REGIONAL) && loggedUser?.regionalId == regional.id) return true
-                      if(loggedUser?.can(Permisos.EDITAR_PROVEEDORES)) return true
+                      return proveedorPolicy.editByRegionalOnly(user, {regionalId: regional.id}) !== false
                     }
                     else{
-                      if(loggedUser?.can(Permisos.REGISTRAR_PROVEEDORES_REGIONAL) && loggedUser?.regionalId == regional.id) return true
-                      if(loggedUser?.can(Permisos.REGISTRAR_PROVEEDORES)) return true
+                      return proveedorPolicy.registerByRegionalOnly(user, {regionalId: regional.id}) !== false
                     }
-                    return false
                   }}
                   feedback={fieldState.error?.message}
                   isInvalid={!!fieldState.error}

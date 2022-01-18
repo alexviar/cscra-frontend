@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react"
 import { AxiosError } from "axios"
-import { Accordion, Alert, Button, Card,Col,Form, Spinner } from "react-bootstrap"
+import { Accordion, Alert, Breadcrumb, Button, Card, Col, Form, Spinner } from "react-bootstrap"
 import { useForm, Controller, FormProvider } from "react-hook-form"
+import { Link } from "react-router-dom"
 import moment from "moment"
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from "yup"
@@ -16,6 +17,7 @@ import { useUser } from "../../../../commons/auth/hooks"
 import { Medico, MedicosTypeahead } from "../../medicos/components"
 import { Proveedor, ProveedoresTypeahead } from "../../proveedores/components"
 import { EstadosAfi, EstadosEmp } from "../utils"
+import { solicitudAtencionExternaPolicy } from "../policies"
 
 type Inputs = AseguradoInputs & {
   regional: Regional[]
@@ -141,10 +143,7 @@ export const SolicitudAtencionExternaForm = ()=>{
     )
   }, {
     onSuccess: ({data: {urlDm11, regionalId}}) => {
-      if(user?.canAny([
-        Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA,
-        Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA_REGISTRADO_POR
-      ]) || (user?.can(Permisos.EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL) && regionalId == user?.regionalId)){
+      if(solicitudAtencionExternaPolicy.emit(user, { regionalId })){
         dm11Viewer.open({url: urlDm11, title: "Formulario D.M. - 11"})
         reset()
         setAsegurado(null)
@@ -182,10 +181,14 @@ export const SolicitudAtencionExternaForm = ()=>{
   }
 
   return <FormProvider {...formMethods}>
+    <Breadcrumb>
+      <Breadcrumb.Item linkAs={Link} linkProps={{to: "/clinica/atencion-externa"}}>Solicitudes de atencion externa</Breadcrumb.Item>
+      <Breadcrumb.Item active>Registro</Breadcrumb.Item>
+    </Breadcrumb>
     <Form onSubmit={handleSubmit((values)=>{
       registrar.mutate(values)
     })}>
-      <h1 style={{fontSize: "1.75rem"}}>Solicitud de atención externa</h1>
+      {/* <h1 style={{fontSize: "1.75rem"}}>Solicitud de atención externa</h1> */}
       {renderAlert()}
       <Accordion className="mt-3"  defaultActiveKey="0">
         <AseguradoCard value={asegurado} onChange={(asegurado)=>{
@@ -213,8 +216,7 @@ export const SolicitudAtencionExternaForm = ()=>{
                           }}
                           id="solicitud-atencion-externa-form/regionales"
                           filterBy={(regional: Regional)=>{
-                            if(user?.can(Permisos.REGISTRAR_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL, false)) return regional.id == user?.regionalId
-                            return true
+                            return solicitudAtencionExternaPolicy.registerByRegionalOnly(user, {regionalId: regional.id}) !== false
                           }}
                           isInvalid={!!fieldState.error}
                           feedback={fieldState.error?.message}

@@ -7,16 +7,12 @@ import {
 } from "react-router-dom"
 import { MdApps } from 'react-icons/md'
 import { FaBell, FaUserCircle, FaBars, FaClinicMedical, FaCalendar } from 'react-icons/fa'
-import { useDispatch, useSelector } from 'react-redux'
 import { useQueryClient } from 'react-query'
 import { QueryProgressModal, PdfModal } from "../../commons/components"
 import { useNavTitle } from "../../commons/hooks"
 import { useModal } from "../../commons/reusable-modal"
-import {Login, ProtectedRoute} from "../../commons/auth/components"
-import { getUser } from "../../commons/auth/selectors/inputSelectors"
+import { Login, ProtectedRoute, useUser, useLogout, useUnauthorizedEffect } from "../../commons/auth"
 import { AuthService } from '../../commons/auth/services';
-import { apiClient } from '../../commons/services';
-import { unauthorized } from '../../commons/auth/actions';
 import { ToggleSidebar } from './ToggleSidebar'
 import { Home } from './Home'
 import "../../configs/yup"
@@ -26,33 +22,23 @@ const IamApp = React.lazy(()=>import("../../apps/iam/IamApp"))
 const ClinicaApp = React.lazy(()=>import("../../apps/clinica/ClinicaApp"))
 
 export default ()=>{
-  const dispatch = useDispatch()
-  const user = useSelector(getUser)
+  const user = useUser()
 
   const modal = useModal("queryLoader")
 
-  const queryClient = useQueryClient()
-
   const navTitle = useNavTitle()
 
-  useEffect(()=>{
-    apiClient.interceptors.response.use(
-      response=>response,
-      error => {
-        if(error.response?.status == 401 || error.response?.status == 419){
-          dispatch(unauthorized())
-        }
-        return Promise.reject(error);
-      }
-    )
+  useUnauthorizedEffect()
 
-    const jsonUser = localStorage.getItem("user")
-    dispatch({
-      type: "SET_USER",
-      payload: jsonUser ? JSON.parse(jsonUser) : null
+  const logout = useLogout()
+
+  useEffect(()=>{
+    if(logout.status === "success") modal.close()
+    else if(logout.status === "error") modal.open({
+      state: "error",
+      error: logout.error
     })
-    // apiClient.get('/user')
-  }, [])
+  }, [logout.status])
 
   return <>
     <Navbar className="shadow-sm border-bottom" bg="primary" variant="dark" style={{zIndex: 1}}>
@@ -81,30 +67,6 @@ export default ()=>{
         >
           <Nav.Link><MdApps size="1.5em" /></Nav.Link>
         </OverlayTrigger>
-        {/* {user ? <OverlayTrigger
-          trigger="click"
-          rootClose
-          placement="bottom"
-          overlay={
-            <Popover id="apps">
-              <Popover.Title className="text-center" as="h3">Notificaciones</Popover.Title>
-              <Popover.Content>
-                
-              </Popover.Content>
-            </Popover>
-          }
-        >
-          <Nav.Link style={{whiteSpace: "nowrap"}}>
-            <FaBell />
-            <div className="pulse bg-danger" style={{
-              left: "0.65rem",
-              top: "-1.35rem",
-              width: "0.5rem",
-              height: "0.5rem",
-              borderRadius: "50%"
-            }}></div>
-          </Nav.Link>
-        </OverlayTrigger> : null} */}
         {user ? <NavDropdown 
           // menuAlign="right"
           title={<>
@@ -119,15 +81,7 @@ export default ()=>{
             modal.open({
               state: "loading"
             })
-            AuthService.logout().then(()=>{
-              localStorage.removeItem("user")
-              queryClient.clear()
-              dispatch(unauthorized())
-              modal.close()
-            }).catch((error)=>modal.open({
-              state: "error",
-              error
-            }))
+            logout.mutate()
           }} >Cerrar sesión</NavDropdown.Item>
         </NavDropdown> : <Nav.Link as={Link} className="text-nowrap" to="/login">Iniciar sesión</Nav.Link>}
       </Nav>

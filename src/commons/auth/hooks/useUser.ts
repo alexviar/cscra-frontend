@@ -1,28 +1,26 @@
 import { useMemo } from "react"
 import { useQuery } from "react-query"
-import { useSelector } from "react-redux"
-import { getUser, getIsAuthenticated } from "../selectors/inputSelectors"
 import { AuthService } from "../services"
-import { User as TUser } from "../state"
 
 export const useUser = () => {
   const fetchUser = useQuery(["user"], ()=>{
     return AuthService.fetch()
   }, {
-    keepPreviousData: true
+    staleTime: Infinity,
+    refetchOnMount: false
   })
 
   const user = fetchUser.data?.data
 
   return useMemo(()=>{
-    if(user){
+    if(user !== undefined){
       return user ? {
         ...user,
-        can: function(permission: string | string[], allowSuperUser: boolean = true) {
+        can: function(permission: string | string[], allowSuperUser: boolean = false) {
           if(typeof permission === "string") permission = [permission]
           return permission.every(p => user?.allPermissions.some(up => up.name == p)) || (allowSuperUser && this.isSuperUser())
         },
-        canAny: function(permission: string[], allowSuperUser: boolean = true) {
+        canAny: function(permission: string[], allowSuperUser: boolean = false) {
           return permission.some(p => user?.allPermissions.some(up => up.name == p)) || (allowSuperUser && this.isSuperUser())
         },
         hasRole: (role: string) => {

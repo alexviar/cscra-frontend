@@ -166,14 +166,18 @@ export default () => {
           {renderRows()}
         </tbody>
       </Table>
-      {buscar.status === "success" ? <div className="d-flex flex-row">
-          <span className="mr-auto">{`Se encontraron ${total} resultados`}</span>
+      <div className="row">
+        <Col className="mr-auto">
+          {buscar.status === "success" ? `Se encontraron ${total} resultados` : ""}
+        </Col>
+        <Col xs="auto">
           <Pagination
             current={page.current}
             total={Math.ceil(total / page.size)}
             onChange={(current) => setPage((page) => ({ ...page, current }))}
           />
-        </div> : null}
+        </Col>
+      </div>
     </ProtectedContent>
   </div>
 }

@@ -1,109 +1,146 @@
-import { useState} from "react"
-import { AxiosError } from "axios"
-import { Button, Col, Collapse, Form, Spinner, Table } from "react-bootstrap"
-import {FaFilter, FaPlus, FaSync} from "react-icons/fa"
+import { useMemo, useRef, useState } from "react"
+import { Button, Breadcrumb } from "react-bootstrap"
+import Skeleton from "react-loading-skeleton"
+import { FaPlus } from "react-icons/fa"
 import { Link, useLocation } from "react-router-dom"
 import { useQuery } from "react-query"
-import { Pagination } from "../../../../commons/components"
 import { Page } from "../../../../commons/services/Page"
 import { SolicitudesAtencionExternaFilter as Filter, SolicitudesAtencionExternaService } from "../services/SolicitudesAtencionExternaService"
 import { SolicitudAtencionExternaFilterForm } from "./SolicitudAtencionExternaFilterForm"
-import { Permisos } from "../../../../commons/auth/constants"
 import { useUser } from "../../../../commons/auth/hooks"
-import { ProtectedContent } from "../../../../commons/auth/components/ProtectedContent"
 import { RowOptions } from "./RowOptions"
-import { SolicitudATPolicy } from "../policies"
+import { solicitudAtencionExternaPolicy } from "../policies"
+import { IndexTemplate } from "../../../../commons/components/IndexTemplate"
+import { superUserPolicyEnhancer } from "../../../../commons/auth/utils"
 
 export const SolicitudAtencionExternaIndex = ()=>{
   const {pathname: path} = useLocation()
-  const [total, setTotal] = useState(0)
   const [page, setPage] = useState<Page>({
     current: 1,
     size: 10
   })
 
-  const loggedUser = useUser();
+  const user = useUser();
 
-  const [filterFormVisible, showFilterForm] = useState(false)
+  const [filter, setFilter] = useState<Filter>({})
 
-  const getDefaultFilter = ()=>{
-    const filter: Filter = {}
-    if(!loggedUser?.can(Permisos.VER_SOLICITUDES_DE_ATENCION_EXTERNA)){
-      if(loggedUser?.can(Permisos.VER_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL)){
-        filter.regionalId = loggedUser.regionalId;
-      }
-      if(loggedUser?.can(Permisos.VER_SOLICITUDES_DE_ATENCION_EXTERNA_REGISTRADO_POR)){
-        filter.registradoPor = loggedUser.id;
-      }
-    }
-    return filter
+  const totalRef = useRef(0)
+
+  if(solicitudAtencionExternaPolicy.viewByRegionalOnly(user)){
+    filter.regionalId = user!.regionalId;
   }
 
-  const [filter, setFilter] = useState<Filter>(getDefaultFilter)
-
+  const canView = superUserPolicyEnhancer(solicitudAtencionExternaPolicy.view)(user)
   const buscar = useQuery(["solicitudesAtencionExterna.buscar", page, filter], ()=>{
-    return SolicitudesAtencionExternaService.buscar({...filter, ...getDefaultFilter()}, page)
+    return SolicitudesAtencionExternaService.buscar(filter, page)
   }, {
-    enabled: loggedUser?.canAny([
-      Permisos.VER_SOLICITUDES_DE_ATENCION_EXTERNA,
-      Permisos.VER_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL,
-      Permisos.VER_SOLICITUDES_DE_ATENCION_EXTERNA_REGISTRADO_POR,
-    ]),
+    enabled: !!canView,
+    // keepPreviousData: true,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
-    onSuccess: ({data: {meta}}) => {
-      setTotal(meta.total)
+    onSuccess: ({data}) => {
+      totalRef.current = data.meta.total
     }
   })
 
-  const renderRows = ()=>{
-    if (buscar.isFetching) {
-      return <tr>
-        <td className="bg-light text-center" colSpan={100}>
-          <Spinner className="mr-2" variant="primary" animation="border" size="sm" />
-          Cargando
+  console.log(buscar)
+
+  const loader = useMemo(()=>{
+    const rows = []
+    for(let i = 0; i < page.size; i++){
+      rows.push(<tr key={i}>
+        <th scope="row">
+          {i + 1}
+        </th>
+        <td>
+          <Skeleton />
         </td>
-      </tr>
-    }
-    if (buscar.isError) {
-      const { error } = buscar
-      return <tr>
-        <td className="bg-danger text-light text-center" colSpan={100}>
-          {(error as AxiosError).response?.data?.message || (error as AxiosError).message}
+        <td>
+          <Skeleton />
         </td>
-      </tr>
+        <td>
+          <Skeleton />
+        </td>
+        <td>
+          <Skeleton />
+        </td>
+        <td>
+          <Skeleton />
+        </td>
+        <td>
+          <Skeleton />
+        </td>
+        <td>
+        </td>
+      </tr>)
     }
-    if (buscar.data){
-      const records = buscar.data!.data.records
-      if(records.length === 0){
-        return  <tr>
-          <td className="bg-light text-center" colSpan={100}>
-            No se encontraron resultados
-          </td>
-      </tr>
-      }
-      return records.map((solicitud, index)=>{
+    return rows
+  }, [page.size])
+
+  if(!canView) return null
+
+  return <div className="px-1">
+    <Breadcrumb>
+      <Breadcrumb.Item active>Solicitudes de atencion externa</Breadcrumb.Item>
+    </Breadcrumb>
+    {/* <h1 style={{fontSize: "1.75rem"}}>Solicitudes de atención externa</h1> */}
+    <IndexTemplate
+      policy={solicitudAtencionExternaPolicy}
+      isLoading={buscar.isFetching}
+      hasError={buscar.isError}
+      total={totalRef.current}
+      page={page}
+      data={buscar.data?.data.records}
+      renderLoader={()=>{
+        return <>{loader}</>
+      }}
+      renderData={(solicitud, index)=>{
         return <tr key={solicitud.id}>
-          <td>{index + 1}</td>
+        <th scope="row">
+          {index + 1}
+        </th>
           <td>{solicitud.numero}</td>
           <td>{solicitud.fecha}</td>
           <td>{solicitud.asegurado.matricula}</td>
-          <td>{solicitud.medico}</td>
-          <td>{solicitud.proveedor}</td>
+          <td>{solicitud.medico.nombreCompleto}</td>
+          <td>{solicitud.proveedor.tipo == 1 ? solicitud.proveedor.nombreCompleto : solicitud.proveedor.nombre}</td>
           <td>
             <RowOptions solicitud={solicitud} />
           </td>
         </tr>
-      })
-    }
-  }
-
-  return <div className="px-1">
-    <h1 style={{fontSize: "1.75rem"}}>Solicitudes de atención externa</h1>
-    <div className="d-flex my-2">
+      }}
+      renderDataHeaders={()=>{
+        return <tr>
+          <th style={{width: 1}}>#</th>
+          <th>Nº</th>
+          <th>Fecha y hora</th>
+          <th>Matrícula asegurado</th>
+          <th>Médico</th>
+          <th>Proveedor</th>
+          <th style={{width: 1}}></th>
+        </tr>
+      }}
+      renderFilterForm={()=>{
+        return <SolicitudAtencionExternaFilterForm onFilter={(filter)=>{
+          setFilter(filter)
+          setPage(page=>({ ...page, current: 1 }))
+        }} />
+      }}
+      renderCreateButton={()=>{
+        return <Button
+          as={Link}
+          to={`${path}/registrar`}
+          className="d-flex align-items-center">
+            <FaPlus className="mr-1" /><span>Nuevo</span>
+        </Button>
+      }}
+      onPageChange={(page)=>setPage(page)}
+      onRefetch={()=>buscar.refetch()}
+    />
+    {/* <div className="d-flex my-2">
       <Form.Row className="ml-auto flex-nowrap" >
         <ProtectedContent
-          authorize={SolicitudATPolicy.view}
+          authorize={solicitudAtencionExternaPolicy.view}
         >
           <Col xs="auto" >
             <Button onClick={()=>{
@@ -112,12 +149,12 @@ export const SolicitudAtencionExternaIndex = ()=>{
           </Col>
           <Col xs="auto" >
             <Button onClick={()=>{
-              showFilterForm(visible=>!visible)
+              setShowFilterForm(visible=>!visible)
             }}><FaFilter /></Button>
           </Col>
         </ProtectedContent>
         <ProtectedContent
-          authorize={SolicitudATPolicy.register}
+          authorize={solicitudAtencionExternaPolicy.register}
         >
           <Col xs="auto">
             <Button
@@ -131,11 +168,11 @@ export const SolicitudAtencionExternaIndex = ()=>{
       </Form.Row>
     </div>
     <ProtectedContent
-      authorize={SolicitudATPolicy.view}
+      authorize={solicitudAtencionExternaPolicy.view}
     >
       <Form.Row className="mb-2">
         <Col xs={12}>
-          <Collapse in={filterFormVisible}>
+          <Collapse in={showFilterForm}>
             <div>
               <SolicitudAtencionExternaFilterForm onFilter={(filter)=>{
                 setFilter(filter)
@@ -146,21 +183,22 @@ export const SolicitudAtencionExternaIndex = ()=>{
         </Col>
         <Col className="ml-auto" xs={"auto"}>
           <div className="d-flex flex-row flex-nowrap align-items-center">
-              <span>Mostrar</span>
-              <Form.Control className="mx-2" as="select" value={page.size} onChange={(e) => {
-                const value = e.target.value
-                setPage((page) => ({
-                  ...page,
-                  size: parseInt(value)
-                }))
-              }}>
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={30}>30</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </Form.Control>
-              <span>filas</span>
+            <span>Mostrar</span>
+            <Form.Label htmlFor="pageSizeSelector" srOnly>Tamaño de pagina</Form.Label>
+            <Form.Control id="pageSizeSelector" className="mx-2" as="select" value={page.size} onChange={(e) => {
+              const value = e.target.value
+              setPage({
+                current: 1,
+                size: parseInt(value)
+              })
+            }}>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={30}>30</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </Form.Control>
+            <span>filas</span>
           </div>
         </Col>
       </Form.Row>
@@ -188,6 +226,6 @@ export const SolicitudAtencionExternaIndex = ()=>{
           onChange={(current) => setPage((page) => ({ ...page, current }))}
         />
       </div> : null}
-    </ProtectedContent>
+    </ProtectedContent> */}
   </div>
 }

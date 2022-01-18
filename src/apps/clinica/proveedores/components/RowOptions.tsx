@@ -7,7 +7,7 @@ import { VerticalEllipsisDropdownToggle } from "../../../../commons/components"
 import { useModal } from "../../../../commons/reusable-modal"
 import { ProtectedContent } from "../../../../commons/auth/components"
 import { Proveedor, ProveedoresService } from "../services"
-import { ProveedorPolicy } from "../policies"
+import { proveedorPolicy } from "../policies"
 
 type Props = {
   proveedor: Proveedor
@@ -22,7 +22,7 @@ export const RowOptions = ({proveedor}: Props) => {
 
     <Dropdown.Menu>
       <ProtectedContent
-        authorize={ProveedorPolicy.view}
+        authorize={(user)=>proveedorPolicy.view(user, {regionalId: proveedor.regionalId})}
       >
         <Dropdown.Item as={Link} to={{
           pathname: `/clinica/proveedores/${proveedor.id}`,
@@ -32,7 +32,7 @@ export const RowOptions = ({proveedor}: Props) => {
         }} ><span className="align-middle">Ver</span></Dropdown.Item>
       </ProtectedContent>
       <ProtectedContent
-        authorize={ProveedorPolicy.edit}
+        authorize={(user)=>proveedorPolicy.edit(user, {regionalId: proveedor.regionalId})}
       >
         <Dropdown.Item as={Link} to={{
           pathname: `/clinica/proveedores/${proveedor.id}/editar`,

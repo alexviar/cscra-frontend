@@ -1,6 +1,7 @@
 import React from 'react'
 import { Redirect, Route, RouteProps, useLocation } from 'react-router';
 import { User, useUser } from '../hooks';
+import { superUserPolicyEnhancer } from '../utils';
 
 type Props = {
   authorize?: (user: User, url: string) => boolean | undefined
@@ -13,14 +14,15 @@ export const ProtectedRoute = ({ children, authorize, ...rest }: Props) => {
   const ignoreAuthorization = state?.ignoreAuthorization
   const loggedUser = useUser()
   
-  if(loggedUser == null) return null
+  /** No renderizar nada hasta obtener los datos del servidor */
+  if(loggedUser === undefined) return null
 
   return (
     <Route
       {...rest}
       render={({ location }) =>
         loggedUser ? (
-          !authorize || authorize(loggedUser, url) || ignoreAuthorization ? children : <Redirect
+          !authorize || superUserPolicyEnhancer(authorize)(loggedUser, url) || ignoreAuthorization ? children : <Redirect
             to="/forbidden"
           />
         ) : (

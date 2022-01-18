@@ -6,7 +6,8 @@ export const medicosFactory = BaseFactory.define<Medico, any, BaseFactory<Medico
   sequence,
   params,
   associations,
-  afterBuild
+  afterBuild,
+  onCreate
 }) => { 
   afterBuild(function(item) {
     medicosFactory.push(item)

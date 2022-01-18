@@ -5,6 +5,7 @@ import * as yup from "yup"
 import { LocationInput } from "../../../../commons/components"
 
 export type Inputs = {
+  initialized: boolean
   direccion?: string,
   ubicacion?: LatLngExpression
   horario?: string, 

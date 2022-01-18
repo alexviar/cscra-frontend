@@ -142,15 +142,16 @@ export const MedicosIndex = () => {
         </div>
       </Collapse>
       <div className="d-flex">
-        <div className="ml-auto mb-2">          
+        <div className="ml-auto mb-2">
           <div className="d-flex flex-row flex-nowrap align-items-center">
             <span>Mostrar</span>
-            <Form.Control className="mx-2" as="select" value={page.size} onChange={(e) => {
+            <Form.Label htmlFor="pageSizeSelector" srOnly>Tamaño de pagina</Form.Label>
+            <Form.Control id="pageSizeSelector" className="mx-2" as="select" value={page.size} onChange={(e) => {
               const value = e.target.value
-              setPage((page) => ({
-                ...page,
+              setPage({
+                current: 1,
                 size: parseInt(value)
-              }))
+              })
             }}>
               <option value={10}>10</option>
               <option value={20}>20</option>

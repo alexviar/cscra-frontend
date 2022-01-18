@@ -8,7 +8,7 @@ import { useQuery } from 'react-query'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { useUser, ProtectedContent } from "../../../../commons/auth"
 import { useModal } from "../../../../commons/reusable-modal"
-import { ProveedorPolicy } from "../policies"
+import { proveedorPolicy } from "../policies"
 import 'react-loading-skeleton/dist/skeleton.css'
 
 export const ProveedorView = ()=>{
@@ -41,12 +41,6 @@ export const ProveedorView = ()=>{
   })
 
   const proveedor = cargar.data?.data || locationState?.proveedor
-
-  useEffect(()=>{
-    if(cargar.isFetching){
-      loader.open({state: "loading"})
-    }
-  }, [cargar.isFetching])
 
   const position: LatLngExpression | null | undefined = proveedor?.ubicacion && [proveedor.ubicacion.latitud, proveedor.ubicacion.longitud]
     
@@ -102,7 +96,7 @@ export const ProveedorView = ()=>{
     </Row>
     {proveedor ? <Form.Row>
       <ProtectedContent
-        authorize={ProveedorPolicy.edit}
+        authorize={(user)=>proveedorPolicy.edit(user, {regionalId: proveedor.regionalId})}
       >
         <Col xs="auto">
           <Button as={Link} to={{

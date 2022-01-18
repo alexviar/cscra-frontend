@@ -1,17 +1,4 @@
 /**
- * Permisos de solicitud de transferencia externa
- */
-export const VER_SOLICITUDES_DE_ATENCION_EXTERNA = "Ver solicitudes de atencion externa";
-export const VER_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL = "Ver solicitudes de atencion externa (misma regional)";
-export const VER_SOLICITUDES_DE_ATENCION_EXTERNA_REGISTRADO_POR = "Ver solicitudes de atencion externa (registrado por)";
-export const REGISTRAR_SOLICITUDES_DE_ATENCION_EXTERNA = "Registrar solicitudes de atencion externa";
-export const REGISTRAR_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL = "Registrar solicitudes de atencion externa (misma regional)";
-// export const REGISTRAR_SOLICITUDES_DE_ATENCION_EXTERNA_REGISTRADO_POR = "Registrar solicitudes de atencion externa (registrado por)";
-export const EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA = "Emitir solicitudes de atencion externa";
-export const EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA_MISMA_REGIONAL = "Emitir solicitudes de atencion externa (misma regional)";
-export const EMITIR_SOLICITUDES_DE_ATENCION_EXTERNA_REGISTRADO_POR = "Emitir solicitudes de atencion externa (registrado por)";
-  
-/**
  * Permisos de usuarios
  */
 export const VER_USUARIOS = "Ver usuarios";
@@ -59,44 +46,3 @@ export const EDITAR_MEDICOS = "Editar médicos";
 export const EDITAR_MEDICOS_REGIONAL = "Editar médicos (regional)";
 export const BAJA_MEDICOS = "Baja médicos";
 export const BAJA_MEDICOS_REGIONAL = "Baja médicos (regional)";
-
-/**
-* Proveedores
-*/
-export const VER_PROVEEDORES = "Ver proveedores";
-export const VER_PROVEEDORES_REGIONAL = "Ver proveedores (regional)";
-export const REGISTRAR_PROVEEDORES = "Registrar proveedores";
-export const REGISTRAR_PROVEEDORES_REGIONAL = "Registrar proveedores (regional)";
-export const EDITAR_PROVEEDORES = "Editar proveedores";
-export const EDITAR_PROVEEDORES_REGIONAL = "Editar proveedores (regional)";
-export const BAJA_PROVEEDOR = "Baja proveedores";
-export const BAJA_PROVEEDOR_REGIONAL = "Baja proveedores (regional)";
-
-export const VER_CONTRATOS_PROVEEDOR = "Ver contratos de proveedores";
-export const VER_CONTRATOS_PROVEEDOR_REGIONAL = "Ver contratos de proveedores (regional)";
-export const REGISTRAR_CONTRATOS_PROVEEDOR = "Registrar contratos de proveedores";
-export const REGISTRAR_CONTRATOS_PROVEEDOR_REGIONAL = "Registrar contratos de proveedores (regional)";
-export const CONSUMIR_CONTRATOS_PROVEEDOR = "Consumir contratos de proveedores";
-export const CONSUMIR_CONTRATOS_PROVEEDOR_REGIONAL = "Consumir contratos de proveedores (regional)";
-export const EXTENDER_CONTRATOS_PROVEEDOR = "Extender contratos de proveedores";
-export const EXTENDER_CONTRATOS_PROVEEDOR_REGIONAL = "Extender contratos de proveedores (regional)";
-export const ANULAR_CONTRATOS_PROVEEDOR = "Anular contratos de proveedores";
-export const ANULAR_CONTRATOS_PROVEEDOR_REGIONAL = "Anular contratos de proveedores (regional)";
-
-/**
-* Especialidades
-*/
-export const VER_ESPECIALIDADES = "Ver especialidades";
-export const REGISTRAR_ESPECIALIDADES = "Registrar especialidades";
-export const EDITAR_ESPECIALIDADES = "Editar especialidades";
-export const ELIMINAR_ESPECIALIDADES = "Eliminar especialidades";
-export const IMPORTAR_ESPECIALIDADES = "Importar especialidades";
-
-/**
-* Prestaciones
-*/
-export const VER_PRESTACIONES = "Ver prestaciones";
-export const REGISTRAR_PRESTACIONES = "Registrar prestaciones";
-export const EDITAR_PRESTACIONES = "Editar prestaciones";
-export const ELIMINAR_PRESTACIONES = "Eliminar prestaciones";
-export const IMPORTAR_PRESTACIONES = "Importar prestaciones";

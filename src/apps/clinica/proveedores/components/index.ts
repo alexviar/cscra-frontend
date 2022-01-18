@@ -1,4 +1,4 @@
 export * from "./ProveedoresIndex"
 export * from "./ProveedorView"
-export * from "./ProveedorWizard"
+export * from "./ProveedorForm"
 export * from "./ProveedoresTypeahead"

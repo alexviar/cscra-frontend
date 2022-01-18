@@ -24,7 +24,7 @@ export const ProveedoresTypeahead = ({isInvalid, feedback, filter={}, ...props}:
     _busqueda: search
   }
 
-  const queryKey = ["proveedores.buscar", filter]
+  const queryKey = ["proveedores", "buscar", filter]
 
   const buscar = useInfiniteQuery(queryKey, ({pageParam = 1})=>{
     return ProveedoresService.buscar({

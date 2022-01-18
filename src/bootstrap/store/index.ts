@@ -1,16 +1,6 @@
-import { all } from "@redux-saga/core/effects";
-import createSagaMiddleware from "redux-saga"
 import { combineReducers, createStore, applyMiddleware, compose } from "redux";
-import { watchUnauthorized } from "../../commons/auth/actions";
-import auth from "../../commons/auth/reducers";
 import { createModalReducer } from "../../commons/reusable-modal"
 import { sidebarVisibility } from "../../commons/components/layouts/reducer";
-
-function* rootSaga() {
-  yield all([
-    watchUnauthorized()
-  ])
-}
 
 //@ts-ignore
 const composeWithDevTools = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
@@ -21,22 +11,12 @@ export const configureStore = () => {
       dm11Viewer: createModalReducer("dm11Viewer"),
       pdfModal: createModalReducer("pdfModal")
     }),
-    sidebarVisibility,
-    auth
+    sidebarVisibility
   })
-
-  // create the saga middleware
-  const sagaMiddleware = createSagaMiddleware()
   // mount it on the Store
   const store = createStore(
-    rootReducer,
-    composeWithDevTools(
-      applyMiddleware(sagaMiddleware)
-    )
+    rootReducer
   )
-
-  // then run the saga
-  sagaMiddleware.run(rootSaga)
 
   return store
 }

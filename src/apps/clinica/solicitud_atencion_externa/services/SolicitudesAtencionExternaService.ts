@@ -14,15 +14,31 @@ export type SolicitudesAtencionExternaFilter = {
 }
 
 export type SolicitudAtencionExterna = {
-  id: number,
-  numero: number,
-  fecha: string,
+  id: number
+  numero: string
+  fecha: string
+  regionalId: number
   asegurado: {
     matricula: string
   },
-  medico: string,
-  especialidad: string,
-  proveedor: string,
+  medico: {
+    id: number
+    nombreCompleto?: string
+    especialidad: string
+  },
+  proveedor: {
+    id: number
+    tipo: 2
+    nombre: string
+  } | {
+    id: number,
+    tipo: 1
+    nombreCompleto?: string
+  },
+  regional: {
+    id: number
+    nombre: string
+  }
   urlDm11: string
 }
 

@@ -1,36 +1,65 @@
-import { Permisos, User } from "../../../../commons/auth";
+import { User } from "../../../../commons/auth";
+import * as Permisos from "./Permisos"
 
-export const ProveedorPolicy = {
-  index: function(user: User){
-    return user?.canAny([
-      Permisos.VER_PROVEEDORES,
-      Permisos.VER_PROVEEDORES_REGIONAL,
-      Permisos.REGISTRAR_PROVEEDORES,
-      Permisos.REGISTRAR_PROVEEDORES_REGIONAL
-    ])
-  },
-  register: function(user: User){
-    return user?.canAny([
-      Permisos.REGISTRAR_PROVEEDORES,
-      Permisos.REGISTRAR_PROVEEDORES_REGIONAL
-    ])
-  },
-  edit: function(user: User){
-    return user?.canAny([
-      Permisos.EDITAR_PROVEEDORES,
-      Permisos.EDITAR_PROVEEDORES_REGIONAL
-    ])
-  },
-  view: function(user: User){
-    return user?.canAny([
-      Permisos.VER_PROVEEDORES,
-      Permisos.VER_PROVEEDORES_REGIONAL
-    ])
-  },
-  baja: function(user: User){
-    return user?.canAny([
-      // Permisos.BAJA_PROVEEDORES,
-      // Permisos.BAJA_PROVEEDORES_REGIONAL
-    ])
+export class ProveedorPolicy {
+  
+  index = (user: User) => {
+    return this.view(user) || this.register(user)
+  }  
+
+  view = (user: User, context?: {
+    regionalId: number
+  }) => { 
+    const byRegionalOnly = this.viewByRegionalOnly(user, context)
+    if(byRegionalOnly !== undefined) return byRegionalOnly
+    if(user?.can(Permisos.VER_PROVEEDORES)) return true
+  }
+
+  viewByRegionalOnly = (user: User, context?: {
+    regionalId: number
+  }) => {
+    if(user?.can(Permisos.VER_PROVEEDORES_REGIONAL)) return !context?.regionalId || user.regionalId == context.regionalId
+  }
+
+  register = (user: User, context?: {
+    regionalId: number
+  }) => {
+    const byRegionalOnly = this.registerByRegionalOnly(user, context)
+    if(byRegionalOnly !== undefined) return byRegionalOnly
+    if(user?.can(Permisos.REGISTRAR_PROVEEDORES)) return true
+  }
+
+  registerByRegionalOnly = (user: User, context?: {
+    regionalId: number
+  }) => {
+    if(user?.can(Permisos.REGISTRAR_PROVEEDORES_REGIONAL)) return !context?.regionalId || user.regionalId == context.regionalId
+  }
+
+  edit = (user: User, context?: {
+    regionalId: number
+  }) => {
+    const byRegionalOnly = this.editByRegionalOnly(user, context)
+    if(byRegionalOnly !== undefined) return byRegionalOnly
+    if(user?.can(Permisos.EDITAR_PROVEEDORES)) return true
+  }
+
+  editByRegionalOnly = (user: User, context?: {
+    regionalId: number
+  }) => {
+    if(user?.can(Permisos.EDITAR_PROVEEDORES_REGIONAL)) return !context?.regionalId || user.regionalId == context.regionalId
+  }
+
+  updateStatus = (user: User, context?: {
+    regionalId: number
+  }) => {
+    const byRegionalOnly = this.updateStatusByRegionalOnly(user, context)
+    if(byRegionalOnly !== undefined) return byRegionalOnly
+    if(user?.can(Permisos.ACTUALIZAR_ESTADO_PROVEEDOR)) return true
+  }
+
+  updateStatusByRegionalOnly = (user: User, context?: {
+    regionalId: number
+  }) => {
+    if(user?.can(Permisos.ACTUALIZAR_ESTADO_PROVEEDOR_REGIONAL)) return !context?.regionalId || user.regionalId == context.regionalId
   }
 }

@@ -7,7 +7,6 @@ import { prettyDOM } from '@testing-library/dom'
 import ListaMoraIndex from "./ListaMoraIndex";
 import { Provider } from 'react-redux'
 import { createStore, combineReducers } from 'redux'
-import AuthModuleReducer from '../../../../commons/auth/reducers';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { listaMoraFactory } from '../services/__factories__/ListaMoraFactory';
@@ -30,7 +29,6 @@ const Wrapper = ({children}: PropsWithChildren<{}>) => {
     <QueryClientProvider client={queryClient}>
       <Provider store={createStore(
         combineReducers({
-          auth: AuthModuleReducer,
           modals: combineReducers({
             queryLoader: createModalReducer("queryLoader")
           }),

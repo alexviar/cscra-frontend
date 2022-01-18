@@ -1,12 +1,9 @@
 import { Form, Button, Alert, Image, Spinner } from 'react-bootstrap'
 import { useForm } from "react-hook-form"
-import { useMutation } from "react-query"
-import { useDispatch, useSelector } from "react-redux"
 import { Redirect, useLocation } from "react-router"
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from "yup"
-import { getIsAuthenticated } from "../selectors/inputSelectors"
-import { AuthService } from "../services/AuthService"
+import { useUser, useLogin } from "../hooks"
 import "./auth.css"
 
 type Credentials = {
@@ -24,9 +21,8 @@ const schema = yup.object().shape({
 })
 
 export const Login = () => {
-  const dispatch = useDispatch()
   const {state} = useLocation<{from: string}>()
-  const isAuthenticated = useSelector(getIsAuthenticated)
+  const user = useUser()
 
   const {handleSubmit, register, formState} = useForm<Inputs>({
     resolver: yupResolver(schema),
@@ -37,19 +33,9 @@ export const Login = () => {
     }
   })
 
-  const login = useMutation(({username, password, remember_me}: Inputs)=>{
-    return AuthService.login(username, password, remember_me)
-  }, {
-    onSuccess: ({data}) => {
-      localStorage.setItem("user", JSON.stringify(data))
-      dispatch({
-        type: "SET_USER",
-        payload: data
-      })
-    }
-  })
+  const login = useLogin()
 
-  return isAuthenticated !== false ? 
+  return user !== null ? 
     <Redirect to={state?.from || "/"} /> :
     <div className="auth-wrapper bg-light">
       <div className="auth-inner shadow-sm">
