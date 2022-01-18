@@ -23,11 +23,13 @@ export const proveedorHandlers = [
       records: data
     }))
   }),
-  rest.get(apiRoute("proveedores/:id"), (req, res, ctx) => {
+  rest.get(apiRoute("proveedores/:id"), async (req, res, ctx) => {
     
     if(!proveedoresFactory.data.length) proveedoresFactory.buildList(100)
     let { data } = proveedoresFactory
   
-    return res(ctx.json(data.find(p => p.id == req.params.id)))
+    const proveedor = data.find(p => p.id == req.params.id)
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    return proveedor ? res(ctx.json(proveedor)) : res(ctx.status(404))
   })
 ]

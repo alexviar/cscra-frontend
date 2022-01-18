@@ -19,7 +19,7 @@ export const proveedoresFactory = BaseFactory.define<Proveedor, any, BaseFactory
 
   if(Math.random() > 0.5){
     return {
-      id: sequence,
+      id: "EMP"+String(sequence).padStart(10, '0'),
       tipo: 2,
       nit: faker.helpers.replaceSymbolWithNumber('###########'),
       nombre: faker.company.companyName(),
@@ -53,7 +53,7 @@ export const proveedoresFactory = BaseFactory.define<Proveedor, any, BaseFactory
     if(nombre.apellidoMaterno) nombre.nombreCompleto += " " + nombre.apellidoMaterno
   
     return {
-      id: sequence,
+      id: "MED" + String(sequence).padStart(10, '0'),
       tipo: 1,
       nit: faker.helpers.replaceSymbolWithNumber('###########'),
       ci,
@@ -64,7 +64,10 @@ export const proveedoresFactory = BaseFactory.define<Proveedor, any, BaseFactory
       regional,
 
       direccion: faker.address.streetAddress(),
-      ubicacion: null,
+      ubicacion: {
+        latitud: parseFloat(faker.address.latitude()), 
+        longitud: parseFloat(faker.address.longitude())
+      },
       telefono1: parseInt(faker.phone.phoneNumber('#######')),
       telefono2: null
     }

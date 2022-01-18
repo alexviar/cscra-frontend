@@ -7,7 +7,7 @@ import * as yup from "yup"
 import { Regional, RegionalesTypeahead } from '../../../../commons/components'
 import { Permisos, useUser } from '../../../../commons/auth'
 import { Proveedor, ProveedoresService } from '../services'
-import { proveedorPolicy } from ".."
+import { proveedorPolicy } from "../policies"
 
 export type Inputs = {
   initialized: boolean

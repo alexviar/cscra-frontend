@@ -4,4 +4,5 @@ export {
   ProveedorForm,
   ProveedoresTypeahead
 } from "./components"
+
 export * from "./policies"

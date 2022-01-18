@@ -20,9 +20,9 @@ import {
 import { 
   ProveedoresIndex,
   ProveedorView,
-  ProveedorForm,
-  proveedorPolicy
-} from './proveedores';
+  ProveedorForm
+} from './proveedores/components';
+import { proveedorPolicy } from "./proveedores/policies"
 import { ProtectedRoute, useUser } from '../../commons/auth';
 import { superUserPolicyEnhancer } from '../../commons/auth/utils';
 import { ListaMoraPolicy } from "./mora/policies";

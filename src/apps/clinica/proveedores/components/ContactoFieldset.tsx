@@ -3,11 +3,14 @@ import { LatLngExpression } from "leaflet"
 import { Controller, useFormContext } from "react-hook-form"
 import * as yup from "yup"
 import { LocationInput } from "../../../../commons/components"
+import "../../../../commons/utils/leafletDefaults"
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 
 export type Inputs = {
   initialized: boolean
   direccion?: string,
-  ubicacion?: LatLngExpression
+  ubicacion?: LatLngExpression | null
   horario?: string, 
   telefono1?: number
   telefono2?: number | null
@@ -29,7 +32,8 @@ export const ContactoFieldset = () => {
   const {
     register,
     control,
-    formState
+    formState,
+    watch
   } = useFormContext<Inputs>()
   // } = useFormContext<Inputs>({
   //   mode: "onBlur",
@@ -41,22 +45,24 @@ export const ContactoFieldset = () => {
 
   const formErrors = formState.errors
 
+  const initialized = watch("initialized")
+
   return <fieldset>
     <legend>Información de contacto</legend>
     <Form.Row>
       <Form.Group as={Col}>
         <Form.Label>Direccion</Form.Label>
-        <Form.Control as="textarea"
+        {initialized ? <Form.Control as="textarea"
           isInvalid={!!formErrors.direccion}
           {...register("direccion")}
-        />
+        /> : <Skeleton count={3}  />}
         <Form.Control.Feedback type="invalid">{formErrors.direccion?.message}</Form.Control.Feedback>
       </Form.Group>
     </Form.Row>
     <Form.Row>
       <Form.Group as={Col}>
         <Form.Label>Ubicación</Form.Label>
-        <Controller
+        {initialized ? <Controller
           name="ubicacion"
           control={control}
           render={({ field, fieldState }) => {
@@ -70,24 +76,24 @@ export const ContactoFieldset = () => {
               <Form.Control.Feedback type="invalid">{fieldState.error?.message}</Form.Control.Feedback>
             </>
           }}
-        />
+        /> : <Skeleton style={{height: 240}} />}
       </Form.Group>
     </Form.Row>
     <Form.Row>
       <Form.Group as={Col} sm={4}>
         <Form.Label>Teléfono 1</Form.Label>
-        <Form.Control
+        {initialized ? <Form.Control
           isInvalid={!!formErrors.telefono1}
           {...register("telefono1")}
-        />
+        /> : <Skeleton />}
         <Form.Control.Feedback type="invalid">{formErrors.telefono1?.message}</Form.Control.Feedback>
       </Form.Group>
       <Form.Group as={Col} sm={4}>
         <Form.Label>Teléfono 2</Form.Label>
-        <Form.Control
+        {initialized ? <Form.Control
           isInvalid={!!formErrors.telefono2}
           {...register("telefono2")}
-        />
+        /> : <Skeleton />}
         <Form.Control.Feedback type="invalid">{formErrors.telefono2?.message}</Form.Control.Feedback>
       </Form.Group>
     </Form.Row>

@@ -6,7 +6,7 @@ const route = (path: string)=>{
 }
 
 export const regionalHandlers = [
-  rest.get(route('regionales'), (req, res, ctx) => {
+  rest.get(route('regionales'), async (req, res, ctx) => {
     const regionales = [
       {
         id: 1,
@@ -17,6 +17,7 @@ export const regionalHandlers = [
         nombre: "Santa Cruz",
       }
     ]//regionalFactory.buildList(10)
+    await new Promise((resolve) => setTimeout(resolve, 5000))
     return res(
       // Respond with a 200 status code
       ctx.status(200),

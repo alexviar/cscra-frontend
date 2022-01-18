@@ -3,7 +3,7 @@ import axios, { AxiosPromise } from 'axios'
 import { keysToUnderscore } from "../../../../commons/utils"
 
 export type Empresa = {
-  id: number
+  id: string
   tipo: 2
   nit: string
   nombre: string  
@@ -16,7 +16,7 @@ export type Empresa = {
 }
 
 export type Medico = {
-  id: number
+  id: string
   tipo: 1
   nit: string
   ci: {
@@ -67,7 +67,7 @@ class ProveedorService {
       })
     })
   }
-  cargar(id: number): AxiosPromise<Proveedor>{
+  cargar(id: string): AxiosPromise<Proveedor>{
     return apiClient.get(`proveedores/${id}`)
   }
   registrar(fields: Omit<Proveedor, "id" | "nombreCompleto" | "estado">): AxiosPromise<Proveedor> {

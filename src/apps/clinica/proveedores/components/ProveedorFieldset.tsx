@@ -21,6 +21,8 @@ export const ProveedorFieldset = () => {
     watch
   } = useFormContext<Inputs>()
 
+  console.log("Watch", watch())
+
   const renderSpecificFieldset = () => {
     if (watch("tipo") == 1) {
       return <ProveedorMedicoFieldset />
@@ -36,47 +38,42 @@ export const ProveedorFieldset = () => {
   return <fieldset>
     <legend>Información general</legend>
     <Form.Row>
-      <Form.Group as={Col} sm={4}>
+      <Form.Group as={Col} md={4}>
         <Form.Label>Tipo de proveedor</Form.Label>
         <Controller
           control={control}
           name="tipo"
-          render={({field, fieldState})=>{
-            return <>
+          render={({field: {value, ...field}, fieldState})=>{
+            console.log("RadioGroup", field)
+            return !id ? <>
               <Form.Row className={fieldState.error ? "is-invalid" : ""}>
                 <Col>
                   <Form.Check 
-                    disabled={!!id}
+                    // disabled={!!id}
+                    readOnly={!!id}
                     type="radio"
                     value={1}
-                    checked={field.value == 1}
+                    checked={value == 1}
                     label="Médico"
                     isInvalid={!!fieldState.error}
-                    {...tipoField}
-                    onChange={(e) => {
-                    if (e.target.checked && !id)
-                      tipoField.onChange(e)
-                    }} 
+                    {...field}
                   />
                 </Col>
                 <Col>
                   <Form.Check
-                    disabled={!!id}
+                    // disabled={!!id}
+                    readOnly={!!id}
                     type="radio"
                     value={2}
-                    checked={field.value == 2}
+                    checked={value == 2}
                     label="Empresa" 
                     isInvalid={!!fieldState.error}
-                    {...tipoField} 
-                    onChange={(e) => {
-                    if (e.target.checked && !id)
-                      tipoField.onChange(e)
-                    }} 
+                    {...field} 
                   />
                 </Col>
               </Form.Row>
               <Form.Control.Feedback type="invalid">{fieldState.error?.message}</Form.Control.Feedback>
-            </>
+            </> : <Form.Control readOnly value={value == 1 ? "MÉDICO" : "EMPRESA"} />
           }}
         />        
       </Form.Group>

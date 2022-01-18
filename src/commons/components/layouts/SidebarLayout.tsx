@@ -22,7 +22,7 @@ export const SidebarLayout = ({sidebar, children}: Props) => {
     }
   }, [showSidebar])
   
-  return <div className={"position-relative d-flex flex-grow-1 bg-light" + (showSidebar ? " toggled" : "")}  id="wrapper">
+  return <div className={"position-relative d-flex flex-grow-1 bg-light" + (showSidebar ? "" : " collapsed")}  id="wrapper">
     <ClickOutsideHandler onClickOutside={onClickOutsideHandler}>
       <Sidebar className="bg-white shadow-sm" {...sidebar}/>
     </ClickOutsideHandler>

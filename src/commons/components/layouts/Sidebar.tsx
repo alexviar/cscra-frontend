@@ -29,12 +29,13 @@ const SidebarItem = (item: MenuItem)=>{
       <ListGroup.Item as={Link} to={item.path} 
         action
         active={!!match}
-        className="border-0 text-nowrap"
+        className="text-nowrap sidebar-navitem"
         style={{
-          padding: ".5rem 1rem"
+          padding: ".5rem 1rem",
+          borderLeft: !!match ? "0.25rem solid #f28c2b" : 0
         }}
         key={item.id}>
-          {item.icon}<span style={{verticalAlign: 'middle', marginLeft: '0.5rem'}}>{item.title}</span>
+          <span className="sidebar-navitem-icon">{item.icon}</span><span className="sidebar-navitem-title">{item.title}</span>
       </ListGroup.Item> : 
       <div
         className="list-group-item border-0 text-nowrap"
@@ -42,7 +43,7 @@ const SidebarItem = (item: MenuItem)=>{
           padding: ".5rem 1rem"
         }}
         key={item.id}>
-          {item.icon}<span style={{verticalAlign: 'middle', marginLeft: '0.5rem'}}>{item.title}</span>
+          <span className="sidebar-navitem-icon">{item.icon}</span><span className="sidebar-navitem-title">{item.title}</span>
       </div>
     }
     {item.items && item.items.map(subitem=>{
@@ -51,7 +52,7 @@ const SidebarItem = (item: MenuItem)=>{
           padding: ".5rem 1rem",
           paddingLeft: "2rem"
         }}
-        className="list-group-item list-group-item-action border-0 text-nowrap" 
+        className="list-group-item list-group-item-action  border-left-3 text-nowrap" 
         key={subitem.id}>
           {subitem.icon || null}<span style={{verticalAlign: 'middle', marginLeft: '0.5rem'}}>{subitem.title}</span>
       </Link>
@@ -69,16 +70,17 @@ export const Sidebar = (props: SidebarProps) => {
   const {className="", side="right", header="", items=[], renderItem} = props
   const borderClass = {left: 'border-left', right: 'border-right'}
   return <div className={`${className}  ${borderClass[side]}`} id="sidebar-wrapper">
-    <div className="sidebar-heading mt-2">{header}</div>
+    <div className="sidebar-heading">
+      <div className="sidebar-heading-content">{header}</div>
+    </div>
     <hr className="mx-2"></hr>
-    <ListGroup variant="flush">
-      {items.map(item=>(
-        <SidebarItem key={item.id} {...item} />
-      ))}      
-    </ListGroup>
-    {/* <div className="list-group list-group-flush">
-      {items.map(item=><a href="#" className="list-group-item list-group-item-action" key={item.id}>{renderItem ? renderItem(item):item.title}</a>)}
-    </div> */}
+    <div className="sidebar-menu">
+      <ListGroup variant="flush">
+        {items.map(item=>(
+          <SidebarItem key={item.id} {...item} />
+        ))}      
+      </ListGroup>
+    </div>
   </div>
   
 }

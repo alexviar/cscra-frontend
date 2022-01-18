@@ -1,5 +1,4 @@
-import { useRef, useState } from "react"
-import { Button, Breadcrumb, Col, Form, Spinner } from "react-bootstrap"
+import { Alert, Button, Breadcrumb, Col, Form, Spinner } from "react-bootstrap"
 import { Link, useParams } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "react-query"
 import { useForm, FormProvider } from "react-hook-form"
@@ -18,7 +17,8 @@ export const ProveedorForm = () => {
   const formMethods = useForm<Inputs>({
     defaultValues: {
       tipo: id?.startsWith("EMP") ? 2 : 1,
-      initialized: !id
+      initialized: !id,
+      ubicacion: null
     }
   })
 
@@ -33,17 +33,22 @@ export const ProveedorForm = () => {
   const queryClient = useQueryClient()
 
   const cargar = useQuery(["proveedores", "obtener", id], () => {
-    return ProveedoresService.cargar(parseInt(id!))
+    return ProveedoresService.cargar(id!)
   }, {
     enabled: !!id && !initialized,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     onSuccess({data}){
+      console.log(data)
       setValue("initialized", true)
       setValue("nit", data.nit)
       setValue("nombre", data.nombre)
       setValue("regional", [data.regional!])
+      setValue("direccion", data.direccion)
+      setValue("ubicacion", data.ubicacion && [data.ubicacion.latitud, data.ubicacion.longitud])
+      setValue("telefono1", data.telefono1)
+      setValue("telefono2", data.telefono2)
       if(data.tipo == 1){
         setValue("ci", data.ci.raiz)
         setValue("ciComplemento", data.ci.complemento)
@@ -110,6 +115,19 @@ export const ProveedorForm = () => {
     }
   })
 
+  const renderAlert = () => {
+    if(cargar.error) {
+      const { response } = cargar.error as any
+      return <Alert variant="danger">
+        {
+          !response ? "No fue posible realizar la solicitud, verifique si tiene conexion a internet" :
+          response.status == 404 ? "El proveedor que busca no existe" : 
+          "Ocurrio un error inesperado"
+        }
+      </Alert>
+    }
+    return null
+  }
 
   return <FormProvider {...formMethods}>
     <Breadcrumb>
@@ -120,8 +138,13 @@ export const ProveedorForm = () => {
     <Form onSubmit={handleSubmit((values)=>{
       guardar.mutate(values)
     })}>
+      {renderAlert()}
       <ProveedorFieldset />
       <ContactoFieldset />
+      <Button className="mt-3" type="submit">
+        {guardar.isLoading ? <Spinner className="mr-2" animation="border" size="sm"/> : null}
+        Guardar
+      </Button>
     </Form>
   </FormProvider>
 }
