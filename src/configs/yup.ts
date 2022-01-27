@@ -9,6 +9,12 @@ import moment from 'moment'
 
 setLocale(messages.yup)
 
+addMethod(mixed, 'nonEmpty', function () {
+  return this.transform(function(value, originalValue) {
+    return typeof originalValue === "string" && originalValue.trim() === "" ? undefined : value;
+  })
+})
+
 addMethod(mixed, 'emptyStringToNull', function () {
   return this.transform(function (value, originalValue) {
     if (this.isType(value)) return value;

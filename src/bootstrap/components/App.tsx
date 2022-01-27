@@ -22,13 +22,14 @@ const IamApp = React.lazy(()=>import("../../apps/iam/IamApp"))
 const ClinicaApp = React.lazy(()=>import("../../apps/clinica/ClinicaApp"))
 
 export default ()=>{
-  const user = useUser()
 
   const modal = useModal("queryLoader")
 
   const navTitle = useNavTitle()
 
   useUnauthorizedEffect()
+  
+  const user = useUser()
 
   const logout = useLogout()
 

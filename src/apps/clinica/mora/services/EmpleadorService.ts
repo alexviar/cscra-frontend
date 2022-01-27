@@ -1,16 +1,24 @@
-import apiClient from "../../../../commons/services/apiClient"
+import { apiClient , PaginatedResponse, Page} from "../../../../commons/services"
+import { keysToUnderscore } from "../../../../commons/utils"
 
-type Empleador = {
-  id: string,
-  numeroPatronal: string,
+export type Empleador = {
+  id: string
+  numeroPatronal: string
   nombre: string
+  // regionalId: number
+}
+
+type Filter = {
+  numeroPatronal?: string
+  regionalId?: number
 }
 
 export const EmpleadorService = {
-  buscarPorPatronal: (numeroPatronal: string) => {
-    return apiClient.get<Empleador>("empleadores/buscar-por-patronal", {
+  buscar: (page: Page, filter: Filter) => {
+    return apiClient.get<PaginatedResponse<Empleador>>("empleadores", {
       params: {
-        numero_patronal: numeroPatronal
+        filter: keysToUnderscore(filter),
+        page: page
       }
     })
   }

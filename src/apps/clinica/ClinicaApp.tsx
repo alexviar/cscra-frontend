@@ -3,10 +3,11 @@ import { Route, Switch, useRouteMatch } from 'react-router-dom';
 import SidebarLayout from '../../commons/components/layouts/SidebarLayout';
 import { FaProcedures, /*FaCoins,*/ FaHandshake, FaUserMd } from 'react-icons/fa';  
 import { GiRodOfAsclepius } from 'react-icons/gi';  
+import { FcDebt } from '../../commons/components/icons/FcDebt';
 import { BiTransfer } from 'react-icons/bi';
 import ListaMoraIndex from './mora/components/ListaMoraIndex';
 import ListaMoraItemForm from './mora/components/ListaMoraItemForm';
-import { FcDebt } from '../../commons/components/icons/FcDebt';
+import { listaMoraPolicy } from "./mora/policies";
 import { 
   SolicitudAtencionExternaIndex,
   SolicitudAtencionExternaForm,
@@ -16,16 +17,14 @@ import {
   MedicosIndex, 
   MedicoView, 
   MedicoForm, 
-  MedicoPolicy } from './medicos';
+  medicoPolicy } from './medicos';
 import { 
   ProveedoresIndex,
   ProveedorView,
-  ProveedorForm
-} from './proveedores/components';
-import { proveedorPolicy } from "./proveedores/policies"
+  ProveedorForm,
+  proveedorPolicy } from "./proveedores"
 import { ProtectedRoute, useUser } from '../../commons/auth';
 import { superUserPolicyEnhancer } from '../../commons/auth/utils';
-import { ListaMoraPolicy } from "./mora/policies";
 import { Image } from "react-bootstrap";
 
 export const ClinicaApp = ()=>{
@@ -35,7 +34,7 @@ export const ClinicaApp = ()=>{
   const sidebarItems = useMemo(()=>{
     const items = [] as any[]
 
-    if(superUserPolicyEnhancer(ListaMoraPolicy.index)(user)){
+    if(superUserPolicyEnhancer(listaMoraPolicy.index)(user)){
       items.push(
         {
           id: "lista-mora",
@@ -55,7 +54,7 @@ export const ClinicaApp = ()=>{
       })
     }
 
-    if(superUserPolicyEnhancer(MedicoPolicy.index)){
+    if(superUserPolicyEnhancer(medicoPolicy.index)){
       items.push({
         id: "medicos",
         path: `${url}/medicos`,
@@ -96,12 +95,13 @@ export const ClinicaApp = ()=>{
   }}>
     <Switch>
       <ProtectedRoute exact path={`${url}/lista-mora/agregar`}
-        authorize={ListaMoraPolicy.index}>
+        authorize={(user) => listaMoraPolicy.register(user)}>
         <ListaMoraItemForm />
       </ProtectedRoute>
-      <Route path={`${url}/lista-mora`}>
+      <ProtectedRoute path={`${url}/lista-mora`}
+        authorize={listaMoraPolicy.index}>
         <ListaMoraIndex />
-      </Route>
+      </ProtectedRoute>
       <ProtectedRoute exact path={`${url}/atencion-externa`}
         authorize={solicitudAtencionExternaPolicy.index}>
         <SolicitudAtencionExternaIndex />
@@ -112,17 +112,17 @@ export const ClinicaApp = ()=>{
         <SolicitudAtencionExternaForm />
       </ProtectedRoute>
       <ProtectedRoute exact path={`${url}/medicos`}
-        authorize={MedicoPolicy.index}
+        authorize={medicoPolicy.index}
       >
         <MedicosIndex />
       </ProtectedRoute>
       <ProtectedRoute exact path={[`${url}/medicos/registrar`, `${url}/medicos/:id/editar`]}
-        authorize={(user, path) => path == `${url}/medicos/registrar` ? MedicoPolicy.register(user) : MedicoPolicy.edit(user) }
+        authorize={(user, path) => path == `${url}/medicos/registrar` ? medicoPolicy.register(user) : medicoPolicy.edit(user) }
       >
         <MedicoForm />
       </ProtectedRoute>
       <ProtectedRoute exact path={`${url}/medicos/:id`}
-        authorize={MedicoPolicy.view}
+        authorize={(user)=>medicoPolicy.view(user)}
       >
         <MedicoView />
       </ProtectedRoute>

@@ -1,5 +1,5 @@
 import { rest } from 'msw'
-import { listaMoraFactory } from '../../apps/clinica/mora/services/__factories__/ListaMoraFactory'
+import { listaMoraFactory } from '../factories'
 import { apiEndpoint } from '../../configs/app'
 import Qs from 'qs'
 
@@ -9,6 +9,7 @@ const route = (path: string)=>{
 
 export const listaMoraHandlers = [
   rest.get(route("lista-mora"), (req, res, ctx) => {
+    if(listaMoraFactory.data.length === 0) listaMoraFactory.buildList(100)
     let data = listaMoraFactory.data
     const {filter, page} = Qs.parse(req.url.search.substring(1)) as any
   

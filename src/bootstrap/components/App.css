@@ -99,7 +99,8 @@ input[type="date"]:read-only::-webkit-calendar-picker-indicator {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-  max-width: 100%
+  max-width: 100%;
+  vertical-align: top;
 }
 
 .list-details .list {

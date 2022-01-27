@@ -32,17 +32,3 @@ export const AGREGAR_EMPLEADOR_EN_MORA = "Agregar empleador en mora";
 export const AGREGAR_EMPLEADOR_EN_MORA_DE_LA_MISMA_REGIONAL = "Agregar empleador en mora (misma regional)";
 export const QUITAR_EMPLEADOR_EN_MORA = "Quitar empleador en mora";
 export const QUITAR_EMPLEADOR_EN_MORA_DE_LA_MISMA_REGIONAL = "Quitar empleador en mora (misma regional)";
-
-
-
-/**
- * Medicos
- */
-export const VER_MEDICOS = "Ver médicos";
-export const VER_MEDICOS_REGIONAL = "Ver médicos (regional)";
-export const REGISTRAR_MEDICOS = "Registrar médicos";
-export const REGISTRAR_MEDICOS_REGIONAL = "Registrar médicos (regional)";
-export const EDITAR_MEDICOS = "Editar médicos";
-export const EDITAR_MEDICOS_REGIONAL = "Editar médicos (regional)";
-export const BAJA_MEDICOS = "Baja médicos";
-export const BAJA_MEDICOS_REGIONAL = "Baja médicos (regional)";

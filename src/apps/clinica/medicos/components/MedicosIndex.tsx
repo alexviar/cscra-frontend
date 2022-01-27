@@ -1,16 +1,19 @@
-import { AxiosError, AxiosPromise } from "axios"
-import { useEffect, useRef, useState } from "react"
-import { Button, Col, Collapse, Form, Row, Spinner, Table } from "react-bootstrap"
-import { FaFilter, FaSync, FaPlus } from "react-icons/fa"
+import { AxiosPromise } from "axios"
+import { useMemo, useRef, useState } from "react"
+import { Breadcrumb, Button } from "react-bootstrap"
+import { FaPlus } from "react-icons/fa"
 import { useQuery } from "react-query"
 import { Link, useLocation } from "react-router-dom"
-import { Pagination } from "../../../../commons/components"
-import { ProtectedContent, useUser, Permisos } from "../../../../commons/auth"
+import { useUser } from "../../../../commons/auth"
 import { PaginatedResponse } from "../../../../commons/services"
-import { MedicoPolicy } from "../policies"
+import { superUserPolicyEnhancer } from "../../../../commons/auth/utils"
 import { Medico, MedicosService, MedicoFilter as Filter } from "../services"
+import { medicoPolicy } from "../policies"
 import { MedicosFilterForm } from "./MedicosFilterForm"
 import { RowOptions } from "./RowOptions"
+import Skeleton from "react-loading-skeleton"
+import 'react-loading-skeleton/dist/skeleton.css'
+import { IndexTemplate } from "../../../../commons/components/IndexTemplate"
 
 export const MedicosIndex = () => {
   const {pathname: path} = useLocation()
@@ -19,63 +22,81 @@ export const MedicosIndex = () => {
     size: 10
   })
 
-  const loggedUser = useUser();
+  const user = useUser();
   
-  const getDefaultFilter = ()=>{
-    const filter: Filter = {  }
-    if(!loggedUser?.can(Permisos.VER_MEDICOS)){
-      if(loggedUser?.can(Permisos.VER_MEDICOS_REGIONAL)){
-        filter.regionalId = loggedUser.regionalId;
-      }
+  const [filter, setFilter] = useState<Filter>(() => {
+    const defaultFilter: Filter = {}
+    if(medicoPolicy.viewByRegionalOnly(user)){
+      defaultFilter.regionalId = user!.regionalId;
     }
-    return filter
-  }
-  const [filter, setFilter] = useState<Filter>(getDefaultFilter)
-  
-  const [filterFormVisible, showFilterForm] = useState(false)
+    return defaultFilter
+  })
 
-  const queryKey = ["medicos.buscar", filter, page];
+  const queryKey = ["medicos", "buscar", filter, page];
+
   const buscar = useQuery(queryKey, () => {
     return MedicosService.buscar(page, filter) as AxiosPromise<PaginatedResponse<Medico>>
   }, {
-    enabled: MedicoPolicy.view(loggedUser),
-    // refetchOnMount: false,
+    enabled: !!superUserPolicyEnhancer(medicoPolicy.view)(user),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false
   })
 
-  const total = buscar.data?.data?.meta?.total || 0
+  const totalRef = useRef(-1)
 
-  const renderRows = () => {
-    if (buscar.isFetching) {
-      return <tr>
-        <td className="bg-light text-center" colSpan={100}>
-          <Spinner className="mr-2" variant="primary" animation="border" size="sm" />
-          Cargando
+  if(buscar.data) {
+    totalRef.current = buscar.data.data.meta.total
+  }
+
+  const loader = useMemo(()=>{
+    const rows = []
+    for(let i = 0; i < page.size; i++){
+      rows.push(<tr key={i}>
+        <th scope="row" style={{ width: 1 }}>
+          {i + 1}
+        </th>
+        <td>
+          <Skeleton />
         </td>
-      </tr>
-    }
-    if (buscar.isError) {
-      const error = buscar.error as AxiosError
-      return <tr>
-        <td className="bg-danger text-light text-center" colSpan={100}>
-          {error.response?.data?.message || error.message}
+        <td>
+          <Skeleton />
         </td>
-      </tr>
+        <td>
+          <Skeleton />
+        </td>
+        <td>
+          <Skeleton />
+        </td>
+        <td>
+          <Skeleton />
+        </td>
+        <td>
+        </td>
+      </tr>)
     }
-    if(buscar.data){
-      const records = buscar.data.data.records
-      if(records.length == 0){
-        return  <tr>
-          <td className="bg-light text-center" colSpan={100}>
-            No se encontraron resultados
-          </td>
-      </tr>
-      }
-      return records.map((medico, index) => {
+    return rows
+  }, [page.size])
+
+  return <div className="px-1">
+    <Breadcrumb>
+      <Breadcrumb.Item active>Médicos</Breadcrumb.Item>
+    </Breadcrumb>
+    <IndexTemplate
+      policy={medicoPolicy}
+      page={page}
+      onPageChange={setPage}
+      total={totalRef.current}
+      onRefetch={()=>{
+        buscar.remove()
+        buscar.refetch({throwOnError: true})
+      }}
+      isLoading={buscar.isFetching}
+      hasError={buscar.isError}
+      data={buscar.data?.data.records}
+      renderData={(medico, index) => {
         return <tr key={medico.id}>
           <th scope="row">
-            {index + 1}
+            {(page.current - 1)*page.size  + index + 1}
           </th>
           <td>
             {medico.ci.texto}
@@ -87,109 +108,45 @@ export const MedicosIndex = () => {
             {medico.especialidad}
           </td>
           <td>
-            {medico.estado == 1 ? "Alta" : medico.estado == 2 ? "Baja" : ""}
+            {medico.regional!.nombre}
           </td>
           <td>
+            {medico.estado == 1 ? "Activo" : medico.estado == 2 ? "De baja" : ""}
+          </td>
+          <td style={{textTransform: "none"}}>
             <RowOptions queryKey={queryKey} medico={medico} />
           </td>
         </tr>
-      })
-    }
-  }
-
-  
-  return <div className="px-1">
-    <h1 style={{fontSize: "1.75rem"}}>Medicos</h1>
-    <div className="d-flex my-2">
-      <Form.Row className="ml-auto flex-nowrap" >
-        <ProtectedContent
-          authorize={MedicoPolicy.view}
-        >
-          <Col xs="auto" >
-            <Button onClick={()=>{
-              buscar.refetch()
-            }}><FaSync /></Button>
-          </Col>
-          <Col xs="auto" >
-            <Button onClick={()=>{
-              showFilterForm(visible=>!visible)
-            }}><FaFilter /></Button>
-          </Col>
-        </ProtectedContent>
-        <ProtectedContent
-          authorize={MedicoPolicy.register}
-        >
-          <Col xs="auto">
-            <Button
-              as={Link}
-              to={`${path}/registrar`}
-              className="d-flex align-items-center">
-                <FaPlus className="mr-1" /><span>Nuevo</span>
-            </Button>
-          </Col>
-        </ProtectedContent>
-      </Form.Row>
-    </div>
-    <ProtectedContent
-      authorize={MedicoPolicy.view}
-    >
-      <Collapse in={filterFormVisible}>
-        <div>
-          <MedicosFilterForm onFilter={(filter)=>{
-            setFilter({...filter, ...getDefaultFilter()})
-            setPage(page => ({...page, current: 1}))
-          }} />
-        </div>
-      </Collapse>
-      <div className="d-flex">
-        <div className="ml-auto mb-2">
-          <div className="d-flex flex-row flex-nowrap align-items-center">
-            <span>Mostrar</span>
-            <Form.Label htmlFor="pageSizeSelector" srOnly>Tamaño de pagina</Form.Label>
-            <Form.Control id="pageSizeSelector" className="mx-2" as="select" value={page.size} onChange={(e) => {
-              const value = e.target.value
-              setPage({
-                current: 1,
-                size: parseInt(value)
-              })
-            }}>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={30}>30</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </Form.Control>
-            <span>filas</span>
-          </div>
-        </div>
-      </div>
-      <Table responsive>
-        <thead>
-          <tr>
-            <th style={{width: 1}}>#</th>
-            <th>C.I.</th>
-            <th>Nombre</th>
-            <th>Especialidad</th>
-            <th>Estado</th>
-            <th style={{width: 1}}></th>
-          </tr>
-        </thead>
-        <tbody>
-          {renderRows()}
-        </tbody>
-      </Table>
-      {buscar.status === "success" ? <div className="row">
-        <Col className="mr-auto">
-          {`Se encontraron ${total} resultados`}
-        </Col>
-        <Col xs="auto">
-          <Pagination
-            current={page.current}
-            total={Math.ceil(total / page.size)}
-            onChange={(current) => setPage((page) => ({ ...page, current }))}
-          />
-        </Col>
-      </div> : null}
-    </ProtectedContent>
+      }}
+      renderDataHeaders={()=>{
+        return <tr>
+          <th style={{ width: 1 }}>#</th>
+          <th>Carnet de identidad</th>
+          <th style={{ minWidth: 250}}>Nombre</th>
+          <th>Especialidad</th>
+          <th>Regional</th>
+          <th>Estado</th>
+          <th style={{ width: 1 }}></th>
+        </tr>
+      }}
+      renderLoader={()=>{
+        return <>{loader}</>
+      }}
+      renderFilterForm={()=>{
+        return <MedicosFilterForm onFilter={(filter) => {
+          buscar.remove()
+          setFilter(filter)
+          setPage(page => ({ ...page, current: 1 }))
+        }} />
+      }}
+      renderCreateButton={()=>{
+        return  <Button
+          as={Link}
+          to={`${path}/registrar`}
+          className="d-flex align-items-center">
+            <FaPlus className="mr-1" /><span>Nuevo</span>
+        </Button>
+      }}
+    />
   </div>
 }

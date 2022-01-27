@@ -23,14 +23,16 @@ export const SidebarLayout = ({sidebar, children}: Props) => {
   }, [showSidebar])
   
   return <div className={"position-relative d-flex flex-grow-1 bg-light" + (showSidebar ? "" : " collapsed")}  id="wrapper">
-    <ClickOutsideHandler onClickOutside={onClickOutsideHandler}>
+    <ClickOutsideHandler className="shadow-sm" style={{zIndex: 100}} onClickOutside={onClickOutsideHandler}>
       <Sidebar className="bg-white shadow-sm" {...sidebar}/>
     </ClickOutsideHandler>
-    <Container className="d-flex flex-column flex-grow-1">
-      <div className="d-flex flex-column bg-white rounded-lg shadow-sm m-2 p-3 flex-grow-1">
-        {children}
-      </div>
-    </Container>
+    <div className="overflow-auto" style={{width: "100%"}}>
+      <Container className="d-flex flex-column">
+        <div className="d-flex flex-column bg-white rounded-lg shadow-sm m-2 p-3 flex-grow-1">
+          {children}
+        </div>
+      </Container>
+    </div>
   </div>
 }
 

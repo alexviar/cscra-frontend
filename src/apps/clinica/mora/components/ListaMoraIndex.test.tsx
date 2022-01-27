@@ -9,12 +9,12 @@ import { Provider } from 'react-redux'
 import { createStore, combineReducers } from 'redux'
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
-import { listaMoraFactory } from '../services/__factories__/ListaMoraFactory';
+import { listaMoraFactory } from '../../../../__mocks__//factories/listaMoraFactory';
 import { QueryProgressModal } from '../../../../commons/components';
 import { createModalReducer } from '../../../../commons/reusable-modal';
 import { server, waitForRequest } from '../../../../__mocks__/server';
 import { apiRoute } from '../../../../__mocks__/routes';
-import { Permisos } from '../policies'
+import * as Permisos from '../policies/Permisos'
 
 const Wrapper = ({children}: PropsWithChildren<{}>) => {
   const preloadedState = {}

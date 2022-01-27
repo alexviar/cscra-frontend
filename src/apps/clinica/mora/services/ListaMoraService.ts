@@ -10,9 +10,14 @@ export type ListaMoraFilter = {
 
 export type ListaMoraItem = {
   id: number,
-  empleadorId: string,
-  numeroPatronal: string,
+  empleadorId: string
+  numeroPatronal: string
   nombre: string
+  regionalId: number
+  regional?: {
+    id: number
+    nombre: string
+  }
 }
 
 export const ListaMoraService = {

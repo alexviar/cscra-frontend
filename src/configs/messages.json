@@ -1,18 +1,18 @@
 {
   "validation": {
-    "required": "Este campo es requerido.",
+    "required": "Este campo es obligatorio.",
     "minLength": "Este campo no debe tener menos de {0} caracteres",
     "maxLength": "Este campo no debe tener mas de {0} caracteres",
     "pattern": "El valor no coincide con el patron esperado. {0}"
   },
   "yup": {    
     "mixed": {
-      "required": "El campo ${path} es requerido",
-      "notType": "El campo ${path} debe ser de tipo `${type}`"
+      "required": "Este campo es obligatorio.",
+      "notType": "El tipo de dato es invalid."
     },
     "string": {
-      "min": "El campo ${path} debe tener al menos ${min} caracteres",
-      "max": "La cantidad maxima de caracteres permitidos es ${max}"
+      "min": "Este campo debe tener al menos ${min} caracteres",
+      "max": "Este campo no admite mas de ${max} caracteres."
     }
   }
 }

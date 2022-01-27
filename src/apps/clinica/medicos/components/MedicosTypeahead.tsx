@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button, Form, InputGroup } from "react-bootstrap"
 import { FaSync } from "react-icons/fa"
 import { AsyncTypeahead, AsyncTypeaheadProps } from 'react-bootstrap-typeahead'
@@ -29,17 +29,25 @@ export const MedicosTypeahead = ({isInvalid, feedback, filter, ...props}: Props)
   const buscar = useInfiniteQuery(queryKey, ({pageParam = 1})=>{
     return MedicosService.buscar({
       current: pageParam,
-      size: 10
+      size: pageParam === 1 ? 20 : 10
     }, filter)
   }, {
     enabled: !!search,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
-    getNextPageParam: (lastPage) => lastPage.data.meta.nextPage,
-    onSuccess: ({pages}) =>{
-      setOptions(pages.flatMap((response)=>response.data.records, 1))
+    getNextPageParam: (lastPage, allPages) => {
+      let nextPage = lastPage.data.meta.nextPage 
+      if(nextPage === 2) return 3
+      return nextPage
     }
   })
+
+  useEffect(()=>{
+    if(buscar.data){
+      const { pages } = buscar.data
+      setOptions(pages.flatMap((response)=>response.data.records, 1))
+    }
+  }, [buscar.data])
 
   return <InputGroup hasValidation  className="position-unset">
     <AsyncTypeahead
@@ -61,6 +69,7 @@ export const MedicosTypeahead = ({isInvalid, feedback, filter, ...props}: Props)
       onSearch={(search) => {
         setSearch(search)
       }}
+      
       paginate
       onPaginate={()=>{
         buscar.fetchNextPage()

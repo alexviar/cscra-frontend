@@ -6,7 +6,7 @@ import { VerticalEllipsisDropdownToggle } from "../../../../commons/components"
 import { useModal } from "../../../../commons/reusable-modal"
 import { ProtectedContent } from "../../../../commons/auth/components"
 import { Medico, MedicosService } from "../services"
-import { MedicoPolicy } from "../policies"
+import { medicoPolicy } from "../policies"
 
 type Props = {
   medico: Medico,
@@ -34,7 +34,7 @@ export const RowOptions = ({medico, queryKey}: Props) => {
               return i == medico ? {
                 ...i,
                 estado: medico.estado == 1 ? 2 : 1,
-                estadoText: medico.estado == 1 ? "Baja" : "Alta"
+                estadoText: medico.estado == 1 ? "De baja" : "Activo"
               } : i
             })
           }
@@ -64,7 +64,7 @@ export const RowOptions = ({medico, queryKey}: Props) => {
     
     <Dropdown.Menu>
       <ProtectedContent
-        authorize={MedicoPolicy.view}
+        authorize={(user) => medicoPolicy.view(user, {regionalId: medico.regionalId})}
       >
         <Dropdown.Item as={Link} to={{
           pathname: `/clinica/medicos/${medico.id}`,
@@ -74,7 +74,7 @@ export const RowOptions = ({medico, queryKey}: Props) => {
         }} ><span className="align-middle">Ver</span></Dropdown.Item>
       </ProtectedContent>
       <ProtectedContent
-        authorize={MedicoPolicy.edit}
+        authorize={(user)=>medicoPolicy.edit(user, {regionalId: medico.regionalId})}
       >
         <Dropdown.Item as={Link} to={{
           pathname: `/clinica/medicos/${medico.id}/editar`,
@@ -84,7 +84,7 @@ export const RowOptions = ({medico, queryKey}: Props) => {
         }} ><span className="align-middle">Editar</span></Dropdown.Item>
       </ProtectedContent>
       <ProtectedContent
-        authorize={MedicoPolicy.baja}
+        authorize={(user)=>medicoPolicy.updateStatus(user, {regionalId: medico.regionalId})}
       >
         <Dropdown.Item className="text-danger" href="#" onClick={() => {
           // if (window.confirm("¿Está seguro?")) {

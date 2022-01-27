@@ -5,6 +5,8 @@
 import '@testing-library/jest-dom';
 import { setLogger } from 'react-query';
 
+// jest.setTimeout(30000);
+
 // src/setupTests.js
 import { server } from './__mocks__/server'
 // Establish API mocking before all tests.

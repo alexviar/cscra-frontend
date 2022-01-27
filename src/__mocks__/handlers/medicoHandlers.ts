@@ -22,5 +22,15 @@ export const medicoHandlers = [
       },
       records: data
     }))
+  }),
+  
+  rest.get(apiRoute("medicos/:id"), async (req, res, ctx) => {
+    
+    if(!medicosFactory.data.length) medicosFactory.buildList(100)
+    let { data } = medicosFactory
+  
+    const proveedor = data.find(p => p.id == req.params.id)
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    return proveedor ? res(ctx.json(proveedor)) : res(ctx.status(404))
   })
 ]

@@ -16,17 +16,6 @@ export type Inputs = {
   telefono2?: number | null
 }
 
-const schema = yup.object().shape({
-  municipio: yup.array().label("municipio").length(1, "Debe indicar un municipio"),
-  direccion: yup.string().label("dirección").trim().required(),
-  ubicacion: yup.mixed().label("ubicación").required(),
-  telefono1: yup.number().label("telefono 1").typeError("No es un numero válido")
-    .emptyStringTo().required(),
-  telefono2: yup.number().label("telefono 2")
-    .emptyStringToNull()
-    .typeError("No es un numero válido").nullable().notRequired()
-})
-
 export const ContactoFieldset = () => {
 
   const {
@@ -35,13 +24,6 @@ export const ContactoFieldset = () => {
     formState,
     watch
   } = useFormContext<Inputs>()
-  // } = useFormContext<Inputs>({
-  //   mode: "onBlur",
-  //   resolver: yupResolver(schema),
-  //   defaultValues: {
-  //     ubicacion: [-17.78629, -63.18117]
-  //   }
-  // })
 
   const formErrors = formState.errors
 

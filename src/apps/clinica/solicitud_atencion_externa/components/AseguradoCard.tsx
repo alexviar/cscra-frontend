@@ -179,10 +179,9 @@ export const AseguradoCard = (props: {
                   </Button>
                 </InputGroup.Append>
                 <Form.Control.Feedback type="invalid">{
-                    (buscar.error as any)?.response?.message || (buscar.error as any)?.message
-                    || formErrors.asegurado?.matricula?.message
-                  }
-                </Form.Control.Feedback>
+                  (buscar.error as any)?.response?.status == 404 ? "Asegurado no encontrado" :
+                  "Ocurrio un error al realizar la busqueda"
+                }</Form.Control.Feedback>
               </InputGroup>            
               {!formErrors.asegurado?.matricula && !buscar.isError ? <Form.Text id="matriculaHelpBlock" muted>Ej: 98-0824-ABC</Form.Text> : null}
             </Form.Group>

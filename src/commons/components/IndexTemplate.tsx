@@ -124,7 +124,7 @@ export function IndexTemplate<Data>({
           </div>
         </Col>
       </Form.Row>
-      <Table responsive>
+      <Table responsive className="text-uppercase">
         <thead>
           {renderDataHeaders()}
         </thead>
@@ -133,10 +133,10 @@ export function IndexTemplate<Data>({
         </tbody>
       </Table>
       <Form.Row>
-        <Col className="mr-auto">
-          {total > 0 ? `Se encontraron ${total} resultados` : ""}
+        <Col className="mr-auto" xs="auto">
+          {total > 0 ? <span style={{whiteSpace: "nowrap"}}>Se encontraron {total} resultados</span> : ""}
         </Col>
-        <Col xs="auto">
+        <Col className="ml-auto" xs="auto">
           <Pagination
             current={page.current}
             total={Math.ceil(total / page.size)}

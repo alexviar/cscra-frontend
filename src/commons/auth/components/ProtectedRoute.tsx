@@ -12,17 +12,19 @@ export const ProtectedRoute = ({ children, authorize, ...rest }: Props) => {
     ignoreAuthorization?: boolean
   }>()
   const ignoreAuthorization = state?.ignoreAuthorization
-  const loggedUser = useUser()
+  const user = useUser()
   
-  /** No renderizar nada hasta obtener los datos del servidor */
-  if(loggedUser === undefined) return null
+  /** TODO: Mostrar un mensaje adecuado hasta obtener los datos del servidor */
+  if(user === undefined) return null
+
+  console.log(user)
 
   return (
     <Route
       {...rest}
       render={({ location }) =>
-        loggedUser ? (
-          !authorize || superUserPolicyEnhancer(authorize)(loggedUser, url) || ignoreAuthorization ? children : <Redirect
+        user ? (
+          !authorize || superUserPolicyEnhancer(authorize)(user, url) || ignoreAuthorization ? children : <Redirect
             to="/forbidden"
           />
         ) : (

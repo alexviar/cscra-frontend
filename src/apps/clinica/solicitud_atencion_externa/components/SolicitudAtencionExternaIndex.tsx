@@ -22,28 +22,28 @@ export const SolicitudAtencionExternaIndex = ()=>{
 
   const user = useUser();
 
-  const [filter, setFilter] = useState<Filter>({})
+  const [filter, setFilter] = useState<Filter>(()=>{
+    const defaultFilter: Filter = {}
+    if(solicitudAtencionExternaPolicy.viewByRegionalOnly(user)){
+      defaultFilter.regionalId = user!.regionalId;
+    }
+    return defaultFilter
+  })
 
-  const totalRef = useRef(0)
-
-  if(solicitudAtencionExternaPolicy.viewByRegionalOnly(user)){
-    filter.regionalId = user!.regionalId;
-  }
-
-  const canView = superUserPolicyEnhancer(solicitudAtencionExternaPolicy.view)(user)
+  const canView = !!superUserPolicyEnhancer(solicitudAtencionExternaPolicy.view)(user)
   const buscar = useQuery(["solicitudesAtencionExterna.buscar", page, filter], ()=>{
     return SolicitudesAtencionExternaService.buscar(filter, page)
   }, {
     enabled: !!canView,
-    // keepPreviousData: true,
     refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
-    onSuccess: ({data}) => {
-      totalRef.current = data.meta.total
-    }
+    refetchOnWindowFocus: false
   })
 
-  console.log(buscar)
+  const totalRef = useRef(-1)
+
+  if(buscar.data) {
+    totalRef.current = buscar.data.data.meta.total
+  }
 
   const loader = useMemo(()=>{
     const rows = []
@@ -77,13 +77,10 @@ export const SolicitudAtencionExternaIndex = ()=>{
     return rows
   }, [page.size])
 
-  if(!canView) return null
-
   return <div className="px-1">
     <Breadcrumb>
       <Breadcrumb.Item active>Solicitudes de atencion externa</Breadcrumb.Item>
     </Breadcrumb>
-    {/* <h1 style={{fontSize: "1.75rem"}}>Solicitudes de atención externa</h1> */}
     <IndexTemplate
       policy={solicitudAtencionExternaPolicy}
       isLoading={buscar.isFetching}
@@ -97,14 +94,14 @@ export const SolicitudAtencionExternaIndex = ()=>{
       renderData={(solicitud, index)=>{
         return <tr key={solicitud.id}>
         <th scope="row">
-          {index + 1}
+            {(page.current - 1)*page.size + index + 1}
         </th>
           <td>{solicitud.numero}</td>
           <td>{solicitud.fecha}</td>
           <td>{solicitud.asegurado.matricula}</td>
           <td>{solicitud.medico.nombreCompleto}</td>
           <td>{solicitud.proveedor.tipo == 1 ? solicitud.proveedor.nombreCompleto : solicitud.proveedor.nombre}</td>
-          <td>
+          <td style={{textTransform: "none"}}>
             <RowOptions solicitud={solicitud} />
           </td>
         </tr>
@@ -122,6 +119,7 @@ export const SolicitudAtencionExternaIndex = ()=>{
       }}
       renderFilterForm={()=>{
         return <SolicitudAtencionExternaFilterForm onFilter={(filter)=>{
+          buscar.remove()
           setFilter(filter)
           setPage(page=>({ ...page, current: 1 }))
         }} />
@@ -135,7 +133,10 @@ export const SolicitudAtencionExternaIndex = ()=>{
         </Button>
       }}
       onPageChange={(page)=>setPage(page)}
-      onRefetch={()=>buscar.refetch()}
+      onRefetch={()=>{
+        buscar.remove()
+        buscar.refetch({throwOnError: true})
+      }}
     />
     {/* <div className="d-flex my-2">
       <Form.Row className="ml-auto flex-nowrap" >

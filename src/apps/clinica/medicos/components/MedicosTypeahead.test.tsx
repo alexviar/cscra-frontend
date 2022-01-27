@@ -1,6 +1,6 @@
 import { PropsWithChildren } from 'react'
 import '@testing-library/jest-dom/extend-expect'
-import { render, fireEvent, waitFor, within } from '@testing-library/react'
+import { render, fireEvent, waitFor, waitForElementToBeRemoved, within } from '@testing-library/react'
 import { prettyDOM } from '@testing-library/dom'
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { MedicosTypeahead } from "./MedicosTypeahead"
@@ -32,43 +32,56 @@ test("Cargar datos", async ()=>{
 
   let pendingRequest, request
 
-  // pendingRequest = waitForRequest("get", apiRoute("medicos"))
+  pendingRequest = waitForRequest("get", apiRoute("medicos"))
   await waitFor(()=>fireEvent.change(combobox, {
     target: {
       value: "Mar"
     }
   }))
-  // request = await pendingRequest
 
-  await component.findByText("Buscando...")  
-  await component.findByText("No se encontraron resultados")  
+  let options, loadMore: HTMLElement, loadingIndicator: HTMLElement
 
-  const medicos = medicosFactory.buildList(30)  
+  loadingIndicator = await component.findByRole("status")
+  await waitFor(()=>expect(loadingIndicator).not.toBeInTheDocument())
+  options = await component.findAllByRole("option")
+
+  expect(options.length).toBe(11)
+  loadMore = await component.findByText("Cargar más...")
+  await waitFor(()=>fireEvent.click(loadMore))
+  loadingIndicator = await component.findByRole("status")
+  await waitFor(()=>expect(loadingIndicator).not.toBeInTheDocument())
+  options = await component.findAllByRole("option")
+
+  expect(options.length).toBe(21)
+  loadMore = await component.findByText("Cargar más...")
+  await waitFor(()=>fireEvent.click(loadMore))
+  loadingIndicator = await component.findByRole("status")
+  await waitFor(()=>expect(loadingIndicator).not.toBeInTheDocument())
+  options = await component.findAllByRole("option")
+
+  expect(options.length).toBe(31)
+  loadMore = await component.findByText("Cargar más...")
+  fireEvent.click(loadMore)
+  loadingIndicator = await component.findByRole("status")
+  await waitFor(()=>expect(loadingIndicator).not.toBeInTheDocument())
+  options = await component.findAllByRole("option")
+
+  expect(options.length).toBe(41)
+  loadMore = await component.findByText("Cargar más...")
+  await waitFor(()=>fireEvent.click(loadMore))
+  loadingIndicator = await component.findByRole("status")
+  // await waitFor(()=>expect(loadingIndicator).not.toBeInTheDocument())
+  // options = await component.findAllByRole("option")
+
+
+
+
+  // expect(options.length).toBe(100)
 
   // pendingRequest = waitForRequest("get", apiRoute("medicos"))
-  await waitFor(()=>fireEvent.change(combobox, {
-    target: {
-      value: "Marc"
-    }
-  }))
-  await component.findByText("Buscando...")
-  await component.findByRole("status")
-  // request = await pendingRequest
-
-  let loadMore = await component.findByText("Cargar más...")
-  await waitFor(()=>fireEvent.click(loadMore))
-
-  await component.findByRole("status")
-  loadMore = await component.findByText("Cargar más...")
-  await waitFor(()=>fireEvent.click(loadMore))
-
-  await component.findByRole("status")
-  loadMore = await component.findByText("Cargar más...")
-
-
-
-  // const dropdownMenu = await component.findByRole("listbox")
-
-  // console.log(prettyDOM(dropdownMenu))
-  // component.debug()
-})
+  // await waitFor(()=>fireEvent.change(combobox, {
+  //   target: {
+  //     value: "Marc"
+  //   }
+  // }))
+}, 60000)

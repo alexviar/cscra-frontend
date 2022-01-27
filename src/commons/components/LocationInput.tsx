@@ -7,7 +7,7 @@ import { latLngExpressionToString } from "../utils"
 import "leaflet/dist/leaflet.css";
 
 type Props = {
-  isInvalid?: boolean
+  isInvalid: boolean
   value: LatLngExpression|null,
   center: LatLngExpression
   onChange: (value?: LatLngExpression|null) => void
@@ -21,9 +21,11 @@ const POSITION_CLASSES = {
 }
 
 const InputLocationControl = ({
+  isInvalid,
   value,
   onChange
 }: {
+  isInvalid: boolean
   value: LatLngExpression | null
   onChange: (value: LatLngExpression | null) => void 
 }) => {
@@ -48,15 +50,17 @@ const InputLocationControl = ({
         }
       }}
     >  
-    <InputGroup>          
+    <InputGroup>      
       <FormControl
+        aria-label="Coordenadas"
+        isInvalid={isInvalid}
         value={search}
         onChange={(e)=>{
           setSearch(e.target.value)
         }}
       />
       <InputGroup.Append>
-        <Button variant="outline-secondary"
+        <Button variant={isInvalid ? "outline-danger" : "outline-secondary"}
           onClick={()=>{
             const coords = search.split(",")
             if(coords.length == 2){
@@ -122,10 +126,8 @@ const CustomMarker = (props: { position: LatLngExpression|null, onChange(positio
 
 export const LocationInput = (props: Props) => {
 
-  return <>
+  return <div className={"border rounded " + (props.isInvalid ? " is-invalid border-danger overflow-hidden" : "")}>
     <MapContainer
-      // //@ts-ignore
-      // whenCreated={ mapInstance => { mapRef.current = mapInstance } }
       center={props.center}
       zoom={13}
       zoomControl={false}
@@ -137,7 +139,10 @@ export const LocationInput = (props: Props) => {
       />
       <div className="leaflet-control-container">
         <div className={POSITION_CLASSES["topleft"]}>
-          <InputLocationControl value={props.value} onChange={(position)=>{
+          <InputLocationControl 
+            isInvalid={props.isInvalid}
+            value={props.value} 
+            onChange={(position)=>{
             props.onChange(position)
           }} />
         </div>
@@ -148,5 +153,5 @@ export const LocationInput = (props: Props) => {
       }} />
       <ZoomControl position="bottomright" />
     </MapContainer>
-  </>
+  </div>
 }

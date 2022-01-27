@@ -1,18 +1,21 @@
+
+import { useEffect } from 'react'
 import { AxiosError } from 'axios'
-import { useEffect, useState, useRef } from 'react'
-import { Alert, Button, Col, Form, Spinner } from 'react-bootstrap'
+import { Alert, Breadcrumb, Button, Col, Form, Spinner } from 'react-bootstrap'
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
+import { Link, useHistory, useParams } from "react-router-dom"
 import { Controller, useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from "yup"
 import { Medico, MedicosService } from '../services'
-import { useHistory, useParams } from 'react-router'
 import { Regional, RegionalesTypeahead } from '../../../../commons/components'
-import { Permisos, useUser } from '../../../../commons/auth'
-import { useModal } from '../../../../commons/reusable-modal'
-// import { Especialidad, EspecialidadesTypeahead } from './EspecialidadesTypeahead'
+import { medicoPolicy } from '../policies'
+import { useUser } from '../../../../commons/auth'
 
 type Inputs = {
+  initialized: boolean
   ci: string
   ciComplemento: string | null
   apellidoPaterno: string
@@ -23,23 +26,26 @@ type Inputs = {
 }
 
 const schema = yup.object().shape({
-  ci: yup.number().label("número de carnet").typeError("El ${path} no es un numero valido"),
-  ciComplemento: yup.string().label("número complemento").transform(value => value === "" ? null : value).trim()
-    .uppercase().nullable().notRequired()
-    .length(2)
-    .matches(/(?=.*[A-Z])(?=.*[0-9])/, "El complemento del carnet esta conformado por un numero y una letra. (No confundir con el expedido)"),
-  apellidoPaterno: yup.string().label("apellido paterno").trim().when("apellidoMaterno", {
-    is: (apellidoMaterno: string) => !apellidoMaterno,
-    then: yup.string().required("Debe proporcionar al menos un apellido"),
-    otherwise: yup.string().nullable().notRequired()
-  }),
-  apellidoMaterno: yup.string().label("apellido materno").trim().emptyStringToNull().when("apellidoPaterno", {
+  ci: yup.number().label("número de carnet")
+    .nonEmpty()
+    .typeError("El ${path} no es un numero valido")
+    .required(),
+  ciComplemento: yup.string().label("complemento del carnet").nonEmpty().uppercase().default(null).nullable()
+    .notRequired()
+    .matches(/^[1-9][A-Z]$/, "Complemento invalido."),
+    // .matches(/(?=.*[A-Z])(?=.*[0-9])/, "El complemento del carnet esta conformado por un numero y una letra. (No confundir con el expedido)"),
+  apellidoPaterno: yup.string().label("apellido paterno").nonEmpty().uppercase().default(null).nullable()
+    .when("apellidoMaterno", {
+      is: (apellidoMaterno: string) => !apellidoMaterno,
+      then: (schema) => schema.required("Debe proporcionar al menos un apellido").max(25)
+    }),
+  apellidoMaterno: yup.string().trim().label("apellido materno").nonEmpty().uppercase().default(null).nullable()
+  .when("apellidoPaterno", {
     is: (apellidoPaterno: string) => !apellidoPaterno,
-    then: yup.string().required("Debe proporcionar al menos un apellido"),
-    otherwise: yup.string().emptyStringToNull().notRequired()
+    then: (schema) => schema.required("Debe proporcionar al menos un apellido").max(25)
   }),
-  nombres: yup.string().label("nombres").trim().required(),
-  especialidad: yup.array().length(1, "Debe indicar una especialidad"),
+  nombres: yup.string().label("nombres").nonEmpty().uppercase().trim().required(),
+  especialidad: yup.string().nonEmpty().uppercase().required("Debe indicar la especialidad del médico"),
   regional: yup.array().length(1, "Debe indicar una regional")
 }, [["apellidoMaterno", "apellidoPaterno"]])
 
@@ -50,16 +56,9 @@ export const MedicoForm = ()=>{
 
   const history = useHistory<{
     medico?: Medico
-    ignoreAuthorization?: boolean
   }>()
 
-  const modal = useModal("queryLoader")
-
-  const loggedUser = useUser()
-
-  const [regionales, setRegionales] = useState<Regional[]>([])
-
-  const continueRef = useRef<boolean>(false)
+  const user = useUser()
 
   const {
     handleSubmit,
@@ -72,14 +71,26 @@ export const MedicoForm = ()=>{
     control,
     formState,
   } = useForm<Inputs>({
-    mode: "onBlur",
     resolver: yupResolver(schema),
     defaultValues: {
+      initialized: !id,
       regional: []
     }
   })
 
+  const initialized = watch("initialized")
+
   const queryClient = useQueryClient()
+  
+  const cargar = useQuery(["medicos", "cargar", id], ()=>{
+    return MedicosService.load(parseInt(id as string))
+  }, {
+    enabled: !!id && !initialized,
+    initialData: history.location.state?.medico && {status: 200, statusText: "OK", data: history.location.state.medico, headers: {}, config: {}},
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false
+  })
 
   const guardar = useMutation((inputs: Inputs)=>{
     return id ? MedicosService.actualizar({
@@ -105,13 +116,10 @@ export const MedicoForm = ()=>{
       regionalId: inputs.regional![0].id
     })
   }, {
-    onSuccess: ()=>{
+    onSuccess: (response)=>{
       reset()
-      queryClient.invalidateQueries("medicos.buscar")
-      if(!continueRef.current)
-        history.replace("/clinica/medicos", {
-          ignoreAuthorization: true
-        })
+      queryClient.invalidateQueries(["medicos", "buscar"])
+      if(id) queryClient.setQueryData(["medicos", "cargar", id], response)
     },
     onError: (error) => {
       if((error as AxiosError)?.response?.status == 422){
@@ -124,165 +132,137 @@ export const MedicoForm = ()=>{
     }
   })
 
-  const cargar = useQuery(["medicos.cargar", id], ()=>{
-    return MedicosService.load(parseInt(id as string))
-  }, {
-    enabled: !!id && !history.location.state?.medico,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    onSuccess: () => {
-      modal.close()
-    },
-    onError: (error) => {
-      modal.open({
-        state: "error",
-        error: error
-      })
-    }
-  })
-
-  const medico = cargar.data?.data || history.location.state?.medico
+  const medico = cargar.data?.data
 
   useEffect(()=>{
     if(medico){
+      setValue("initialized", true)
       setValue("ci", String(medico.ci.raiz))
       setValue("ciComplemento", medico.ci.complemento)
       setValue("apellidoPaterno", medico.apellidoPaterno)
       setValue("apellidoMaterno", medico.apellidoMaterno)
       setValue("nombres", medico.nombres)
+      setValue("especialidad", medico.especialidad)
+      setValue("regional", [ medico.regional! ])
     }
   }, [medico])
 
-  useEffect(()=>{
-    if(cargar.isFetching){
-      modal.open({
-        state: "loading"
-      })
-    }
-  }, [cargar.isFetching])
-
-  useEffect(()=>{
-    if(medico && regionales.length){
-      setValue("regional", regionales.filter(r=>r.id == medico.regionalId))
-    }
-  }, [medico, regionales])
-
-  return <Form id="medico-form"
-    onSubmit={handleSubmit((inputs)=>{
-      guardar.mutate(inputs)
-    })}
-  >
-    <h1 style={{fontSize: "2rem"}}>{id ? "Actualizar" : "Registrar Medico"}</h1>
-    {guardar.status == "error" || guardar.status == "success"  ? <Alert variant={guardar.isError ? "danger" : "success"}>
-      {guardar.isError ? (guardar.error as AxiosError).response?.data?.message || (guardar.error as AxiosError).message : "Guardado"}
-    </Alert> : null}
-    <Form.Row>
-      <Form.Group as={Col} md={4} xs={8}>
-        <Form.Label>Carnet de identidad</Form.Label>
-        <Form.Control
-          isInvalid={!!formState.errors.ci}
-          {...register("ci")}
-        />
-        <Form.Control.Feedback type="invalid">{formState.errors.ci?.message}</Form.Control.Feedback>
-      </Form.Group>
-      <Form.Group as={Col} md={2} xs={4}>
-        <Form.Label>Complemento</Form.Label>
-        <Form.Control
-          isInvalid={!!formState.errors.ciComplemento}
-          {...register("ciComplemento")}
-        />
-        <Form.Control.Feedback type="invalid">{formState.errors.ciComplemento?.message}</Form.Control.Feedback>
-      </Form.Group>
-    </Form.Row>
-    <Form.Row>
-      <Form.Group as={Col} md={4}>
-        <Form.Label>Apellido Paterno</Form.Label>
-        <Form.Control
-          isInvalid={!!formState.errors.apellidoPaterno}
-          {...register("apellidoPaterno")}
-        />
-        <Form.Control.Feedback type="invalid">{formState.errors.apellidoPaterno?.message}</Form.Control.Feedback>
-      </Form.Group>
-      <Form.Group as={Col} md={4}>
-        <Form.Label>Apellido Materno</Form.Label>
-        <Form.Control
-          isInvalid={!!formState.errors.apellidoMaterno}
-          {...register("apellidoMaterno")}
-        />
-        <Form.Control.Feedback type="invalid">{formState.errors.apellidoMaterno?.message}</Form.Control.Feedback>
-      </Form.Group>
-      <Form.Group as={Col} md={4}>
-        <Form.Label>Nombres</Form.Label>
-        <Form.Control
-          isInvalid={!!formState.errors.nombres}
-          {...register("nombres")}
-        />
-        <Form.Control.Feedback type="invalid">{formState.errors.nombres?.message}</Form.Control.Feedback>
-      </Form.Group>
-    </Form.Row>
-    <Form.Row>
-      <Form.Group as={Col} md={8}>
-        <Form.Label htmlFor="medico-especialidad">Especialidad</Form.Label>
-        <Form.Control
-          id="medico-especialidad"
-          isInvalid={!!formState.errors.especialidad}
-          {...register("especialidad")}
-        />
-      </Form.Group>
-      <Form.Group as={Col} md={4}>
-        <Form.Label>Regional</Form.Label>
-        <Controller
-          name="regional"
-          control={control}
-          render={({field, fieldState})=>{
-            return <>
-              <RegionalesTypeahead
-                id="medicos-form/regionales-typeahead"
-                onLoad={(regionales)=>setRegionales(regionales)}
-                filterBy={(regional) => loggedUser?.can(Permisos.REGISTRAR_MEDICOS) || loggedUser?.regionalId == regional.id}
-                feedback={fieldState.error?.message}
-                className={fieldState.error ? "is-invalid" : ""}
-                isInvalid={!!fieldState.error}
-                selected={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-              />
-            </>
-          }}
-        />
-      </Form.Group>
-    </Form.Row>
-    <div className="m-n1">
-      {!id ? <Button 
-        className="m-1"
-        type="submit"
-        onClick={()=>{
-          continueRef.current = true
-        }}
-      >
-        {guardar.isLoading && continueRef.current ? <Spinner animation="border" size="sm" />: null}
-        Guardar y continuar
-      </Button> : null}
-      <Button
-        className="m-1"
-        type="submit"
-        onClick={()=>{
-          continueRef.current = false
-        }}
-      >
-        {guardar.isLoading && !continueRef.current ? <Spinner animation="border" size="sm" />: null}
-        Guardar
-      </Button>
-      <Button 
-        className="m-1"
-        variant="secondary"
-        type="reset"
-        onClick={()=>{
-          setValue("regional", [])
-          clearErrors()
-        }}
-      >Limpiar</Button>
-    </div>
-  </Form>
+  return <div>
+    <Breadcrumb>
+      <Breadcrumb.Item linkAs={Link} linkProps={{to: "/clinica/medicos"}}>Médicos</Breadcrumb.Item>
+      {id ? <Breadcrumb.Item active>{id}</Breadcrumb.Item> : null}
+      <Breadcrumb.Item active>{!id ? "Registro" : "Actualización"}</Breadcrumb.Item>
+    </Breadcrumb>
+      
+    <Form id="medico-form"
+      onSubmit={handleSubmit((inputs)=>{
+        guardar.mutate(inputs)
+      })}
+    >
+      {guardar.status == "error" || guardar.status == "success"  ? <Alert variant={guardar.isError ? "danger" : "success"}>
+        {guardar.isError ? (guardar.error as AxiosError).response?.data?.message || (guardar.error as AxiosError).message : "Guardado"}
+      </Alert> : null}
+      <Form.Row>
+        <Form.Group as={Col} xs={12} sm={6} md={4}>
+          <fieldset className={`border${formState.errors.ci || formState.errors.ciComplemento ? " border-danger " : " "}rounded`}
+            style={{padding: 5, paddingTop: 0, marginBottom: -6, marginLeft: -5, marginRight: -5}}>
+            <Form.Label as="legend" style={{width: "auto", fontSize:"1rem"}}>Carnet de identidad</Form.Label>
+            <Form.Row>
+              <Col xs={8}>
+                {initialized ? <Form.Control
+                  aria-label="Número raiz"
+                  className="text-uppercase"
+                  isInvalid={!!formState.errors.ci}
+                  {...register("ci")}
+                /> : <Skeleton />}
+                <Form.Control.Feedback type="invalid">{formState.errors.ci?.message}</Form.Control.Feedback>
+              </Col>
+              <Col xs={4}>
+                {initialized ? <Form.Control
+                  aria-label="Número complemento"
+                  className="text-uppercase"
+                  isInvalid={!!formState.errors.ciComplemento}
+                  {...register("ciComplemento")}
+                /> : <Skeleton />}
+                <Form.Control.Feedback type="invalid">{formState.errors.ciComplemento?.message}</Form.Control.Feedback>
+              </Col>
+            </Form.Row>
+          </fieldset>
+        </Form.Group>
+      </Form.Row>
+      <Form.Row>
+        <Form.Group as={Col} md={4}>
+          <Form.Label>Apellido Paterno</Form.Label>
+          {initialized ? <Form.Control
+            className="text-uppercase"
+            isInvalid={!!formState.errors.apellidoPaterno}
+            {...register("apellidoPaterno")}
+          /> : <Skeleton />}
+          <Form.Control.Feedback type="invalid">{formState.errors.apellidoPaterno?.message}</Form.Control.Feedback>
+        </Form.Group>
+        <Form.Group as={Col} md={4}>
+          <Form.Label>Apellido Materno</Form.Label>
+          {initialized ? <Form.Control
+            className="text-uppercase"
+            isInvalid={!!formState.errors.apellidoMaterno}
+            {...register("apellidoMaterno")}
+          /> : <Skeleton />}
+          <Form.Control.Feedback type="invalid">{formState.errors.apellidoMaterno?.message}</Form.Control.Feedback>
+        </Form.Group>
+        <Form.Group as={Col} md={4}>
+          <Form.Label>Nombres</Form.Label>
+          {initialized ? <Form.Control
+            className="text-uppercase"
+            isInvalid={!!formState.errors.nombres}
+            {...register("nombres")}
+          /> : <Skeleton />}
+          <Form.Control.Feedback type="invalid">{formState.errors.nombres?.message}</Form.Control.Feedback>
+        </Form.Group>
+      </Form.Row>
+      <Form.Row>
+        <Form.Group as={Col} md={4}>
+          <Form.Label htmlFor="medico-especialidad">Especialidad</Form.Label>
+          {initialized ? <Form.Control
+            id="medico-especialidad"
+            className="text-uppercase"
+            isInvalid={!!formState.errors.especialidad}
+            {...register("especialidad")}
+          /> : <Skeleton />}
+          <Form.Control.Feedback type="invalid">{formState.errors.especialidad?.message}</Form.Control.Feedback>
+        </Form.Group>
+        <Form.Group as={Col} md={4}>
+          <Form.Label>Regional</Form.Label>
+          {initialized ? <Controller
+            name="regional"
+            control={control}
+            render={({field, fieldState})=>{
+              return <>
+                <RegionalesTypeahead
+                  id="medicos-form/regionales-typeahead"
+                  className="text-uppercase"
+                  filterBy={(regional) => {
+                    if(id){
+                      return medicoPolicy.editByRegionalOnly(user, {regionalId: regional.id}) !== false
+                    }
+                    else {
+                      return medicoPolicy.registerByRegionalOnly(user, {regionalId: regional.id}) !== false
+                    }
+                  }}
+                  feedback={fieldState.error?.message}
+                  isInvalid={!!fieldState.error}
+                  selected={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                />
+              </>
+            }}
+          /> : <Skeleton />}
+        </Form.Group>
+      </Form.Row>
+      <Button className="mt-3" type="submit">
+          {guardar.isLoading ? <Spinner className="mr-2" animation="border" size="sm"/> : null}
+          Guardar
+        </Button>
+    </Form>
+  </div>
 }

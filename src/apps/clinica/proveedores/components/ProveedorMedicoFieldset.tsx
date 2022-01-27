@@ -1,15 +1,11 @@
-import { AxiosError, AxiosResponse } from 'axios'
-import { useEffect, useState, useRef } from 'react'
-import { Alert, Button, Col, Form, InputGroup, Modal, Spinner } from 'react-bootstrap'
-import { Controller, useFormContext } from 'react-hook-form'
-import { useParams } from 'react-router'
-import * as yup from 'yup'
-import { Regional, RegionalesTypeahead } from '../../../../commons/components'
-import { useUser } from '../../../../commons/auth'
-import { Proveedor } from '../services'
-import { proveedorPolicy } from '../policies'
+import {  Col, Form } from 'react-bootstrap'
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
+import { Controller, useFormContext } from 'react-hook-form'
+import { useParams } from 'react-router'
+import { Regional, RegionalesTypeahead } from '../../../../commons/components'
+import { useUser } from '../../../../commons/auth'
+import { proveedorPolicy } from '../policies'
 
 export type Inputs = {
   initialized: boolean
@@ -23,38 +19,6 @@ export type Inputs = {
   especialidad?: string
   regional?: Regional[]
 }
-
-type Props = {
-  proveedor?: Proveedor,
-  onSubmit?: (data: Inputs) => void
-}
-
-const schema = yup.object().shape({
-  nit: yup.string().label("NIT")
-    .trim()
-    .matches(/^[0-9]*$/, "Este campo solo admite números")
-    .nullable()
-    .notRequired(),
-  ci: yup.number().label("número de carnet")
-    .emptyStringToNull()
-    .typeError("El ${path} no es un numero valido")
-    .nullable()
-    .required(),
-  ciComplemento: yup.string().transform(value => value === "" ? null : value).trim().uppercase().nullable().notRequired()
-    .length(2).matches(/[0-1A-Z]/),
-  apellidoPaterno: yup.string().label("apellido paterno").trim().when("apellidoMaterno", {
-    is: (apellidoMaterno: string) => !apellidoMaterno,
-    then: yup.string().required("Debe proporcionar al menos un apellido").max(50)
-  }),
-  apellidoMaterno: yup.string().label("apellido materno").trim().when("apellidoPaterno", {
-    is: (apellidoPaterno: string) => !apellidoPaterno,
-    then: yup.string().required("Debe proporcionar al menos un apellido").max(50)
-  }),
-  nombres: yup.string().label("nombres").trim().required().label("'Nombres'").max(50),
-  especialidad: yup.array().length(1, "Debe indicar una especialidad"),
-  regional: yup.array().length(1, "Debe indicar una regional")
-}, [["apellidoMaterno", "apellidoPaterno"]])
-
 
 export const ProveedorMedicoFieldset = ()=>{
 
@@ -77,29 +41,39 @@ export const ProveedorMedicoFieldset = ()=>{
 
   return <>
     <Form.Row>
-      <Form.Group as={Col} md={4} xs={8}>
-        <Form.Label>NIT</Form.Label>
+      <Form.Group as={Col} xs={12} sm={6} md={4}>
+        <Form.Label htmlFor="nit">NIT</Form.Label>
         {initialized ? <Form.Control
           isInvalid={!!formErrors.nit}
           {...register("nit")}
         /> : <Skeleton />}
         <Form.Control.Feedback type="invalid">{formErrors.nit?.message}</Form.Control.Feedback>
       </Form.Group>
-      <Form.Group as={Col} md={4} xs={8}>
-        <Form.Label>Carnet de identidad</Form.Label>
-        {initialized ? <Form.Control
-          isInvalid={!!formErrors.ci}
-          {...register("ci")}
-        /> : <Skeleton />}
-        <Form.Control.Feedback type="invalid">{formErrors.ci?.message}</Form.Control.Feedback>
-      </Form.Group>
-      <Form.Group as={Col} md={2} xs={4}>
-        <Form.Label>Complemento</Form.Label>
-        {initialized ? <Form.Control
-          isInvalid={!!formErrors.ciComplemento}
-          {...register("ciComplemento")}
-        /> : <Skeleton />}
-        <Form.Control.Feedback type="invalid">{formErrors.ciComplemento?.message}</Form.Control.Feedback>
+      <Form.Group as={Col} xs={12} sm={6} md={4}>
+        <fieldset className={`border${formState.errors.ci || formState.errors.ciComplemento ? " border-danger " : " "}rounded`}
+          style={{padding: 5, paddingTop: 0, marginBottom: -6, marginLeft: -5, marginRight: -5}}>
+          <Form.Label as="legend" style={{width: "auto", fontSize:"1rem"}}>Carnet de identidad</Form.Label>
+          <Form.Row>
+            <Col xs={8}>
+              {initialized ? <Form.Control
+                aria-label="Número raiz"
+                className="text-uppercase"
+                isInvalid={!!formState.errors.ci}
+                {...register("ci")}
+              /> : <Skeleton />}
+              <Form.Control.Feedback type="invalid">{formState.errors.ci?.message}</Form.Control.Feedback>
+            </Col>
+            <Col xs={4}>
+              {initialized ? <Form.Control
+                aria-label="Número complemento"
+                className="text-uppercase"
+                isInvalid={!!formState.errors.ciComplemento}
+                {...register("ciComplemento")}
+              /> : <Skeleton />}
+              <Form.Control.Feedback type="invalid">{formState.errors.ciComplemento?.message}</Form.Control.Feedback>
+            </Col>
+          </Form.Row>
+        </fieldset>
       </Form.Group>
     </Form.Row>
     <Form.Row>
@@ -129,11 +103,13 @@ export const ProveedorMedicoFieldset = ()=>{
       </Form.Group>
     </Form.Row>
     <Form.Row>
-      <Form.Group as={Col} md={8}>
+      <Form.Group as={Col} md={4}>
         <Form.Label htmlFor="medico-especialidad">Especialidad</Form.Label>
         {initialized ? <Form.Control id="medico-especialidad"
+          isInvalid={!!formErrors.especialidad}
           {...register("especialidad")}
         /> : <Skeleton />}
+        <Form.Control.Feedback type="invalid">{formErrors.especialidad?.message}</Form.Control.Feedback>
       </Form.Group>
       <Form.Group as={Col} md={4}>
         <Form.Label>Regional</Form.Label>

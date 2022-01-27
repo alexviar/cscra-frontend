@@ -5,7 +5,7 @@ import { VerticalEllipsisDropdownToggle } from "../../../../commons/components"
 import { useModal } from "../../../../commons/reusable-modal"
 import { ProtectedContent } from "../../../../commons/auth/components"
 import { ListaMoraItem, ListaMoraService } from "../services"
-import { ListaMoraPolicy } from "../policies"
+import { listaMoraPolicy } from "../policies"
 
 type Props = {
   item: ListaMoraItem
@@ -59,7 +59,7 @@ export const RowOptions = ({item, queryKey}: Props) => {
     
     <Dropdown.Menu>
       <ProtectedContent
-        authorize={ListaMoraPolicy.quitar}
+        authorize={(user)=> listaMoraPolicy.remove(user, {regionalId: item.regionalId})}
       >
         <Dropdown.Item className="text-danger" href="#" onClick={() => {
           if (window.confirm("¿Está seguro?")) {

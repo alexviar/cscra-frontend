@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react"
 import { Button, Form, Col, Spinner } from "react-bootstrap"
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 import { Controller, useForm, useFormContext } from "react-hook-form"
 import { useParams, useHistory } from "react-router"
 import { yupResolver } from "@hookform/resolvers/yup"
@@ -22,17 +24,6 @@ export type Inputs = {
   regional?: Regional[]
 }
 
-const schema = yup.object().shape({
-  nit: yup.string().label("NIT")
-  .trim()
-  .matches(/^[0-9]*$/, "Este campo solo admite números")
-  .required(),
-  // .nullable()
-  // .notRequired('),
-  nombre: yup.string().trim().required().max(150),  
-  regional: yup.array().length(1, "Debe indicar una regional")
-})
-
 export const ProveedorEmpresaFieldset = ()=>{
 
   const { id } = useParams<{id: string}>()
@@ -40,40 +31,47 @@ export const ProveedorEmpresaFieldset = ()=>{
   const {
     control,
     formState,
-    register
+    register,
+    watch
   } = useFormContext<Inputs>()
 
   const user = useUser()
 
   const formErrors = formState.errors
+  const initialized = watch("initialized")
 
   return <>
     <Form.Row>
       <Form.Group as={Col} sm={4}>
-        <Form.Label>NIT</Form.Label>
-        <Form.Control
+        <Form.Label htmlFor="proveedor-nit">NIT</Form.Label>
+        {initialized ? <Form.Control
+          id="proveedor-nit"
+          className="text-uppercase"
           isInvalid={!!formErrors.nit}
           {...register("nit")}
-        />
+        /> : <Skeleton />}
         <Form.Control.Feedback type="invalid">{formErrors.nit?.message}</Form.Control.Feedback>
       </Form.Group>
       <Form.Group as={Col} sm={8}>
-        <Form.Label>Nombre</Form.Label>
-        <Form.Control
+        <Form.Label htmlFor="proveedor-nombre">Nombre</Form.Label>
+        {initialized ? <Form.Control
+          id="proveedor-nombre"
+          className="text-uppercase"
           isInvalid={!!formErrors.nombre}
           {...register("nombre")}
-        />
+        /> : <Skeleton />}
         <Form.Control.Feedback type="invalid">{formErrors.nombre?.message}</Form.Control.Feedback>
       </Form.Group>      
       <Form.Group as={Col} md={4}>
-          <Form.Label>Regional</Form.Label>
-          <Controller
+          <Form.Label htmlFor="proveedor-form/regionales-typeahead">Regional</Form.Label>
+          {initialized ? <Controller
             name="regional"
             control={control}
             render={({field, fieldState})=>{
               return <>
                 <RegionalesTypeahead
                   id="proveedor-form/regionales-typeahead"
+                  className="text-uppercase"
                   filterBy={(regional) => { 
                     if(id){
                       return proveedorPolicy.editByRegionalOnly(user, {regionalId: regional.id}) !== false
@@ -90,7 +88,7 @@ export const ProveedorEmpresaFieldset = ()=>{
                 />
               </>
             }}
-          />
+          /> : <Skeleton />}
         </Form.Group>
       
     </Form.Row>

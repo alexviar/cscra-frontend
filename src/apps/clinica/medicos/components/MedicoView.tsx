@@ -1,11 +1,11 @@
 import { useEffect } from 'react'
-import { Table } from 'react-bootstrap'
+import { Alert, Breadcrumb, Table } from 'react-bootstrap'
 import { Medico, MedicosService } from '../services'
 import { useQuery, useMutation } from 'react-query'
-import { useLocation, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { useUser } from "../../../../commons/auth"
 import { useModal } from "../../../../commons/reusable-modal"
-import { MedicoPolicy } from "../policies"
+import { medicoPolicy } from "../policies"
 
 export const MedicoView = ()=>{
   const { pathname, state: locationState } = useLocation<{
@@ -16,37 +16,39 @@ export const MedicoView = ()=>{
     id: string
   }>()
 
-  const loggedUser = useUser()
-
-  const loader = useModal("queryLoader")
+  const user = useUser()
 
   const cargar = useQuery(["cargar", id], ()=>{
     return MedicosService.load(parseInt(id))
   }, {
-    enabled: !locationState?.medico,
+    initialData: locationState?.medico && { status: 200, statusText: "OK", headers: {}, config: {}, data: locationState?.medico },
     refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    onSuccess: () => {
-      loader.close()
-    },
-    onError: (error) => {
-      loader.open({
-        state: "error",
-        error
-      })
-    }
+    refetchOnReconnect: false
   })
 
   const medico = cargar.data?.data || locationState?.medico
 
-  useEffect(()=>{
-    if(cargar.isFetching){
-      loader.open({state: "loading"})
+  const renderAlert = () => {
+    if(cargar.error) {
+      const { response } = cargar.error as any
+      return <Alert variant="danger">
+        {
+          !response ? "No fue posible realizar la solicitud, verifique si tiene conexion a internet" :
+          response.status == 404 ? "El proveedor que busca no existe" : 
+          "Ocurrio un error inesperado"
+        }
+      </Alert>
     }
-  }, [cargar.isFetching])
+    return null
+  }
   
-  return <>
-    <h2 style={{fontSize: "1.75rem"}}>Medico</h2>
+  return <div>
+    <Breadcrumb>
+      <Breadcrumb.Item linkAs={Link} linkProps={{to: "/clinica/medicos"}}>Médicos</Breadcrumb.Item>
+      <Breadcrumb.Item active>{id}</Breadcrumb.Item>
+      <Breadcrumb.Item active>Detalles</Breadcrumb.Item>
+    </Breadcrumb>
+    {renderAlert()}
       <Table>
         <tbody>
           <tr>
@@ -67,5 +69,5 @@ export const MedicoView = ()=>{
           </tr>
         </tbody>
       </Table>
-  </>
+  </div>
 }

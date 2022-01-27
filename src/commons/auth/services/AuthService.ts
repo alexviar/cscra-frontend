@@ -12,17 +12,21 @@ export type User = {
   apellidoMaterno: string
   nombres: string
   nombreCompleto: string
-  allPermissions: {
-    id: number
-    name: string
-  }[]
   roles: {
     id: number
     name: string
+    permissions: {
+      id: number
+      name: string
+    }[]
   }[]
   createdAt: string
   updatedAt: string
   regionalId: number
+  regional: {
+    id: number,
+    nombre: string
+  }
 }
 
 export const AuthService = {

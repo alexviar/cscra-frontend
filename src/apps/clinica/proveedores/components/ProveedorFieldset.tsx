@@ -16,18 +16,23 @@ export const ProveedorFieldset = () => {
   const { id } = useParams<{ id?: string }>()
 
   const {
+    clearErrors,
     control,
     register,
     watch
   } = useFormContext<Inputs>()
 
-  console.log("Watch", watch())
+  const tipo = watch("tipo")
+  
+  useEffect(()=>{
+    clearErrors()
+  }, [tipo])
 
   const renderSpecificFieldset = () => {
-    if (watch("tipo") == 1) {
+    if (tipo == 1) {
       return <ProveedorMedicoFieldset />
     }
-    if (watch("tipo") == 2) {
+    if (tipo == 2) {
       return <ProveedorEmpresaFieldset />
     }
     return null
@@ -44,7 +49,6 @@ export const ProveedorFieldset = () => {
           control={control}
           name="tipo"
           render={({field: {value, ...field}, fieldState})=>{
-            console.log("RadioGroup", field)
             return !id ? <>
               <Form.Row className={fieldState.error ? "is-invalid" : ""}>
                 <Col>

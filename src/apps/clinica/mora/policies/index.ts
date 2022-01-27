@@ -1,2 +1,3 @@
-export * as Permisos from "./Permisos";
-export * from "./ListaMoraPolicy"
+import { ListaMoraPolicy }from "./ListaMoraPolicy"
+
+export const listaMoraPolicy = new ListaMoraPolicy()

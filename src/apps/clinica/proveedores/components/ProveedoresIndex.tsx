@@ -22,25 +22,29 @@ export const ProveedoresIndex = () => {
 
   const user = useUser()
 
-  const [filter, setFilter] = useState<Filter>({})
-
-  if(proveedorPolicy.viewByRegionalOnly(user)) {
-    filter.regionalId = user?.regionalId;
-  }
-
-  const totalRef = useRef(0)
+  const [filter, setFilter] = useState<Filter>(() => {
+    const defaultFilter: Filter = {}
+    if(proveedorPolicy.viewByRegionalOnly(user)) {
+      defaultFilter.regionalId = user?.regionalId;
+    }
+    return defaultFilter
+  })
 
   const queryKey = ["proveedores", "buscar", filter, page]
+
   const buscar = useQuery(queryKey, () => {
     return ProveedoresService.buscar(page, filter)
   }, {
     enabled: !!superUserPolicyEnhancer(proveedorPolicy.view)(user),
     refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    onSuccess: ({data}) =>{
-      totalRef.current = data.meta.total
-    }
+    refetchOnReconnect: false
   })
+
+  const totalRef = useRef(-1)
+
+  if(buscar.data) {
+    totalRef.current = buscar.data.data.meta.total
+  }
 
   const loader = useMemo(()=>{
     const rows = []
@@ -52,7 +56,13 @@ export const ProveedoresIndex = () => {
         <td>
           <Skeleton />
         </td>
-        <td style={{minWidth: 100}}>
+        <td>
+          <Skeleton />
+        </td>
+        <td>
+          <Skeleton />
+        </td>
+        <td>
           <Skeleton />
         </td>
         <td>
@@ -71,22 +81,31 @@ export const ProveedoresIndex = () => {
       page={page}
       onPageChange={setPage}
       total={totalRef.current}
-      onRefetch={buscar.refetch}
+      onRefetch={()=>{
+        buscar.remove()
+        buscar.refetch({throwOnError: true})
+      }}
       isLoading={buscar.isFetching}
       hasError={buscar.isError}
       data={buscar.data?.data.records}
       renderData={(item, index) => {
         return <tr key={item.id}>
-          <th scope="row" style={{ width: 1 }}>
-            {index + 1}
+          <th scope="row">
+            {(page.current - 1)*page.size  + index + 1}
           </th>
           <td>
-            {item.tipo == 1 ? item.nombreCompleto : item.nombre}
-          </td>
-          <td style={{minWidth: 100}}>
             {item.tipo == 1 ? "Medico" : "Empresa"}
           </td>
           <td>
+            {item.tipo == 1 ? item.nombreCompleto : item.nombre}
+          </td>
+          <td>
+            {item.regional!.nombre}
+          </td>
+          <td>
+            {item.estado == 1 ? "Activo" : item.estado == 2 ? "De baja" : ""}
+          </td>
+          <td style={{textTransform: "none"}}>
             <RowOptions proveedor={item} queryKey={queryKey} />
           </td>
         </tr>
@@ -94,8 +113,10 @@ export const ProveedoresIndex = () => {
       renderDataHeaders={()=>{
         return <tr>
           <th style={{ width: 1 }}>#</th>
-          <th>Nombre</th>
-          <th style={{ width: 1 }}>Tipo</th>
+          <th>Tipo</th>
+          <th style={{ minWidth: 250}}>Nombre</th>
+          <th>Regional</th>
+          <th>Estado</th>
           <th style={{ width: 1 }}></th>
         </tr>
       }}
@@ -104,6 +125,7 @@ export const ProveedoresIndex = () => {
       }}
       renderFilterForm={()=>{
         return <ProveedoresFilterForm onFilter={(filter) => {
+          buscar.remove()
           setFilter(filter)
           setPage(page => ({ ...page, current: 1 }))
         }} />

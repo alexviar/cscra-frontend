@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { Alert, Button, Breadcrumb, Col, Form, Spinner } from "react-bootstrap"
 import { Link, useParams } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "react-query"
@@ -5,8 +6,59 @@ import { useForm, FormProvider } from "react-hook-form"
 import { Inputs as ProveedorInputs, ProveedorFieldset } from "./ProveedorFieldset"
 import { Inputs as ContactoInputs, ContactoFieldset } from "./ContactoFieldset"
 import { Empresa, Medico, InformacionContacto, ProveedoresService } from "../services"
+import { AxiosError } from "axios"
+import { useServerValidation } from "../../../../commons/hooks"
+import * as yup from "yup"
+import { yupResolver } from "@hookform/resolvers/yup"
 
 type Inputs = ProveedorInputs & ContactoInputs
+
+const schema = yup.object().shape({
+  tipo: yup.number().required().oneOf([1,2]),
+  nit: yup.string().trim().label("NIT")
+    .matches(/^[0-9]*$/, "Este campo solo admite números").required(),
+  ci: yup.number().label("número de carnet")
+    .nonEmpty()
+    .typeError("El ${path} no es un numero valido")
+    .when("tipo", function(tipo: any, schema: any) {
+      if(tipo == 1) return schema.required()
+      return schema.optional()
+    }),
+  ciComplemento: yup.string().label("complemento del carnet").nonEmpty().uppercase().default(null).nullable().notRequired()
+    .when("tipo", {
+      is: (tipo: any) => tipo == 1,
+      then: (schema) => schema.matches(/^[1-9][A-Z]$/, "Complemento invalido.")
+    }),
+  apellidoPaterno: yup.string().label("apellido paterno").nonEmpty().uppercase().default(null).nullable()
+    .when(["tipo", "apellidoMaterno"], {
+      is: (tipo: number, apellidoMaterno: string) => tipo == 1 && !apellidoMaterno,
+      then: (schema) => schema.required("Debe proporcionar al menos un apellido").max(25)
+    }),
+  apellidoMaterno: yup.string().trim().label("apellido materno").nonEmpty().uppercase().default(null).nullable()
+  .when(["tipo", "apellidoPaterno"], {
+    is: (tipo: number, apellidoPaterno: string) => tipo == 1 && !apellidoPaterno,
+    then: (schema) => schema.required("Debe proporcionar al menos un apellido").max(25)
+  }),
+  nombre: yup.string().label("nombre").nonEmpty().uppercase().required().label("nombre")
+    .when("tipo", function(tipo: any, schema: any) {
+      return tipo ==  1 ? schema.max(50) : schema.max(100)
+    }),
+  especialidad: yup.string().label("especialidad").nonEmpty().uppercase()
+    .when("tipo", function(tipo: any, schema: any) {
+      return tipo ==  1 ? schema.required("Debe indicar una especialidad") : schema.optional()
+    }),
+  regional: yup.array().length(1, "Debe indicar una regional").required(),
+
+  direccion: yup.string().label("dirección").nonEmpty().uppercase().required().max(80),
+  ubicacion: yup.mixed().label("ubicación").required(),
+  telefono1: yup.number().label("telefono 1")
+    .nonEmpty()
+    .typeError("No es un numero válido").required(),
+  telefono2: yup.number().label("telefono 2")
+    .nonEmpty()
+    .typeError("No es un numero válido").notRequired()
+}, [["apellidoMaterno", "apellidoPaterno"]])
+
 
 export const ProveedorForm = () => {
 
@@ -15,32 +67,50 @@ export const ProveedorForm = () => {
   } = useParams<{id?: string}>()
 
   const formMethods = useForm<Inputs>({
-    defaultValues: {
-      tipo: id?.startsWith("EMP") ? 2 : 1,
+    resolver: yupResolver(schema),
+    defaultValues: !id || id.startsWith("MED") ? {
+      tipo: 1,
       initialized: !id,
+      ciComplemento: null,
+      regional: [],
+      ubicacion: null
+    } : {
+      tipo: 2,
+      initialized: !id,
+      regional: [],
       ubicacion: null
     }
   })
 
   const {
+    formState,
     handleSubmit,
+    setError,
     setValue,
     watch
   } = formMethods
+
+  if(Object.keys(formState.errors).length === 0) console.log(formState.errors, watch())
 
   const initialized = watch("initialized")
 
   const queryClient = useQueryClient()
 
-  const cargar = useQuery(["proveedores", "obtener", id], () => {
+  const cargar = useQuery(["proveedores", "cargar", id], () => {
     return ProveedoresService.cargar(id!)
   }, {
     enabled: !!id && !initialized,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    onSuccess({data}){
-      console.log(data)
+    onError(){
+      setValue("initialized", true)
+    }
+  })
+
+  useEffect(()=>{
+    if(cargar.data){
+      const { data } = cargar.data
       setValue("initialized", true)
       setValue("nit", data.nit)
       setValue("nombre", data.nombre)
@@ -56,11 +126,8 @@ export const ProveedorForm = () => {
         setValue("apellidoPaterno", data.apellidoPaterno)
         setValue("especialidad", data.especialidad)
       }
-    },
-    onError(){
-      setValue("initialized", true)
     }
-  })
+  }, [cargar.data])
 
   const guardar = useMutation((values: Inputs)=>{
 
@@ -106,7 +173,9 @@ export const ProveedorForm = () => {
       telefono2: values.telefono2!
     }
 
-    return ProveedoresService.registrar({
+    return id ? ProveedoresService.actualizar({
+      id, ...general, ...contacto
+    }) : ProveedoresService.registrar({
       ...general, ...contacto
     })
   }, {
@@ -115,9 +184,12 @@ export const ProveedorForm = () => {
     }
   })
 
+  // Efecto para agregar errores de validocion devueltos por el servidor
+  useServerValidation(guardar.error as AxiosError, setError)
+
   const renderAlert = () => {
     if(cargar.error) {
-      const { response } = cargar.error as any
+      const { response } = cargar.error as AxiosError
       return <Alert variant="danger">
         {
           !response ? "No fue posible realizar la solicitud, verifique si tiene conexion a internet" :
@@ -125,6 +197,20 @@ export const ProveedorForm = () => {
           "Ocurrio un error inesperado"
         }
       </Alert>
+    }
+    if(guardar.error && (guardar.error as AxiosError).response?.status == 422) {
+      const { response } = guardar.error as AxiosError
+      return <Alert variant="danger">
+        {
+          !response ? "No fue posible realizar la solicitud, verifique si tiene conexion a internet" :
+          "Ocurrio un error inesperado"
+        }
+      </Alert>
+    }
+    if(guardar.isSuccess) {
+      return <Alert variant="success">
+      La operacion se realizó con exito
+    </Alert>
     }
     return null
   }
@@ -136,7 +222,8 @@ export const ProveedorForm = () => {
       <Breadcrumb.Item active>{!id ? "Registro" : "Actualización"}</Breadcrumb.Item>
     </Breadcrumb>
     <Form onSubmit={handleSubmit((values)=>{
-      guardar.mutate(values)
+      console.log("Values", values)
+      // guardar.mutate(values)
     })}>
       {renderAlert()}
       <ProveedorFieldset />
