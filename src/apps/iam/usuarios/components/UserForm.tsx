@@ -1,20 +1,22 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Alert, Accordion, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap'
+import { Alert, Breadcrumb, Accordion, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap'
+import Skeleton from 'react-loading-skeleton'
 import { useForm, Controller } from 'react-hook-form'
 import { AxiosError } from 'axios'
 import { useQuery, useMutation, useQueryClient } from 'react-query'
-import { useParams, useHistory } from "react-router-dom"
+import { Link, useParams, useHistory } from "react-router-dom"
 import { RegionalesTypeahead } from "../../../../commons/components"
 import { Regional } from "../../../../commons/services"
 import { UserService, User, Rol } from "../services"
 import { RolesCheckList } from './RolesCheckList'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { Permisos } from '../../../../commons/auth/constants'
 import { useUser } from '../../../../commons/auth/hooks'
+import { usuarioPolicy } from '../policies'
 
 
 type Inputs = {
+  initialized: boolean
   informacionPersonal: {
     ci: string,
     ciComplemento: string,
@@ -45,11 +47,13 @@ export const UserForm = () => {
       ciComplemento: yup.lazy(value => value ? yup.string().label("'complemento'").trim().length(2) : yup.string().nullable().optional()),
       apellidoPaterno: yup.string().label("apellido paterno").trim().when("apellidoMaterno", {
         is: (apellidoMaterno: string) => !apellidoMaterno,
-        then: yup.string().required("Debe proporcionar al menos un apellido")
+        then: (schema) => schema.required("Debe proporcionar al menos un apellido"),
+        otherwise: (schema) => schema.nullable().optional()
       }),
       apellidoMaterno: yup.string().label("apellido materno").trim().when("apellidoPaterno", {
         is: (apellidoPaterno: string) => !apellidoPaterno,
-        then: yup.string().required("Debe proporcionar al menos un apellido")
+        then: (schema) => schema.required("Debe proporcionar al menos un apellido"),
+        otherwise: (schema) => schema.nullable().optional()
       }),
       nombres: yup.string().label("nombres").trim().required().label("'Nombres'"),
     }, [["apellidoMaterno", "apellidoPaterno"]]),
@@ -74,13 +78,14 @@ export const UserForm = () => {
     formState,
     handleSubmit,
     register,
+    reset,
     setValue,
-    trigger,
     watch
   } = useForm<Inputs>({
     resolver: yupResolver(schema),
     mode: 'onBlur',
     defaultValues: {
+      initialized: !id,
       informacionUsuario: {
         roles: [],
         regional: []
@@ -93,74 +98,114 @@ export const UserForm = () => {
     user: User
   }>()
 
+  const initialized = watch("initialized")
+
   const queryClient = useQueryClient()
 
   const queryKey = ["usuarios.cargar", id];
   const cargar = useQuery(queryKey, () => {
     return UserService.cargar(parseInt(id!))
   }, {
-    enabled: !!id && !history.location.state?.user
+    enabled: !!id && !initialized,
+    initialData: history.location.state?.user && {status: 200, statusText: "OK", data: history.location.state.user, headers: {}, config: {}},
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false
   })
+  
+  const user = cargar.data?.data
+
+  useEffect(()=>{
+    if(cargar.status === "error"){
+      setValue("initialized", true)
+    }
+    if(cargar.status === "success") {
+      setValue("initialized", true)
+      setValue("informacionPersonal", {
+        ci: String(user!.ci.raiz),
+        ciComplemento: user!.ci.complemento,
+        apellidoPaterno: user!.apellidoPaterno,
+        apellidoMaterno: user!.apellidoMaterno,
+        nombres: user!.nombre
+      })
+      setValue("informacionUsuario", {
+        username: user!.username,
+        roles: user!.roles,
+        regional: [user!.regional as Regional]
+      })
+    }
+  }, [cargar.status])
 
   const guardar = useMutation(({informacionPersonal, informacionUsuario}: Inputs) => {
     return id ? UserService.actualizar(parseInt(id), {
       regionalId: informacionUsuario.regional[0]!.id,
       roles: informacionUsuario.roles.map(r => r.name),
-      ci: parseInt(informacionPersonal.ci),
-      ciComplemento: informacionPersonal.ciComplemento,
+      ci: {
+        raiz: parseInt(informacionPersonal.ci),
+        complemento: informacionPersonal.ciComplemento,
+      },
       apellidoPaterno: informacionPersonal.apellidoPaterno,
       apellidoMaterno: informacionPersonal.apellidoMaterno,
-      nombres: informacionPersonal.nombres
+      nombre: informacionPersonal.nombres
     }) : UserService.registrar({
       username: informacionUsuario.username,
       password: informacionUsuario.password as string,
       regionalId: informacionUsuario.regional[0]!.id,
       roles: informacionUsuario.roles.map(r => r.name),
-      ci: parseInt(informacionPersonal.ci),
-      ciComplemento: informacionPersonal.ciComplemento,
+      ci: {
+        raiz: parseInt(informacionPersonal.ci),
+        complemento: informacionPersonal.ciComplemento,
+      },
       apellidoPaterno: informacionPersonal.apellidoPaterno,
       apellidoMaterno: informacionPersonal.apellidoMaterno,
-      nombres: informacionPersonal.nombres
+      nombre: informacionPersonal.nombres
     })
   }, {
-    onSuccess: ({data}) => {
-      queryClient.invalidateQueries("usuarios.buscar")
-      history.replace(`/iam/usuarios/${data.id}`, {
-        user: data
-      })
+    onSuccess: (response) => {
+      queryClient.invalidateQueries(["usuarios","buscar"])
+      if(id){
+        queryClient.setQueryData(["usuarios", "cargar", id], response)
+        // history.push("/iam/roles")
+      }
+      else{
+        reset({
+          initialized: true,
+          informacionUsuario: {
+            roles: [],
+            regional: []
+          }
+        })
+      }
     }
   })
 
-  const [regionales, setRegionales] = useState<Regional[]>([])
-
   const filterRegional = useCallback((regional: Regional)=>{
-    return loggedUser?.can(Permisos.REGISTRAR_USUARIOS) ? true : (regional.id == loggedUser?.regionalId)
+    if(id){
+      return usuarioPolicy.editByRegionalOnly(loggedUser, {regionalId: regional.id}) !== false
+    }
+    else {
+      return usuarioPolicy.registerByRegionalOnly(loggedUser, {regionalId: regional.id}) !== false
+    }
   }, [loggedUser])
 
-  const user = cargar.data?.data || history.location.state?.user
+  const registeredFields = {
+    ci: register("informacionPersonal.ci"),
+    ciComplemento: register("informacionPersonal.ciComplemento"),
+    apellidoPaterno: register("informacionPersonal.apellidoPaterno"),
+    apellidoMaterno: register("informacionPersonal.apellidoMaterno"),
+    nombre: register("informacionPersonal.nombres"),
+    username: register("informacionUsuario.username")
+  }
 
-  useEffect(()=>{
-    if(user && regionales.length) {
-      setValue("informacionPersonal", {
-        ci: String(user.ciRaiz),
-        ciComplemento: user.ciComplemento,
-        apellidoPaterno: user.apellidoPaterno,
-        apellidoMaterno: user.apellidoMaterno,
-        nombres: user.nombres
-      })
-      setValue("informacionUsuario", {
-        username: user.username,
-        roles: user.roles,
-        regional: [regionales.find(r=>r.id == user.id)!]
-      })
-    }
-  }, [user, regionales])
-
-  return <>
+  return <div>
+    <Breadcrumb>
+      <Breadcrumb.Item linkAs={Link} linkProps={{to: "/iam/usuarios"}}>Usuarios</Breadcrumb.Item>
+      {id ? <Breadcrumb.Item active>{id}</Breadcrumb.Item> : null}
+      <Breadcrumb.Item active>{!id ? "Registro" : "Actualización"}</Breadcrumb.Item>
+    </Breadcrumb>
     <Form onSubmit={handleSubmit((data) => {
       guardar.mutate(data)
     })}>
-      <h1 style={{ fontSize: "2rem" }}>Usuarios</h1>
       {guardar.status == "error" || guardar.status == "success"  ? <Alert variant={guardar.isError ? "danger" : "success"}>
         {guardar.isError ? (guardar.error as AxiosError).response?.data?.message || (guardar.error as AxiosError).message : "Guardado"}
       </Alert> : null}
@@ -175,54 +220,59 @@ export const UserForm = () => {
             <Accordion.Collapse eventKey="0">
               <Card.Body>
                 <Form.Row>
-                  <Form.Group as={Col} xs={8} md={4}>
-                    <Form.Label title="Numero raiz del carnet de identidad">Carnet de identidad</Form.Label>
-                    <Form.Control type="number"
-                      isInvalid={!!formState.errors.informacionPersonal?.ci}
-                      {...register("informacionPersonal.ci")}
-                    ></Form.Control>
-                    <Form.Control.Feedback type="invalid">{formErrors.informacionPersonal?.ci?.message}</Form.Control.Feedback>
-                  </Form.Group>
-                  <Form.Group as={Col} xs={4} md={2}>
-                    <Form.Label title="Complemento del carnet de identiad">Complemento</Form.Label>
-                    <Form.Control
-                      isInvalid={!!formErrors.informacionPersonal?.ciComplemento}
-                      {...register("informacionPersonal.ciComplemento")}
-                    ></Form.Control>
-                    <Form.Control.Feedback type="invalid">{formErrors.informacionPersonal?.ciComplemento?.message}</Form.Control.Feedback>
+                  <Form.Group as={Col} xs={12} sm={6} md={4}>
+                    <fieldset className={`border${formState.errors.informacionPersonal?.ci || formState.errors.informacionPersonal?.ciComplemento ? " border-danger " : " "}rounded`}
+                      style={{padding: 5, paddingTop: 0, marginBottom: -6}}>
+                      <Form.Label as="legend" style={{width: "auto", fontSize:"1rem"}}>Carnet de identidad</Form.Label>
+                      <Form.Row>
+                        <Col xs={8}>
+                          {initialized ? <Form.Control
+                            aria-label="Número raiz"
+                            className="text-uppercase"
+                            isInvalid={!!formState.errors.informacionPersonal?.ci}
+                            {...registeredFields.ci}
+                          /> : <Skeleton height="calc(1.5em + 0.75rem + 2px)" />}
+                          <Form.Control.Feedback type="invalid">{formState.errors.informacionPersonal?.ci?.message}</Form.Control.Feedback>
+                        </Col>
+                        <Col xs={4}>
+                          {initialized ? <Form.Control
+                            aria-label="Número complemento"
+                            className="text-uppercase"
+                            isInvalid={!!formState.errors.informacionPersonal?.ciComplemento}
+                            {...registeredFields.ciComplemento}
+                          /> : <Skeleton height="calc(1.5em + 0.75rem + 2px)" />}
+                          <Form.Control.Feedback type="invalid">{formState.errors.informacionPersonal?.ciComplemento?.message}</Form.Control.Feedback>
+                        </Col>
+                      </Form.Row>
+                    </fieldset>
                   </Form.Group>
                 </Form.Row>
                 <Form.Row>
-                  <Form.Group as={Col} lg={4}>
+                  <Form.Group as={Col} md={4}>
                     <Form.Label>Apellido Paterno</Form.Label>
-                    <Form.Control
-                      isInvalid={!!formErrors.informacionPersonal?.apellidoPaterno}
-                      {...register("informacionPersonal.apellidoPaterno")}
-                      onChange={(e)=>{
-                        register("informacionPersonal.apellidoPaterno").onChange(e)
-                        formState.isSubmitted && trigger("informacionPersonal.apellidoMaterno")
-                      }}
-                    />
-                    <Form.Control.Feedback type="invalid">{formErrors.informacionPersonal?.apellidoPaterno?.message}</Form.Control.Feedback>
+                    {initialized ? <Form.Control
+                      className="text-uppercase"
+                      isInvalid={!!formState.errors.informacionPersonal?.apellidoPaterno}
+                      {...registeredFields.apellidoPaterno}
+                    /> : <Skeleton height="calc(1.5em + 0.75rem + 2px)" />}
+                    <Form.Control.Feedback type="invalid">{formState.errors.informacionPersonal?.apellidoPaterno?.message}</Form.Control.Feedback>
                   </Form.Group>
-                  <Form.Group as={Col} lg={4}>
+                  <Form.Group as={Col} md={4}>
                     <Form.Label>Apellido Materno</Form.Label>
-                    <Form.Control
-                      isInvalid={!!formErrors.informacionPersonal?.apellidoMaterno}
-                      {...register("informacionPersonal.apellidoMaterno")}
-                      onChange={(e)=>{
-                        register("informacionPersonal.apellidoPaterno").onChange(e)
-                        formState.isSubmitted && trigger("informacionPersonal.apellidoMaterno")
-                      }}
-                    />
-                    <Form.Control.Feedback type="invalid">{formErrors.informacionPersonal?.apellidoMaterno?.message}</Form.Control.Feedback>
+                    {initialized ? <Form.Control
+                      className="text-uppercase"
+                      isInvalid={!!formState.errors.informacionPersonal?.apellidoMaterno}
+                      {...registeredFields.apellidoMaterno}
+                    /> : <Skeleton height="calc(1.5em + 0.75rem + 2px)" />}
+                    <Form.Control.Feedback type="invalid">{formState.errors.informacionPersonal?.apellidoMaterno?.message}</Form.Control.Feedback>
                   </Form.Group>
-                  <Form.Group as={Col} lg={4}>
+                  <Form.Group as={Col} md={4}>
                     <Form.Label>Nombres</Form.Label>
-                    <Form.Control
+                    {initialized ? <Form.Control
+                      className="text-uppercase"
                       isInvalid={!!formState.errors.informacionPersonal?.nombres}
-                      {...register("informacionPersonal.nombres")}
-                    />
+                      {...registeredFields.nombre}
+                    /> : <Skeleton height="calc(1.5em + 0.75rem + 2px)" />}
                     <Form.Control.Feedback type="invalid">{formState.errors.informacionPersonal?.nombres?.message}</Form.Control.Feedback>
                   </Form.Group>
                 </Form.Row>
@@ -240,11 +290,11 @@ export const UserForm = () => {
                 <Form.Row>
                   <Form.Group controlId="username" as={Col} md={4}>
                     <Form.Label >Usuario</Form.Label>
-                    <Form.Control
+                    {initialized ? <Form.Control
                       disabled={!!id}
                       isInvalid={!!formState.errors.informacionUsuario?.username}
                       {...register("informacionUsuario.username")}
-                    ></Form.Control>
+                    /> : <Skeleton height="calc(1.5em + 0.75rem + 2px)" />}
                     <Form.Control.Feedback type="invalid">{formState.errors.informacionUsuario?.username?.message}</Form.Control.Feedback>
                   </Form.Group>
                   {id ? null : <><Form.Group as={Col} md={4}>
@@ -277,7 +327,8 @@ export const UserForm = () => {
                     render={({ field, fieldState }) => {
                       return <RegionalesTypeahead
                         id="usuario/regionales-typeahead"
-                        onLoad={setRegionales}
+                        initialized={initialized}
+                        className="text-uppercase"
                         isInvalid={!!fieldState.error}
                         feedback={fieldState.error?.message}
                         filterBy={filterRegional}
@@ -296,6 +347,7 @@ export const UserForm = () => {
                       control={control}
                       render={({ field, fieldState }) => {
                         return <><RolesCheckList
+                          initialized={initialized}
                           isInvalid={!!fieldState.error}
                           onChange={field.onChange}
                           selected={field.value}
@@ -319,5 +371,5 @@ export const UserForm = () => {
         </Col>
       </Form.Row>
     </Form>
-  </>
+  </div>
 }

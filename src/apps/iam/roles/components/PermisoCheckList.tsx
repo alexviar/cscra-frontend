@@ -1,14 +1,17 @@
 import { useEffect } from 'react'
-import { Alert, Form, ListGroup, Spinner } from 'react-bootstrap'
+import { Alert, Form, ListGroup } from 'react-bootstrap'
+import Skeleton from "react-loading-skeleton"
 import { useQuery } from 'react-query'
 import { PermisoService, Permiso } from '../services'
 
 type Props = {
+  initialized: boolean,
   isInvalid?: boolean,
   selected?: Permiso[],
   onChange?: (permisos: Permiso[])=>void
 }
 export const PermisoCheckList = ({
+  initialized,
   isInvalid,
   selected=[],
   onChange
@@ -16,7 +19,7 @@ export const PermisoCheckList = ({
   const buscar = useQuery("permisos.buscar", ()=>{
     return PermisoService.buscar()
   }, {
-    // refetchOnMount: false,
+    refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false
   })
@@ -24,9 +27,9 @@ export const PermisoCheckList = ({
   const permisos = (buscar.data?.data || []) as Permiso[]
 
   const renderContent = ()=>{
-    if(buscar.isFetching){
-      return <><Spinner animation="border" size="sm" /><span>Cargando</span></>
-    }
+    // if(buscar.isFetching){
+    //   return <><Spinner animation="border" size="sm" /><span>Cargando</span></>
+    // }
     if(buscar.isError){
       return <Alert variant="danger">
         Ocurrio un error al obtener la lista de permisos. Haga clic <a href="#"
@@ -40,7 +43,7 @@ export const PermisoCheckList = ({
     return <ListGroup as="ul" className={`overflow-auto flex-grow-1`} style={{maxHeight: "12rem"}}>
       {permisos.map((permiso, index)=>{
         return <ListGroup.Item key={permiso} as="li"
-          className={"py-2 px-3 text-capitalize" + (isInvalid ? " border-danger" : "")}
+          className={"py-2 px-3 text-uppercase" + (isInvalid ? " border-danger" : "")}
           action
         >
           <Form.Check type="checkbox"
@@ -59,7 +62,8 @@ export const PermisoCheckList = ({
     </ListGroup>
   }
 
+  initialized = initialized && (buscar.status === "error" || buscar.status === "success")
   return <div className={isInvalid ? "is-invalid" : ""} >
-    {renderContent()}
+    {initialized ? renderContent() : <Skeleton containerClassName='input-skeleton' count={5} />}
   </div>
 }

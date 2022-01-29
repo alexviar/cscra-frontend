@@ -18,9 +18,9 @@ export const solicitudesAtencionExternaFactory = BaseFactory.define<SolicitudAte
     id: 1,
     nombre: "La Paz"
   }
-  const medico = associations.medico || medicosFactory.build()
+  const medico = associations.medico || medicosFactory.build() as any
 
-  const proveedor =  associations.proveedor || proveedoresFactory.build()
+  const proveedor =  associations.proveedor || proveedoresFactory.build() as any
 
 
   return {
@@ -28,11 +28,17 @@ export const solicitudesAtencionExternaFactory = BaseFactory.define<SolicitudAte
     numero: String(sequence).padStart(10, '0'),
     fecha: moment(faker.date.recent(365)).format("L"),
     regionalId: regional.id,
+    prestacion: faker.lorem.text(80),
     regional,
     proveedor,
     medico,
-    asegurado: {
-      matricula: faker.helpers.replaceSymbols("##-####-???")
+    paciente: {
+      matricula: faker.helpers.replaceSymbols("##-####-???"),
+      nombreCompleto: `${faker.name.lastName()} ${faker.name.lastName()} ${faker.name.firstName()}`
+    },
+    titular: {
+      matricula: faker.helpers.replaceSymbols("##-####-???"),
+      nombreCompleto: `${faker.name.lastName()} ${faker.name.lastName()} ${faker.name.firstName()}`
     },
     urlDm11: faker.internet.url()
   }

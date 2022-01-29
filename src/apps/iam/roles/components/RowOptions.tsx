@@ -6,7 +6,7 @@ import { VerticalEllipsisDropdownToggle } from "../../../../commons/components"
 import { useModal } from "../../../../commons/reusable-modal"
 import { ProtectedContent } from "../../../../commons/auth/components"
 import { Rol, RolService } from "../services"
-import { RolPolicy } from "../policies"
+import { rolPolicy } from "../policies"
 
 type Props = {
   rol: Rol
@@ -61,7 +61,7 @@ export const RowOptions = ({rol, queryKey}: Props) => {
     />
     <Dropdown.Menu>
       <ProtectedContent
-        authorize={RolPolicy.view}
+        authorize={rolPolicy.view}
       >
         <Dropdown.Item as={Link} to={{
           pathname: `/iam/roles/${rol.id}`,
@@ -71,7 +71,7 @@ export const RowOptions = ({rol, queryKey}: Props) => {
         }} >Ver</Dropdown.Item>
       </ProtectedContent>
       <ProtectedContent
-        authorize={RolPolicy.edit}
+        authorize={rolPolicy.edit}
       >
         <Dropdown.Item as={Link} to={{
           pathname: `/iam/roles/${rol.id}/editar`,
@@ -81,7 +81,7 @@ export const RowOptions = ({rol, queryKey}: Props) => {
         }}>Editar</Dropdown.Item>
       </ProtectedContent>
       <ProtectedContent
-        authorize={RolPolicy.delete}
+        authorize={rolPolicy.delete}
       >
         <Dropdown.Item className="text-danger" onClick={()=>{
           if(window.confirm("Esta accion es irreversible, ¿Esta seguro de continuar?")){

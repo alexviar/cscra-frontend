@@ -12,10 +12,11 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { BrowserRouter as Router } from 'react-router-dom'
 import { Provider } from 'react-redux';
 import configureStore from './bootstrap/store';
-import './bootstrap/components/custom.scss';
-import './index.css';
 import moment from 'moment'
 import 'moment/locale/es'
+import 'react-loading-skeleton/dist/skeleton.css'
+import './bootstrap/components/custom.scss';
+import './index.css';
 
 moment.locale('es')
 

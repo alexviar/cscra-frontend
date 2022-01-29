@@ -1,96 +1,102 @@
 import { useEffect, useRef } from 'react'
 import { AxiosError } from 'axios'
-import { Alert, Button, Col, Form, Modal, Spinner, Table } from 'react-bootstrap'
+import { Alert, Breadcrumb, Button, Col, Form, Modal, Spinner, Table } from 'react-bootstrap'
 import { RolService, Rol } from '../services'
-import { useQuery, useMutation } from 'react-query'
+import { useQueryClient, useQuery, useMutation } from 'react-query'
 import { FaEdit } from 'react-icons/fa'
 import { Link, useLocation, useParams } from 'react-router-dom'
-import { useModal } from "../../../../commons/reusable-modal"
+import Skeleton from "react-loading-skeleton"
+import 'react-loading-skeleton/dist/skeleton.css'
 
 
 export const RolView = ()=>{
-  const { pathname, state: locationState } = useLocation<{
+  const location = useLocation<{
     rol?: Rol
   }>()
   const { id } = useParams<{
     id: string
   }>()
 
-  const queryLoader = useModal("queryLoader")
+  const queryClient = useQueryClient()
 
-  const cargar = useQuery(["cargar", id], ()=>{
+  const cargar = useQuery(["roles", "cargar", id], ()=>{
     return RolService.cargar(parseInt(id))
   }, {
-    enabled: !locationState?.rol,
-    refetchOnMount: false,
+    initialData: location.state?.rol && { status: 200, statusText: "OK", headers: {}, config: {}, data: location.state?.rol },
     refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    onSuccess: () => {
-      queryLoader.close()
-    },
-    onError: (error) => {
-      queryLoader.open({
-        state: "error",
-        error
-      })
-    }
+    refetchOnReconnect: false
   })
 
   const eliminar = useMutation(()=>{
     return RolService.eliminar(parseInt(id))
   }, {
     onSuccess: () => {
-      queryLoader.close()
+      queryClient.invalidateQueries(["roles", "buscar"]);
     },
     onError: (error) => {
-      queryLoader.open({
-        state: error,
-        error
-      })
     }
   })
 
-  const rol = cargar.data?.data || locationState?.rol
+  const rol = cargar.data?.data
 
-  useEffect(()=>{
-    if(cargar.isFetching){
-      queryLoader.open({
-        state: "loading"
-      })
+  const renderAlert = () => {
+    if (cargar.error) {
+      const { response } = cargar.error as any
+      return <Alert variant="danger">
+        {
+          !response ? 
+            "No fue posible realizar la solicitud, verifique si tiene conexion a internet" :
+            response.status == 404 ? 
+              "El usuario que busca no existe" :
+              "Ocurrio un error inesperado"
+        }
+      </Alert>
     }
-  }, [cargar.isFetching])
-
+    if(eliminar.status == "success") {
+      return <Alert variant="success">
+        El rol ha sido eliminado.
+      </Alert>
+    }
+    if(eliminar.status == "error") {
+      return <Alert variant="danger">
+        Ocurrio un error mientras se intentaba eliminar el rol.
+      </Alert>
+    }
+    return null
+  }
   
   return <>
-    <h2 style={{fontSize: "1.75rem"}}>{rol?.name}</h2>
+    <Breadcrumb>
+      <Breadcrumb.Item linkAs={Link} linkProps={{ to: "/iam/roles" }}>Roles</Breadcrumb.Item>
+      <Breadcrumb.Item active>{id}</Breadcrumb.Item>
+      <Breadcrumb.Item active>Detalles</Breadcrumb.Item>
+    </Breadcrumb>
+    {renderAlert()}
     <Table>
       <tbody>
         <tr>
           <th scope="row" style={{width: '1px'}}>Nombre</th>
-          <td className="text-capitalize">{rol?.name}</td>
+          <td className="text-capitalize">{rol?rol.name: <Skeleton />}</td>
         </tr>
         <tr>
           <th className="text-nowrap" scope="row">Descripción</th>
-          <td className={rol?.description ? "" : "bg-light"}>{rol?.description || "Sin descripción"}</td>
+          <td className={rol?.description ? "" : "bg-light"}>{rol?rol.description || "Sin descripción": <Skeleton />}</td>
         </tr>
         <tr>
           <th scope="row">Fecha de creación</th>
-          <td>{rol?.createdAt}</td>
+          <td>{rol?rol.createdAt:<Skeleton />}</td>
         </tr>
         <tr>
           <th scope="row">Fecha de actualización</th>
-          <td>{rol?.updatedAt}</td>
+          <td>{rol?rol.updatedAt: <Skeleton />}</td>
         </tr>
         <tr>
           <th scope="row">Permisos</th>
-            <td className={`d-flex ${rol?.permissionNames.length ? "" : "bg-light"}`}>{
-              rol?.permissionNames.length ? 
-              <ul className="d-inline-block">{rol?.permissionNames.map((p, i)=><li key={i} className="text-capitalize">{p}</li>)}</ul> :
-              "No se agregaron permisos"
+            <td className={`d-flex ${rol?.permissions.length ? "" : "bg-light"}`}>{
+              rol ? rol.permissions.length ? <ul className="d-inline-block">
+                {rol?.permissions.map((p, i)=><li key={p.id} className="text-capitalize">{p.name}</li>)}
+              </ul> : "No se agregaron permisos" : <Skeleton count={5} />
             }
-              {/* <Button className="btn-icon ml-auto mb-auto" style={{top: 0, right: 0}} variant="link" onClick={()=>{
-                      //refetch()
-              }}><FaEdit /></Button> */}
             </td>
         </tr>
       </tbody>
@@ -106,10 +112,9 @@ export const RolView = ()=>{
       </Col>
       <Col xs="auto">
         <Button variant="danger" onClick={()=>{
-          queryLoader.open({
-            state: "loading"
-          })
-          eliminar.mutate()
+          if(window.confirm("Esta accion es irreversible, ¿Esta seguro de continuar?")){
+            eliminar.mutate()
+          }
         }}>
           {eliminar.isLoading ? <Spinner className="mr-2" animation="border" size="sm" /> : null}
           Eliminar

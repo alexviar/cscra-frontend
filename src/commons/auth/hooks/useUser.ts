@@ -10,9 +10,9 @@ export const useUser = () => {
     staleTime: Infinity,
     refetchOnMount: false
   })
-
-  console.log("User", fetchUser.data)
-  const user = fetchUser.isError ? null : fetchUser.data?.data
+  
+  // const user = fetchUser.isError ? null : fetchUser.data?.data
+  const user = fetchUser.data?.data
 
   return useMemo(()=>{
     if(user !== undefined){

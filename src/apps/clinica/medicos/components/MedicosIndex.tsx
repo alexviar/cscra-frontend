@@ -52,8 +52,8 @@ export const MedicosIndex = () => {
     const rows = []
     for(let i = 0; i < page.size; i++){
       rows.push(<tr key={i}>
-        <th scope="row" style={{ width: 1 }}>
-          {i + 1}
+        <th scope="row">
+          {(page.current - 1)*page.size  + i + 1}
         </th>
         <td>
           <Skeleton />

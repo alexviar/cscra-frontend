@@ -18,12 +18,11 @@ export const RowOptions = ({item, queryKey}: Props) => {
   const queryClient = useQueryClient()
 
   const quitar = useMutation(()=>{
-    return ListaMoraService.quitar(item.empleadorId)
+    return ListaMoraService.quitar(item.id)
   }, {
     onSuccess: ()=>{
       modal.close()
       queryClient.setQueryData(queryKey, (oldData: any) => {
-        console.log(oldData)
         return {
           ...oldData,
           data: {

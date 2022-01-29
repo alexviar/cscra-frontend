@@ -84,7 +84,7 @@ export default ()=>{
             })
             logout.mutate()
           }} >Cerrar sesión</NavDropdown.Item>
-        </NavDropdown> : <Nav.Link as={Link} className="text-nowrap" to="/login">Iniciar sesión</Nav.Link>}
+        </NavDropdown> : user === null ? <Nav.Link as={Link} className="text-nowrap" to="/login">Iniciar sesión</Nav.Link> : null}
       </Nav>
     </Navbar>
 

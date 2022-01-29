@@ -22,12 +22,12 @@ export const medicosFactory = BaseFactory.define<Medico, any, BaseFactory<Medico
   ci.texto = ci.raiz + (ci.complemento ? `-${ci.complemento}` : "")
   
   const nombre = {
-    nombres: faker.name.firstName(),
+    nombre: faker.name.firstName(),
     apellidoPaterno: faker.name.lastName(),
     apellidoMaterno: faker.name.lastName(),
     nombreCompleto: ""
   }
-  nombre.nombreCompleto = nombre.nombres
+  nombre.nombreCompleto = nombre.nombre
   if(nombre.apellidoPaterno) nombre.nombreCompleto += " " + nombre.apellidoPaterno
   if(nombre.apellidoMaterno) nombre.nombreCompleto += " " + nombre.apellidoMaterno
 

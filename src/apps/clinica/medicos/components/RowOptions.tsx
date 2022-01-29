@@ -25,7 +25,6 @@ export const RowOptions = ({medico, queryKey}: Props) => {
       modal.close()
       queryClient.invalidateQueries("medicos.buscar", { inactive: true })
       queryClient.setQueryData(queryKey, (oldData: any) => {
-        console.log(oldData)
         return {
           ...oldData,
           data: {

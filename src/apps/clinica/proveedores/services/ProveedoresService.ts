@@ -38,9 +38,10 @@ export type Medico = {
 }
 
 export type InformacionContacto = {
+  razonSocial?: string
   direccion: string
   ubicacion: {
-    latitud: number,
+    latitud: number
     longitud: number
   } | null
   telefono1: number
@@ -50,15 +51,14 @@ export type InformacionContacto = {
 export type Proveedor = (Empresa | Medico) & InformacionContacto
 
 export type Filter = {
-  tipos?: number[]
-  nombre?: string
+  tipo?: number
   _busqueda?: string
   regionalId?: number
-  activos?: number
+  estado?: number
 }
 
 
-class ProveedorService {
+export const ProveedoresService = {
   buscar(page: Page, filter?: Filter) {
     return apiClient.get<PaginatedResponse<Proveedor>>("proveedores", {
       params: keysToUnderscore({
@@ -66,16 +66,17 @@ class ProveedorService {
         page
       })
     })
-  }
+  },
   cargar(id: string): AxiosPromise<Proveedor>{
     return apiClient.get(`proveedores/${id}`)
-  }
+  },
   registrar(fields: Omit<Proveedor, "id" | "nombreCompleto" | "estado">): AxiosPromise<Proveedor> {
     return apiClient.post("proveedores", keysToUnderscore(fields))
-  }
+  },
   actualizar({id, ...fields}: Omit<Proveedor, "nombreCompleto" | "estado">): AxiosPromise<Proveedor>{
     return apiClient.put(`proveedores/${id}`, keysToUnderscore(fields))
+  },
+  actualizarEstado(id: string, estado: 1 | 2): AxiosPromise<Proveedor>{
+    return apiClient.put(`proveedores/${id}/actualizar-estado`, keysToUnderscore({estado}))
   }
 }
-
-export const ProveedoresService = new ProveedorService()

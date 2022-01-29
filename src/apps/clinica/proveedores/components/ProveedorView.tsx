@@ -70,12 +70,12 @@ export const ProveedorView = ()=>{
                   <dt className="col-lg-5 col-md-12 col-sm-5">Carnet de identidad</dt>
                   <dd className="col-lg-7 col-md-12 col-sm-7">{proveedor.ci.texto}</dd>
                   <dt className="col-lg-5 col-md-12 col-sm-5">Nombre</dt>
-                  <dd className="col-lg-7 col-md-12 col-sm-7">{proveedor.nombreCompleto}</dd>
+                  <dd className="col-lg-7 col-md-12 col-sm-7">{proveedor.razonSocial}</dd>
                   <dt className="col-lg-5 col-md-12 col-sm-5">Especialidad</dt>
                   <dd className="col-lg-7 col-md-12 col-sm-7">{proveedor.especialidad}</dd>
               </> : (proveedor.tipo == 2 ? <>
                 <dt className="col-lg-5 col-md-12 col-sm-5">Nombre</dt>
-                <dd className="col-lg-7 col-md-12 col-sm-7">{proveedor?.nombre}</dd>
+                <dd className="col-lg-7 col-md-12 col-sm-7">{proveedor.razonSocial}</dd>
               </> : null) :
               tipo == 1 ? <>
                   <dt className="col-lg-5 col-md-12 col-sm-5">Carnet de identidad</dt>

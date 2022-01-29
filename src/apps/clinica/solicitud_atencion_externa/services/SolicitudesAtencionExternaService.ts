@@ -2,25 +2,29 @@ import { apiClient, PaginatedResponse, Page } from "../../../../commons/services
 import { keysToUnderscore } from "../../../../commons/utils"
 
 export type SolicitudesAtencionExternaFilter = {
-  numero?: number
   desde?: string
   hasta?: string
   numeroPatronal?: string
-  matriculaAsegurado?: string
-  medico?: string
-  proveedor?: string
+  matricula?: string
+  medicoId?: number
+  proveedorId?: string
   regionalId?: number
-  registradoPor?: number
 }
 
 export type SolicitudAtencionExterna = {
   id: number
   numero: string
   fecha: string
+  prestacion: string,
   regionalId: number
-  asegurado: {
+  paciente: {
     matricula: string
-  },
+    nombreCompleto: string
+  }
+  titular: {
+    matricula: string
+    nombreCompleto: string
+  } | null
   medico: {
     id: number
     nombreCompleto?: string
@@ -28,13 +32,13 @@ export type SolicitudAtencionExterna = {
   },
   proveedor: {
     id: string
-    tipo: 2
-    nombre: string
-  } | {
-    id: string,
+    razonSocial: string
+  } & ({ 
     tipo: 1
-    nombreCompleto?: string
-  },
+    especialidad: string
+  } | {
+    tipo:2
+  }),
   regional: {
     id: number
     nombre: string
@@ -51,10 +55,10 @@ export const SolicitudesAtencionExternaService = {
   generarDm11: (solicitud_id: number) => {
     return apiClient.put<{url: string}>(`solicitudes-atencion-externa/${solicitud_id}/generar-dm11`)
   },
-  registrar: (regional_id: number, asegurado_id: string, medico_id: number, proveedor_id: string, prestacion: string) => {
+  registrar: (regional_id: number, paciente_id: string, medico_id: number, proveedor_id: string, prestacion: string) => {
     return apiClient.post("solicitudes-atencion-externa", {
       regional_id,
-      asegurado_id,
+      paciente_id,
       medico_id,
       proveedor_id,
       prestacion

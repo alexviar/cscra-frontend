@@ -12,10 +12,13 @@ import { Asegurado, SolicitudesAtencionExternaService } from "../services"
 import { Regional, RegionalesTypeahead } from "../../../../commons/components"
 import { useModal } from "../../../../commons/reusable-modal"
 import { useUser } from "../../../../commons/auth/hooks"
+import { superUserPolicyEnhancer } from "../../../../commons/auth/utils"
 import { Medico, MedicosTypeahead } from "../../medicos/components"
 import { Proveedor, ProveedoresTypeahead } from "../../proveedores/components"
 import { EstadosAfi, EstadosEmp } from "../utils"
 import { solicitudAtencionExternaPolicy } from "../policies"
+import { proveedorPolicy } from "../../proveedores"
+import { medicoPolicy } from "../../medicos"
 
 type Inputs = AseguradoInputs & {
   regional: Regional[]
@@ -141,9 +144,9 @@ export const SolicitudAtencionExternaForm = ()=>{
     )
   }, {
     onSuccess: ({data: {urlDm11, regionalId}}) => {
-      if(solicitudAtencionExternaPolicy.emit(user, { regionalId })){
+      reset()
+      if(superUserPolicyEnhancer(solicitudAtencionExternaPolicy.emit)(user, { regionalId })){
         dm11Viewer.open({url: urlDm11, title: "Formulario D.M. - 11"})
-        reset()
         setAsegurado(null)
       }
     }
@@ -171,8 +174,9 @@ export const SolicitudAtencionExternaForm = ()=>{
       </Alert>
     }
     if(registrar.isError){
+      const error = registrar.error as AxiosError
       return <Alert variant="danger">
-        Ocurrio un error al procesar la solicitud
+        {error.response?.data?.message || error.message}
       </Alert>
     }
     return null
@@ -253,7 +257,10 @@ export const SolicitudAtencionExternaForm = ()=>{
                           //@ts-ignore
                           feedback={fieldState.error?.message}
                           disabled={watch("regional").length == 0}
-                          filter={{regionalId: watch("regional").length && watch("regional")[0].id}}
+                          filter={{
+                            regionalId: medicoPolicy.viewByRegionalOnly(user) ? user!.regionalId : watch("regional").length && watch("regional")[0].id,
+                            estado: 1
+                          }}
                           className="text-uppercase"
                           isInvalid={!!fieldState.error}
                           selected={field.value}
@@ -297,7 +304,10 @@ export const SolicitudAtencionExternaForm = ()=>{
                             //@ts-ignore
                             feedback={fieldState.error?.message}
                             disabled={watch("regional").length == 0}
-                            filter={{regionalId: watch("regional").length && watch("regional")[0].id}}
+                            filter={{
+                              regionalId: proveedorPolicy.viewByRegionalOnly(user) ? user!.regionalId : watch("regional").length && watch("regional")[0].id,
+                              estado: 1
+                            }}
                             className="text-uppercase"
                             isInvalid={!!fieldState.error}
                             selected={field.value}

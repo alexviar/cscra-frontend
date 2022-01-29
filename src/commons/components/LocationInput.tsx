@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState, useRef } from "react"
 import { Button, FormControl, InputGroup } from "react-bootstrap"
+import Skeleton from "react-loading-skeleton"
 import { FaSearch } from "react-icons/fa"
 import { LatLngExpression, Marker as LeafletMarker, Map } from "leaflet"
 import { MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents, ZoomControl } from "react-leaflet"
 import { latLngExpressionToString } from "../utils"
 import "leaflet/dist/leaflet.css";
+import "../utils/leafletDefaults"
 
 type Props = {
+  initialized?: boolean
   isInvalid: boolean
   value: LatLngExpression|null,
   center: LatLngExpression
@@ -124,21 +127,32 @@ const CustomMarker = (props: { position: LatLngExpression|null, onChange(positio
   </Marker>
 }
 
+function UpdateCenter({center}: {center: LatLngExpression}) {
+  const map = useMap()
+
+  useEffect(()=>{
+    map.setView(center)
+  }, [center])
+
+  return null
+}
+
 export const LocationInput = (props: Props) => {
 
-  return <div className={"border rounded " + (props.isInvalid ? " is-invalid border-danger overflow-hidden" : "")}>
+  return props.initialized !== false ? <div className={"border rounded " + (props.isInvalid ? " is-invalid border-danger overflow-hidden" : "")}>
     <MapContainer
       center={props.center}
       zoom={13}
       zoomControl={false}
       style={{height: 240, cursor: "crosshair"}}
     >
+      <UpdateCenter center={props.center} />
       <TileLayer
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <div className="leaflet-control-container">
-        <div className={POSITION_CLASSES["topleft"]}>
+        <div className={POSITION_CLASSES["topleft"]} style={{zIndex: 800}}>
           <InputLocationControl 
             isInvalid={props.isInvalid}
             value={props.value} 
@@ -153,5 +167,5 @@ export const LocationInput = (props: Props) => {
       }} />
       <ZoomControl position="bottomright" />
     </MapContainer>
-  </div>
+  </div> : <Skeleton height={240} />
 }

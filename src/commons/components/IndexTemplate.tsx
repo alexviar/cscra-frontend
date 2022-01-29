@@ -1,9 +1,10 @@
 import React, { useState} from "react"
-import { Button, Col, Collapse, Form, Table } from "react-bootstrap"
-import {FaFilter, FaSync} from "react-icons/fa"
+import { Button, Col, Collapse, Form, InputGroup, Table } from "react-bootstrap"
+import {FaFilter, FaSearch, FaSync} from "react-icons/fa"
 import { Pagination } from "./Pagination"
 import { Page } from "../services/Page"
 import { User, ProtectedContent } from "../auth"
+import { SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG } from "constants"
 
 type Props<Data> = {
   page: Page
@@ -18,10 +19,11 @@ type Props<Data> = {
   renderLoader: () => React.ReactElement
   renderData: (item: Data, index: number) => React.ReactElement
   renderDataHeaders: () => React.ReactElement
-  renderFilterForm: () => React.ReactElement
+  renderFilterForm?: () => React.ReactElement
   renderCreateButton: () => React.ReactElement
   onRefetch: () => void
   onPageChange: (page: Page) => void
+  onSearch?: (search: string) => void
 }
 
 export function IndexTemplate<Data>({
@@ -31,6 +33,7 @@ export function IndexTemplate<Data>({
   isLoading,
   hasError,
   policy,
+  onSearch,
   onRefetch,
   onPageChange,
   renderLoader,
@@ -40,6 +43,7 @@ export function IndexTemplate<Data>({
   renderFilterForm
 }: Props<Data>) {
   
+  const [ search, setSearch ] = useState("")
   const [ showFilterForm, setShowFilterForm] = useState(false)
 
   const renderRows = ()=>{
@@ -77,11 +81,11 @@ export function IndexTemplate<Data>({
               onRefetch()
             }}><FaSync /></Button>
           </Col>
-          <Col xs="auto" >
+          {renderFilterForm ? <Col xs="auto" >
             <Button onClick={()=>{
               setShowFilterForm(visible=>!visible)
             }}><FaFilter /></Button>
-          </Col>
+          </Col> : null}
         </ProtectedContent>
         <ProtectedContent
           authorize={policy.register}
@@ -95,14 +99,32 @@ export function IndexTemplate<Data>({
     <ProtectedContent
       authorize={policy.view}
     >
+      {renderFilterForm ? <Collapse in={showFilterForm}>
+        <div className="mb-2">
+          {renderFilterForm()}
+        </div>
+      </Collapse> : null}
       <Form.Row className="mb-2">
-        <Col xs={12}>
-          <Collapse in={showFilterForm}>
-            <div>
-              {renderFilterForm()}
-            </div>
-          </Collapse>
-        </Col>
+        {onSearch ? <Col className="mb-2">
+          {/* <Form.Row className="flex-nowrap">
+            <Col>
+              <Form.Control aria-label="Busqueda" type="search" />
+            </Col>
+            <Col xs={"auto"}>
+              <Button className="ml-2" type="submit"><FaSearch /></Button>
+            </Col>
+          </Form.Row> */}
+          <InputGroup>
+              <Form.Control aria-label="Busqueda" type="search" value={search} onChange={(e)=>{
+                setSearch(e.target.value)
+              }} />
+              <InputGroup.Append>
+                <Button onClick={()=>{
+                  onSearch(search)
+                }}><FaSearch /></Button>
+              </InputGroup.Append>
+          </InputGroup>
+        </Col> : null}
         <Col className="ml-auto" xs={"auto"}>
           <div className="d-flex flex-row flex-nowrap align-items-center">
             <span>Mostrar</span>
@@ -124,11 +146,11 @@ export function IndexTemplate<Data>({
           </div>
         </Col>
       </Form.Row>
-      <Table responsive className="text-uppercase">
+      <Table responsive>
         <thead>
           {renderDataHeaders()}
         </thead>
-        <tbody>
+        <tbody className="text-uppercase">
           {renderRows()}
         </tbody>
       </Table>

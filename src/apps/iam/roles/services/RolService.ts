@@ -2,15 +2,14 @@ import { apiClient, Page, PaginatedResponse } from "../../../../commons/services
 import { Permiso } from "./PermisoService"
 
 export type RolFilter = {
-  texto?: string,
+  _busqueda?: string,
 }
 
 export type Rol = {
   id: number,
   name: string,
   description: string,
-  permissionNames: string[]
-  permissions: Permiso[]
+  permissions: {id: number, name: string}[]
   createdAt: string
   updatedAt: string
 }

@@ -10,7 +10,7 @@ export type Medico = {
   },
   apellidoPaterno: string
   apellidoMaterno: string
-  nombres: string
+  nombre: string
   nombreCompleto?: string
   especialidad: string
   estado: number
@@ -22,8 +22,10 @@ export type Medico = {
 }
 
 export type MedicoFilter = {
-  ci?: string,
-  ciComplemento?: string
+  ci?: {
+    raiz: number,
+    complemento?: string
+  }
   nombre?: string,
   especialidad?: string
   regionalId?: number
@@ -50,7 +52,7 @@ export const MedicosService = {
     return apiClient.put<Medico>(`medicos/${medico.id}`, keysToUnderscore(medico))
   },
   cambiarEstado: (id: number, estado: number) => {
-    return apiClient.put(`medicos/${id}/cambiar-estado`, {
+    return apiClient.put(`medicos/${id}/actualizar-estado`, {
       estado
     })
   }

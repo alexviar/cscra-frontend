@@ -54,8 +54,10 @@ export const MedicosFilterForm = (props: Props) => {
   return <Form onSubmit={handleSubmit((data) => {
     const filter: Filter = {}
     if(data.numCi) {
-      filter.ci = data.numCi
-      if(data.compCi) filter.ciComplemento = data.compCi
+      filter.ci = {
+        raiz: parseInt(data.numCi)
+      }
+      if(data.compCi) filter.ci!.complemento = data.compCi
     }
     if(data.nombre) filter.nombre = data.nombre
     if(data.especialidad) filter.especialidad = data.especialidad
@@ -65,7 +67,7 @@ export const MedicosFilterForm = (props: Props) => {
   })}>
     <Form.Row>
       <Form.Group as={Col} xs={12} md={5} lg={4}>
-        <fieldset className="border rounded" style={{padding: 5, paddingTop: 0, marginBottom: -6, marginLeft: -5, marginRight: -5}}>
+        <fieldset className="border rounded" style={{padding: 5, paddingTop: 0, marginBottom: -6}}>
           <Form.Label as="legend" style={{width: "auto", fontSize:"1rem"}}>Carnet de identidad</Form.Label>
           <Form.Row>
             <Col xs={9}>
@@ -112,7 +114,7 @@ export const MedicosFilterForm = (props: Props) => {
             return <RegionalesTypeahead
               className="text-uppercase"
               id="medico-filter-regional"
-              selected={medicoPolicy.viewByRegionalOnly(user) ? [user.regional] : value}
+              selected={medicoPolicy.viewByRegionalOnly(user) ? [user.regional as Regional] : value}
               {...field}
             />
           }}

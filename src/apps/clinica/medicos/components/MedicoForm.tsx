@@ -101,7 +101,7 @@ export const MedicoForm = ()=>{
       },
       apellidoPaterno: inputs.apellidoPaterno,
       apellidoMaterno: inputs.apellidoMaterno,
-      nombres: inputs.nombres,
+      nombre: inputs.nombres,
       especialidad: inputs.especialidad,
       regionalId: inputs.regional![0].id
     }) : MedicosService.registrar({
@@ -111,7 +111,7 @@ export const MedicoForm = ()=>{
       },
       apellidoPaterno: inputs.apellidoPaterno,
       apellidoMaterno: inputs.apellidoMaterno,
-      nombres: inputs.nombres,
+      nombre: inputs.nombres,
       especialidad: inputs.especialidad,
       regionalId: inputs.regional![0].id
     })
@@ -119,7 +119,10 @@ export const MedicoForm = ()=>{
     onSuccess: (response)=>{
       reset()
       queryClient.invalidateQueries(["medicos", "buscar"])
-      if(id) queryClient.setQueryData(["medicos", "cargar", id], response)
+      if(id) {
+        queryClient.setQueryData(["medicos", "cargar", id], response)
+        history.push("/clinica/medicos")
+      }
     },
     onError: (error) => {
       if((error as AxiosError)?.response?.status == 422){
@@ -141,9 +144,9 @@ export const MedicoForm = ()=>{
       setValue("ciComplemento", medico.ci.complemento)
       setValue("apellidoPaterno", medico.apellidoPaterno)
       setValue("apellidoMaterno", medico.apellidoMaterno)
-      setValue("nombres", medico.nombres)
+      setValue("nombres", medico.nombre)
       setValue("especialidad", medico.especialidad)
-      setValue("regional", [ medico.regional! ])
+      setValue("regional", [ medico.regional as Regional ])
     }
   }, [medico])
 
@@ -165,7 +168,7 @@ export const MedicoForm = ()=>{
       <Form.Row>
         <Form.Group as={Col} xs={12} sm={6} md={4}>
           <fieldset className={`border${formState.errors.ci || formState.errors.ciComplemento ? " border-danger " : " "}rounded`}
-            style={{padding: 5, paddingTop: 0, marginBottom: -6, marginLeft: -5, marginRight: -5}}>
+            style={{padding: 5, paddingTop: 0, marginBottom: -6}}>
             <Form.Label as="legend" style={{width: "auto", fontSize:"1rem"}}>Carnet de identidad</Form.Label>
             <Form.Row>
               <Col xs={8}>

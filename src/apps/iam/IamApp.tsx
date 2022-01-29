@@ -6,9 +6,10 @@ import { ProtectedRoute } from '../../commons/auth/components'
 import { useUser } from '../../commons/auth/hooks'
 import {UserIndex, UserView, UserForm, CambiarContrasenaForm } from './usuarios/components'
 import {RolIndex, RolView, RolForm} from './roles/components'
-import { UsuarioPolicy } from './usuarios/policies'
-import { RolPolicy } from './roles/policies'
+import { usuarioPolicy } from './usuarios/policies'
+import { rolPolicy } from './roles/policies'
 import { Image } from 'react-bootstrap'
+import { superUserPolicyEnhancer } from '../../commons/auth/utils'
 
 export const IamApp = ()=>{
   const { url } = useRouteMatch()
@@ -16,7 +17,7 @@ export const IamApp = ()=>{
 
   const sidebarItems = useMemo(()=>{
     const items = [] as any[]
-    if(UsuarioPolicy.index(loggedUser)) {
+    if(superUserPolicyEnhancer(usuarioPolicy.index)(loggedUser)) {
       items.push({
         id: "users",
         icon: <FaUsers />,
@@ -24,7 +25,7 @@ export const IamApp = ()=>{
         title: "Usuarios",
       })
     }
-    if(RolPolicy.index(loggedUser)){
+    if(superUserPolicyEnhancer(rolPolicy.index)(loggedUser)){
       items.push(
         {
           id: "roles",
@@ -48,17 +49,17 @@ export const IamApp = ()=>{
         <Redirect to={`${url}/usuarios`} />
       </Route> */}
       <ProtectedRoute exact path={`${url}/usuarios`}
-        authorize={UsuarioPolicy.index}
+        authorize={usuarioPolicy.index}
       >
         <UserIndex />
       </ProtectedRoute>
       <ProtectedRoute exact path={[`${url}/usuarios/registrar`, `${url}/usuarios/:id/editar`]}
-        authorize={(user, currentUrl) => currentUrl == `${url}/usuarios/registrar` ? UsuarioPolicy.register(user) : UsuarioPolicy.edit(user)}
+        authorize={(user, currentUrl) => currentUrl == `${url}/usuarios/registrar` ? usuarioPolicy.register(user) : usuarioPolicy.edit(user)}
       >
         <UserForm />
       </ProtectedRoute>
       <ProtectedRoute exact path={`${url}/usuarios/:id/cambiar-contrasena`}
-        authorize={UsuarioPolicy.changePassword}
+        authorize={(user) => usuarioPolicy.changePassword(user)}
       >
         <CambiarContrasenaForm />
       </ProtectedRoute>
@@ -66,23 +67,23 @@ export const IamApp = ()=>{
         <CambiarContrasenaForm />
       </ProtectedRoute>
       <ProtectedRoute exact path={`${url}/usuarios/:id`}
-        authorize={UsuarioPolicy.view}
+        authorize={(user) => usuarioPolicy.view(user)}
       >
         <UserView />
       </ProtectedRoute>
       
       <ProtectedRoute exact path={`${url}/roles`}
-        authorize={RolPolicy.index}
+        authorize={rolPolicy.index}
       >
         <RolIndex />
       </ProtectedRoute>
       <ProtectedRoute exact path={[`${url}/roles/registrar`, `${url}/roles/:id/editar`]}
-        authorize={(user, currentUrl) => currentUrl == `${url}/roles/registrar` ? RolPolicy.register(user) : RolPolicy.edit(user)}
+        authorize={(user, currentUrl) => currentUrl == `${url}/roles/registrar` ? rolPolicy.register(user) : rolPolicy.edit(user)}
       >
         <RolForm />
       </ProtectedRoute>
       <ProtectedRoute exact path={`${url}/roles/:id`}
-        authorize={RolPolicy.view}
+        authorize={(user)=>rolPolicy.view(user)}
       >
         <RolView />
       </ProtectedRoute>

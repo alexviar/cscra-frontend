@@ -1,17 +1,18 @@
 import { useEffect } from "react"
 import { Dropdown } from "react-bootstrap"
-import { useMutation, useQuery, useQueryClient } from "react-query"
+import { QueryKey, useMutation, useQuery, useQueryClient } from "react-query"
 import { Link } from "react-router-dom"
 import { VerticalEllipsisDropdownToggle } from "../../../../commons/components"
 import { useModal } from "../../../../commons/reusable-modal"
 import { ProtectedContent } from "../../../../commons/auth/components"
 import { User, UserService } from "../services"
-import { UsuarioPolicy } from "../policies"
+import { usuarioPolicy } from "../policies"
 
 type Props = {
+  queryKey: QueryKey
   user: User
 }
-export const RowOptions = ({user}: Props) => {
+export const RowOptions = ({user, queryKey}: Props) => {
 
   const modal = useModal<{
     state: "loading" | "error"
@@ -21,11 +22,11 @@ export const RowOptions = ({user}: Props) => {
   const queryClient = useQueryClient()
 
   const cambiarEstado = useMutation(()=>{
-    return user.estado ? UserService.bloquear(user.id) : UserService.desbloquear(user.id)
+    return user.estado == 1 ? UserService.bloquear(user.id) : UserService.desbloquear(user.id)
   }, {
     onSuccess: ()=>{
       modal.close()
-      queryClient.setQueryData("usuarios.buscar", (oldData: any) => {
+      queryClient.setQueryData(queryKey, (oldData: any) => {
         return {
           ...oldData,
           data: {
@@ -33,7 +34,7 @@ export const RowOptions = ({user}: Props) => {
             records: oldData.data.records.map((u: any)=>{
               return u == user ? {
                 ...u,
-                estado: !user.estado
+                estado: user.estado == 1 ? 2 : 1
               } : {...u}
             })
           }
@@ -62,7 +63,7 @@ export const RowOptions = ({user}: Props) => {
     />
     <Dropdown.Menu>
       <ProtectedContent
-        authorize={UsuarioPolicy.view}
+        authorize={(login) => usuarioPolicy.view(login, {regionalId: user.regionalId})}
       >
         <Dropdown.Item as={Link} to={{
           pathname: `/iam/usuarios/${user.id}`,
@@ -72,7 +73,7 @@ export const RowOptions = ({user}: Props) => {
         }} >Ver</Dropdown.Item>
       </ProtectedContent>
       <ProtectedContent
-        authorize={UsuarioPolicy.edit}
+        authorize={(login) => usuarioPolicy.edit(login, {regionalId: user.regionalId})}
       >
         <Dropdown.Item as={Link} to={{
           pathname: `/iam/usuarios/${user.id}/editar`,
@@ -80,7 +81,7 @@ export const RowOptions = ({user}: Props) => {
         }}>Editar</Dropdown.Item>
       </ProtectedContent>
       <ProtectedContent
-        authorize={UsuarioPolicy.changePassword}
+        authorize={(login) => usuarioPolicy.changePassword(login, {regionalId: user.regionalId})}
       >
         <Dropdown.Item as={Link} to={{
           pathname: `/iam/usuarios/${user.id}/cambiar-contrasena`,
@@ -88,11 +89,11 @@ export const RowOptions = ({user}: Props) => {
         }}>Cambiar contraseña</Dropdown.Item>
       </ProtectedContent>
       <ProtectedContent
-        authorize={(loggedUser)=>user.estado ? UsuarioPolicy.disable(loggedUser) : UsuarioPolicy.enable(loggedUser)}
+        authorize={(login)=> (user.estado == 1 ? usuarioPolicy.disable : usuarioPolicy.enable)(login, {regionalId: user.regionalId})}
       >
         <Dropdown.Item className="text-danger" onClick={()=>{
             cambiarEstado.mutate()
-        }}>{user.estado ? "Bloquear" : "Desbloquear"}</Dropdown.Item>
+        }}>{user.estado == 1 ? "Bloquear" : "Habilitar"}</Dropdown.Item>
       </ProtectedContent>
     </Dropdown.Menu>
   </Dropdown>

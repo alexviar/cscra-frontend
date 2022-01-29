@@ -9,3 +9,5 @@ export * from './PdfModal'
 export * from './RegionalesTypeahead'
 
 export * from './LocationInput'
+
+export * from './LazyControl'

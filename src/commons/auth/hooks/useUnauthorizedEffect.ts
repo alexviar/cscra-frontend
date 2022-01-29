@@ -12,9 +12,7 @@ export const useUnauthorizedEffect = ()=>{
     apiClient.interceptors.response.use(
       response=>response,
       error => {
-        console.log("Intercept error")
         if(error.response?.status == 401 || error.response?.status == 419){
-          console.log("Set null")
           queryClient.setQueryData(["user"], {
             data: null
           })

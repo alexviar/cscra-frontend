@@ -17,8 +17,6 @@ export const ProtectedRoute = ({ children, authorize, ...rest }: Props) => {
   /** TODO: Mostrar un mensaje adecuado hasta obtener los datos del servidor */
   if(user === undefined) return null
 
-  console.log(user)
-
   return (
     <Route
       {...rest}

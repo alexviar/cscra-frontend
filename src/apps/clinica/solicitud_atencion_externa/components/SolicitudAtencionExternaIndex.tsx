@@ -93,14 +93,23 @@ export const SolicitudAtencionExternaIndex = ()=>{
       }}
       renderData={(solicitud, index)=>{
         return <tr key={solicitud.id}>
-        <th scope="row">
-            {(page.current - 1)*page.size + index + 1}
-        </th>
+          <th scope="row">
+              {(page.current - 1)*page.size + index + 1}
+          </th>
           <td>{solicitud.numero}</td>
           <td>{solicitud.fecha}</td>
-          <td>{solicitud.asegurado.matricula}</td>
-          <td>{solicitud.medico.nombreCompleto}</td>
-          <td>{solicitud.proveedor.tipo == 1 ? solicitud.proveedor.nombreCompleto : solicitud.proveedor.nombre}</td>
+          <td>{solicitud.regional.nombre}</td>
+          <td>
+            <div>{solicitud.paciente.nombreCompleto}</div>
+            <div className="text-muted">{solicitud.paciente.matricula}</div>
+          </td>
+          <td>
+            <div>{solicitud.titular?.nombreCompleto}</div>
+            <div className="text-muted">{solicitud.titular?.matricula}</div>
+          </td>
+          <td>{solicitud.prestacion}</td>
+          {/* <td>{solicitud.medico.nombreCompleto}</td>
+          <td>{solicitud.proveedor.razonSocial}</td> */}
           <td style={{textTransform: "none"}}>
             <RowOptions solicitud={solicitud} />
           </td>
@@ -110,10 +119,13 @@ export const SolicitudAtencionExternaIndex = ()=>{
         return <tr>
           <th style={{width: 1}}>#</th>
           <th>Nº</th>
-          <th>Fecha y hora</th>
-          <th>Matrícula asegurado</th>
-          <th>Médico</th>
-          <th>Proveedor</th>
+          <th>Fecha</th>
+          <th>Regional</th>
+          <th>Paciente</th>
+          <th>Titular</th>
+          <th>Prestación</th>
+          {/* <th>Médico</th>
+          <th>Proveedor</th> */}
           <th style={{width: 1}}></th>
         </tr>
       }}

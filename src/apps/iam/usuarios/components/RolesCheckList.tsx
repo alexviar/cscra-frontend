@@ -1,20 +1,24 @@
 import React, { useEffect } from 'react'
 import { Alert, Form, ListGroup, Spinner } from 'react-bootstrap'
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 import { useQuery } from 'react-query'
 import { RolService, Rol } from '../services'
 
 type Props = {
+  initialized?: boolean,
   isInvalid?: boolean,
   selected?: Rol[],
   onChange?: (roles: Rol[])=>void
 }
 
 export const RolesCheckList = React.memo(({
+  initialized,
   isInvalid,
   selected=[],
   onChange
 }: Props)=>{
-  const buscar = useQuery("roles.buscar", ()=>{
+  const buscar = useQuery(["roles", "buscar"], ()=>{
     return RolService.buscar()
   }, {
     refetchOnReconnect: false,
@@ -25,9 +29,9 @@ export const RolesCheckList = React.memo(({
   const roles = (buscar.data?.data || []) as Rol[]
 
   const renderContent = ()=>{
-    if(buscar.isFetching){
-      return <><Spinner animation="border" size="sm" /><span>Cargando</span></>
-    }
+    // if(buscar.isFetching){
+    //   return <><Spinner animation="border" size="sm" /><span>Cargando</span></>
+    // }
     if(buscar.isError){
       return <Alert variant="danger">
         Ocurrio un error al obtener la lista de roles. Haga clic <a href="#"
@@ -61,6 +65,6 @@ export const RolesCheckList = React.memo(({
   }
 
   return <div className={isInvalid ? "is-invalid" : ""} >
-    {renderContent()}
+    {initialized && (buscar.isError || buscar.data?.data) ? renderContent() : <Skeleton height="12rem" />}
   </div>
 })

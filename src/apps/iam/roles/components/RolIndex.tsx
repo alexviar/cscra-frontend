@@ -1,23 +1,24 @@
 import { AxiosPromise, AxiosError } from "axios"
-import React, {useState, useRef} from "react"
-import { Alert, Dropdown, ButtonGroup, Button, Form, Modal, Table, Spinner, Row, Col } from "react-bootstrap"
+import React, {useMemo, useState, useRef} from "react"
+import { Button, Breadcrumb, Form, Modal, Table, Spinner, Row, Col } from "react-bootstrap"
 import { Link } from "react-router-dom"
 import { useQuery, useMutation } from "react-query"
 import { FaSync, FaFilter, FaPlus } from "react-icons/fa"
 import { Page, PaginatedResponse } from "../../../../commons/services"
 import { RolFilterForm } from "./RolFilterForm"
-import { Pagination, VerticalEllipsisDropdownToggle } from "../../../../commons/components"
-import { ProtectedContent } from "../../../../commons/auth/components"
 import { useUser } from "../../../../commons/auth/hooks"
 import { Rol, RolService, RolFilter } from "../services"
-import { RolPolicy } from "../policies"
+import { rolPolicy } from "../policies"
 import { RowOptions } from "./RowOptions"
+import { IndexTemplate } from "../../../../commons/components/IndexTemplate"
+import Skeleton from "react-loading-skeleton"
+import 'react-loading-skeleton/dist/skeleton.css'
+import { superUserPolicyEnhancer } from "../../../../commons/auth/utils"
 
 export const RolIndex = ()=>{
 
-  const loggedUser = useUser()
+  const user = useUser()
 
-  const [total, setTotal] = useState(0)
   const [page, setPage] = useState<Page>({
     current: 1,
     size: 10
@@ -25,130 +26,105 @@ export const RolIndex = ()=>{
 
   const [filter, setFilter] = useState<RolFilter>({})
 
-  const queryKey = ["roles.buscar", page, filter]
+  const queryKey = ["roles", "buscar", page, filter]
   const buscar = useQuery(queryKey, ()=>{
     return RolService.buscar(filter, page) as AxiosPromise<PaginatedResponse<Rol>>
   }, {
-    enabled: RolPolicy.view(loggedUser),
-    // refetchOnMount: false,
+    enabled: !!superUserPolicyEnhancer(rolPolicy.view)(user),
     refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
-    onSuccess: ({data: {meta}}) => {
-      setTotal(meta.total)
-    }
+    refetchOnWindowFocus: false
   })
+  
+  const totalRef = useRef(-1)
 
-  const renderRows = ()=>{
-    if (buscar.isFetching) {
-      return <tr>
-        <td className="bg-light text-center" colSpan={100}>
-          <Spinner className="mr-2" variant="primary" animation="border" size="sm" />
-          Cargando
-        </td>
-      </tr>
-    }
-    if (buscar.isError) {
-      const { error } = buscar
-      return <tr>
-        <td className="bg-danger text-light text-center" colSpan={100}>
-          {(error as AxiosError).response?.data?.message || (error as AxiosError).message}
-        </td>
-      </tr>
-    }
-    if(buscar.data){
-      const records = buscar.data.data.records
-      if(records.length == 0){
-        return  <tr>
-          <td className="bg-light text-center" colSpan={100}>
-            No se encontraron resultados
-          </td>
-      </tr>
-      }
-      return records.map((rol, index)=>{
-        return <tr key={rol.id}>
-          <td>{index + 1}</td>
-          <td className="text-capitalize">{rol.name}</td>
-          <td>{rol.description}</td>
-          <td>
-            <RowOptions rol={rol} queryKey={queryKey} />
-          </td>
-        </tr>
-      })
-    }
+  if(buscar.data) {
+    totalRef.current = buscar.data.data.meta.total
   }
 
+  const loader = useMemo(()=>{
+    const rows = []
+    for(let index = 0; index < page.size; index++){
+      rows.push(<tr key={index}>
+        <th scope="row">
+          {(page.current - 1)*page.size  + index + 1}
+        </th>
+        <td>
+          <Skeleton />
+        </td>
+        <td>
+          <Skeleton />
+        </td>
+        <td>
+        </td>
+      </tr>)
+    }
+    return rows
+  }, [page.size])
+
   return <div className="px-1">
-    <h2 style={{fontSize: "1.75rem"}}>Roles</h2>
-    <div className="d-flex my-2">
-      <Row className="ml-auto flex-nowrap" >
-        <ProtectedContent
-          authorize={RolPolicy.register}
-        >
-          <Col xs="auto">
-            <Button
-              as={Link}
-              to={`/iam/roles/registrar`}
-              className="d-flex align-items-center">
-                <FaPlus className="mr-2" />Nuevo
-            </Button>
-          </Col>
-        </ProtectedContent>
-      </Row>
-    </div>
-    <ProtectedContent
-      authorize={RolPolicy.view}
-    >
-      <Row>
-        <Col className="mb-2">
-          <RolFilterForm onSearch={(filter)=>{
-            setFilter({texto: filter})
-          }} />
-        </Col>
-        <Col className="mb-2" xs={"auto"}>
-          <div className="d-flex flex-row flex-nowrap align-items-center">
-              <span>Mostrar</span>
-              <Form.Control className="mx-2" as="select" value={page.size} onChange={(e) => {
-                const value = e.target.value
-                setPage((page) => ({
-                  current: 1,
-                  size: parseInt(value)
-                }))
-              }}>
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={30}>30</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </Form.Control>
-              <span>filas</span>
-          </div>
-        </Col>
-      </Row>
-      <Table responsive>
-        <thead>
-          <tr>
-            <th style={{width: 1}}>#</th>
-            <th>Nombre</th>
-            <th>Descripcion</th>
-            <th style={{width: 1}}></th>
-          </tr>
-        </thead>
-        <tbody>
-          {renderRows()}
-        </tbody>
-      </Table>
-      <div className="row">
-        <Col>
-          <span className="mr-auto">{`Se encontraron ${total} resultados`}</span>
-        </Col>
-        <Col>
-          <Pagination
-            current={page.current}
-            total={Math.ceil((total - page.size) / page.size) + 1}
-            onChange={(current) => setPage((page) => ({ ...page, current }))}
-          />
-        </Col>
-      </div>
-    </ProtectedContent>
+    <Breadcrumb>
+      <Breadcrumb.Item active>Roles</Breadcrumb.Item>
+    </Breadcrumb>
+    <IndexTemplate
+      policy={rolPolicy}
+      page={page}
+      onSearch={(search) => {
+        setFilter(filter => ({...filter, _busqueda: search}))
+        setPage(page => ({...page, current: 1}))
+      }}
+      onPageChange={setPage}
+      total={totalRef.current}
+      onRefetch={()=>{
+        buscar.remove()
+        buscar.refetch({throwOnError: true})
+      }}
+      isLoading={buscar.isFetching}
+      hasError={buscar.isError}
+      data={buscar.data?.data.records}
+      renderData={(rol, index) => {
+        return <tr key={rol.id}>
+          <th scope="row">
+            {(page.current - 1)*page.size  + index + 1}
+          </th>
+          <td>
+            {rol.name}
+          </td>
+          <td>
+            {rol.description}
+          </td>
+          <td style={{textTransform: "none"}}>
+            <RowOptions queryKey={queryKey} rol={rol} />
+          </td>
+        </tr>
+      }}
+      renderDataHeaders={()=>{
+        return <tr>
+          <th style={{ width: 1 }}>#</th>
+          <th>Nombre</th>
+          <th style={{ minWidth: 250}}>Descripción</th>
+          <th style={{ width: 1 }}></th>
+        </tr>
+      }}
+      renderLoader={()=>{
+        return <>{loader}</>
+      }}
+      // renderFilterForm={()=>{
+      //   return <RolFilterForm onSearch={(filter) => {
+      //     buscar.remove()
+      //     setFilter({_busqueda: filter})
+      //     setPage(page => ({ ...page, current: 1 }))
+      //   }} />
+      // }}
+      renderCreateButton={()=>{
+        return <Button
+          as={Link}
+          to={`/iam/roles/registrar`}
+          className="d-flex align-items-center">
+            <FaPlus className="mr-2" />Nuevo
+        </Button>
+      }}
+    />
   </div>
+
+
 }

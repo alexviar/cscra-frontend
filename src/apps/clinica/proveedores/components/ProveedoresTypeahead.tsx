@@ -50,7 +50,7 @@ export const ProveedoresTypeahead = ({isInvalid, feedback, filter={}, ...props}:
       searchText="Buscando..."
       paginationText="Cargar más..."
       {...props}
-      labelKey={(proveedor: Proveedor) => proveedor.tipo == 1 ? proveedor.nombreCompleto : proveedor.nombre}
+      labelKey={(proveedor: Proveedor) => proveedor.razonSocial!}
       className={props.className + ((buscar.isError || isInvalid) ? " is-invalid" : "")}
       isInvalid={buscar.isError || isInvalid}
       filterBy={()=>true}
@@ -69,7 +69,7 @@ export const ProveedoresTypeahead = ({isInvalid, feedback, filter={}, ...props}:
 
       renderMenuItemChildren={(proveedor) => {
         return <div>
-          <div>{proveedor.tipo == 1 ? proveedor.nombreCompleto : proveedor.nombre}</div>
+          <div>{proveedor.razonSocial}</div>
           <small className="text-muted">{proveedor.tipo == 1 ? proveedor.especialidad : "Empresa"}</small> 
         </div>
       }}

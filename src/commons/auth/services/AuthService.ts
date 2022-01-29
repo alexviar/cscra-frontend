@@ -24,7 +24,7 @@ export type User = {
   updatedAt: string
   regionalId: number
   regional: {
-    id: number,
+    id: number
     nombre: string
   }
 }

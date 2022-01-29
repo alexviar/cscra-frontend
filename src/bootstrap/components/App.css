@@ -2,16 +2,9 @@
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
+/* .react-loading-skeleton {
+  vertical-align: top;
+} */
 
 dt {
   margin-bottom: .5rem;
@@ -68,7 +61,11 @@ dt::after {
   right: 0;
 }
 
-input {
+.input-skeleton {
+  font-size: 1.5em
+}
+
+.rbt-input-main, .rbt-input-hint {
   text-transform: inherit;
 }
 

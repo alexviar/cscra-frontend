@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react"
 import { Button, Form, Col, Spinner } from "react-bootstrap"
-import Skeleton from 'react-loading-skeleton'
-import 'react-loading-skeleton/dist/skeleton.css'
 import { Controller, useForm, useFormContext } from "react-hook-form"
 import { useParams, useHistory } from "react-router"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
-import { Regional, RegionalesTypeahead } from '../../../../commons/components'
+import { Regional, RegionalesTypeahead, LazyControl } from '../../../../commons/components'
 import { Permisos, useUser } from '../../../../commons/auth'
 import { Proveedor, ProveedoresService } from '../services'
 import { proveedorPolicy } from "../policies"
@@ -44,33 +42,36 @@ export const ProveedorEmpresaFieldset = ()=>{
     <Form.Row>
       <Form.Group as={Col} sm={4}>
         <Form.Label htmlFor="proveedor-nit">NIT</Form.Label>
-        {initialized ? <Form.Control
+        <LazyControl
           id="proveedor-nit"
+          initialized={initialized}
           className="text-uppercase"
           isInvalid={!!formErrors.nit}
           {...register("nit")}
-        /> : <Skeleton />}
+        />
         <Form.Control.Feedback type="invalid">{formErrors.nit?.message}</Form.Control.Feedback>
       </Form.Group>
       <Form.Group as={Col} sm={8}>
         <Form.Label htmlFor="proveedor-nombre">Nombre</Form.Label>
-        {initialized ? <Form.Control
+        <LazyControl
           id="proveedor-nombre"
+          initialized={initialized}
           className="text-uppercase"
           isInvalid={!!formErrors.nombre}
           {...register("nombre")}
-        /> : <Skeleton />}
+        />
         <Form.Control.Feedback type="invalid">{formErrors.nombre?.message}</Form.Control.Feedback>
       </Form.Group>      
       <Form.Group as={Col} md={4}>
           <Form.Label htmlFor="proveedor-form/regionales-typeahead">Regional</Form.Label>
-          {initialized ? <Controller
+          <Controller
             name="regional"
             control={control}
             render={({field, fieldState})=>{
               return <>
                 <RegionalesTypeahead
                   id="proveedor-form/regionales-typeahead"
+                  initialized={initialized}
                   className="text-uppercase"
                   filterBy={(regional) => { 
                     if(id){
@@ -88,7 +89,7 @@ export const ProveedorEmpresaFieldset = ()=>{
                 />
               </>
             }}
-          /> : <Skeleton />}
+          />
         </Form.Group>
       
     </Form.Row>

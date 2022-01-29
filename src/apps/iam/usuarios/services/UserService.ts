@@ -3,28 +3,37 @@ import { keysToUnderscore } from "../../../../commons/utils"
 import { Rol } from "../../roles/services"
 
 export type UserFilter = {
-  ci?: string
-  ciComplemento?: string
+  _busqueda?: string
+  ci?: {
+    raiz: number
+    complemento?: string
+  }
   nombreCompleto?: string
   username?: string
-  estado?: boolean
+  estado?: number
   regionalId?: number
 }
 
 export type User = {
   id: number
   username: string
-  estado: boolean
-  ciRaiz: number
-  ciComplemento: string
-  ci: string
+  estado: number
+  ci: {
+    raiz: number
+    complemento: string
+    texto?: string
+  }
   apellidoPaterno: string
   apellidoMaterno: string
-  nombres: string
+  nombre: string
   nombreCompleto: string
   roles: Rol[]
   // roleNames: string[]
   regionalId: number
+  regional: {
+    id: number
+    nombre: string
+  }
   createdAt: string
   updatedAt: string
 }
@@ -46,22 +55,26 @@ export const UserService = {
     password: string
     regionalId: number,
     roles: string[]
-    ci: number
-    ciComplemento: string
+    ci: {
+      raiz: number,
+      complemento: string | null
+    }
     apellidoPaterno: string
     apellidoMaterno: string
-    nombres: string
+    nombre: string
   }) => {
     return apiClient.post('/usuarios', keysToUnderscore(data))
   },
   actualizar: (id: number, data: {
     regionalId: number,
     roles: string[]
-    ci: number
-    ciComplemento: string
+    ci: {
+      raiz: number,
+      complemento: string | null
+    }
     apellidoPaterno: string
     apellidoMaterno: string
-    nombres: string
+    nombre: string
   }) => {
     return apiClient.put(`/usuarios/${id}`, keysToUnderscore(data))
   },

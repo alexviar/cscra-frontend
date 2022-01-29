@@ -65,7 +65,6 @@ export const AseguradoCard = (props: {
     onSuccess: ({ data: { records } }) => {
       if (records.length == 1) {
         const asegurado = records[0]
-        console.log("Choosed", asegurado)
         props.onChange(asegurado)
       }
       else {

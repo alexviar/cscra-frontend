@@ -45,6 +45,12 @@ export const ProveedoresIndex = () => {
   if(buscar.data) {
     totalRef.current = buscar.data.data.meta.total
   }
+  
+  const updateFilter = (filter: Filter)=>{
+    buscar.remove()
+    setFilter(oldFilter => ({...oldFilter, ...filter}));
+    setPage(page => ({...page, current: 1}))
+  }
 
   const loader = useMemo(()=>{
     const rows = []
@@ -79,6 +85,9 @@ export const ProveedoresIndex = () => {
     <IndexTemplate
       policy={proveedorPolicy}
       page={page}
+      onSearch={(search)=>{
+        updateFilter({_busqueda: search})
+      }}
       onPageChange={setPage}
       total={totalRef.current}
       onRefetch={()=>{
@@ -97,7 +106,7 @@ export const ProveedoresIndex = () => {
             {item.tipo == 1 ? "Medico" : "Empresa"}
           </td>
           <td>
-            {item.tipo == 1 ? item.nombreCompleto : item.nombre}
+            {item.razonSocial}
           </td>
           <td>
             {item.regional!.nombre}
@@ -124,11 +133,7 @@ export const ProveedoresIndex = () => {
         return <>{loader}</>
       }}
       renderFilterForm={()=>{
-        return <ProveedoresFilterForm onFilter={(filter) => {
-          buscar.remove()
-          setFilter(filter)
-          setPage(page => ({ ...page, current: 1 }))
-        }} />
+        return <ProveedoresFilterForm onFilter={updateFilter} />
       }}
       renderCreateButton={()=>{
         return <Button

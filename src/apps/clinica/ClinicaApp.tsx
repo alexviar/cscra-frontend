@@ -44,7 +44,7 @@ export const ClinicaApp = ()=>{
         }
       )
     }
-    console.log(solicitudAtencionExternaPolicy)
+    
     if(superUserPolicyEnhancer(solicitudAtencionExternaPolicy.index)(user)) {
       items.push({
         id: "atencion-externa",
