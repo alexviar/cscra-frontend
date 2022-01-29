@@ -2,6 +2,7 @@ import { apiClient, PaginatedResponse, Page } from "../../../../commons/services
 import { keysToUnderscore } from "../../../../commons/utils"
 
 export type SolicitudesAtencionExternaFilter = {
+  _busqueda?: string
   desde?: string
   hasta?: string
   numeroPatronal?: string
@@ -32,13 +33,14 @@ export type SolicitudAtencionExterna = {
   },
   proveedor: {
     id: string
+    tipo: number
     razonSocial: string
-  } & ({ 
-    tipo: 1
     especialidad: string
-  } | {
-    tipo:2
-  }),
+  }
+  empleador: {
+    nombre: string
+    numeroPatronal: string
+  }
   regional: {
     id: number
     nombre: string

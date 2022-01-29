@@ -25,13 +25,13 @@ export const ProveedoresFilterForm = (props: Props)=>{
     reset
   } = useForm<Inputs>({
     defaultValues: {
-      regional: proveedorPolicy.viewByRegionalOnly(user) ? [user!.regional] : [],
+      regional: proveedorPolicy.viewByRegionalOnly(user) ? [user!.regional as Regional] : [],
       estado: 0,
       tipo: 0
     }
   })
   
-  return <Form onSubmit={handleSubmit((data)=>{
+  return <Form className="p-2 border rounded" onSubmit={handleSubmit((data)=>{
     const filter: Filter = {}
     filter.regionalId = data.regional.length && data.regional[0].id
     filter.estado = data.estado
@@ -99,7 +99,7 @@ export const ProveedoresFilterForm = (props: Props)=>{
                       paddingBottom: "0.375rem"
                     }}
                     type="radio"
-                    label="Ambos"
+                    label="Todos"
                     value={0}
                     checked={value == 0}
                     {...field}
@@ -172,7 +172,7 @@ export const ProveedoresFilterForm = (props: Props)=>{
       </Col>
       <Col xs="auto">
         <Button variant="secondary" onClick={()=>reset({
-          regional: proveedorPolicy.viewByRegionalOnly(user) ? [user!.regional] : [],
+          regional: proveedorPolicy.viewByRegionalOnly(user) ? [user!.regional!] : [],
           estado: 0,
           tipo: 0
         })}>Limpiar</Button>

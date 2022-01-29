@@ -2,7 +2,6 @@ import { authClient, apiClient } from "../../../commons/services"
 
 export type User = {
   id: number
-  isGuest: boolean
   username: string
   estado: boolean
   ciRaiz: number

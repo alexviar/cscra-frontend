@@ -51,7 +51,7 @@ export const MedicosFilterForm = (props: Props) => {
 
   if(!user) return null
   
-  return <Form onSubmit={handleSubmit((data) => {
+  return <Form className="p-2 border rounded" onSubmit={handleSubmit((data) => {
     const filter: Filter = {}
     if(data.numCi) {
       filter.ci = {
@@ -59,14 +59,13 @@ export const MedicosFilterForm = (props: Props) => {
       }
       if(data.compCi) filter.ci!.complemento = data.compCi
     }
-    if(data.nombre) filter.nombre = data.nombre
     if(data.especialidad) filter.especialidad = data.especialidad
     if(data.regional.length) filter.regionalId = data.regional[0].id
     if(data.estado) filter.estado = data.estado
     props.onFilter(filter)
   })}>
     <Form.Row>
-      <Form.Group as={Col} xs={12} md={5} lg={4}>
+      <Form.Group as={Col} sm={6} lg={4} xl={3}>
         <fieldset className="border rounded" style={{padding: 5, paddingTop: 0, marginBottom: -6}}>
           <Form.Label as="legend" style={{width: "auto", fontSize:"1rem"}}>Carnet de identidad</Form.Label>
           <Form.Row>
@@ -89,23 +88,7 @@ export const MedicosFilterForm = (props: Props) => {
           </Form.Row>
         </fieldset>
       </Form.Group>
-      <Form.Group as={Col} xs={12} md={7} lg={8}>
-        <Form.Label>Nombre</Form.Label>
-        <Form.Control
-          className="text-uppercase"
-          {...register("nombre")}
-        />
-      </Form.Group>
-    </Form.Row>
-    <Form.Row>
-      <Form.Group as={Col} lg={4} sm={6}>
-        <Form.Label>Especialidad</Form.Label>
-        <Form.Control
-          className="text-uppercase"
-          {...register("especialidad")}
-        />
-      </Form.Group>
-      <Form.Group as={Col} lg={4} sm={6}>
+      <Form.Group as={Col} sm={6} lg={4} xl={3}>
         <Form.Label>Regional</Form.Label>
         <Controller
           control={control}
@@ -120,7 +103,14 @@ export const MedicosFilterForm = (props: Props) => {
           }}
         />
       </Form.Group>
-      <Form.Group as={Col} lg={4}>
+      <Form.Group as={Col} lg={4} xl={3}>
+        <Form.Label>Especialidad</Form.Label>
+        <Form.Control
+          className="text-uppercase"
+          {...register("especialidad")}
+        />
+      </Form.Group>
+      <Form.Group as={Col} lg={4} xl={3}>
         <fieldset className="border rounded" style={{padding: 5, paddingTop: 0, marginBottom: -6}}>
           <Form.Label as="legend" style={{width: "auto", fontSize:"1rem"}}>Estado</Form.Label>
           <Controller
@@ -151,7 +141,7 @@ export const MedicosFilterForm = (props: Props) => {
                       paddingBottom: "0.375rem"
                     }}
                     type="radio"
-                    label="De baja"
+                    label="Bajas"
                     value={2}
                     checked={value == 2}
                     {...field}
@@ -165,7 +155,7 @@ export const MedicosFilterForm = (props: Props) => {
                       paddingBottom: "0.375rem"
                     }}
                     type="radio"
-                    label="Ambos"
+                    label="Todos"
                     value=""
                     checked={value === ""}
                     {...field}

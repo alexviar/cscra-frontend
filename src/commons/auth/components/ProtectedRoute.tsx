@@ -8,34 +8,28 @@ type Props = {
   children: React.ReactNode
 } & RouteProps
 export const ProtectedRoute = ({ children, authorize, ...rest }: Props) => {
-  const { pathname: url, state } = useLocation<{
+  const location = useLocation<{
     ignoreAuthorization?: boolean
   }>()
-  const ignoreAuthorization = state?.ignoreAuthorization
+  const ignoreAuthorization = location.state?.ignoreAuthorization
   const user = useUser()
   
-  /** TODO: Mostrar un mensaje adecuado hasta obtener los datos del servidor */
-  if(user === undefined) return null
 
-  return (
-    <Route
+  return <Route
       {...rest}
-      render={({ location }) =>
-        user ? (
-          !authorize || superUserPolicyEnhancer(authorize)(user, url) || ignoreAuthorization ? children : <Redirect
-            to="/forbidden"
-          />
-        ) : (
-          <Redirect
-            to={{
-              pathname: "/login",
-              state: { from: location }
-            }}
-          />
-        )
-      }
+      render={({ location }) => {
+        if(user === null) return <Redirect
+        to={{
+          pathname: "/login",
+          state: { from: location }
+        }}
+      />
+      if(ignoreAuthorization || !authorize || superUserPolicyEnhancer(authorize)(user, location.pathname)) return children
+      return <Redirect
+        to="/forbidden"
+      />
+      }}
     />
-  );
 }
 
 export default ProtectedRoute

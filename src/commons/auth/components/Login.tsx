@@ -35,16 +35,16 @@ export const Login = () => {
 
   const login = useLogin()
 
-  return user !== null ? 
-    <Redirect to={state?.from || "/"} /> :
-    <div className="auth-wrapper bg-light">
+  if(user !== null) return <Redirect to={state?.from || "/"} />
+
+  return <div className="auth-wrapper bg-light">
       <div className="auth-inner shadow-sm">
         <Form onSubmit={handleSubmit((credentials)=>{
             login.mutate(credentials)
           })}
         >
           <div className="d-flex justify-content-center"><Image src="/logo-lg.png" /></div>
-          <h3 className="mb-2 text-center" style={{ fontSize: "1.25rem" }}>Iniciar Sesión</h3>
+          <h3 className="mb-2 text-center text-uppercase" style={{ fontSize: "1.25rem" }}>Iniciar Sesión</h3>
           {login.isError ? <Alert variant="danger" >{(login.error as any)?.response?.message || (login.error as any)?.message}</Alert> :  null}
           <Form.Group>
             <Form.Label>Usuario</Form.Label>

@@ -18,7 +18,7 @@ export const ListaMoraFilterForm = (props: Props)=>{
     reset
   } = useForm<Inputs>()
 
-  return <Form onSubmit={handleSubmit((inputs)=>{
+  return <Form className="p-2 border rounded" onSubmit={handleSubmit((inputs)=>{
     const filter: Filter = {}
     if(inputs.nombre) filter.nombre = inputs.nombre
     if(inputs.numeroPatronal) filter.numeroPatronal = inputs.numeroPatronal

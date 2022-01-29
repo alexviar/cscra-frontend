@@ -7,6 +7,7 @@ export const useLogout = ()=>{
   return useMutation(()=>AuthService.logout(), {
     onSuccess: () => {
       queryClient.clear()
+      localStorage.removeItem("user")
       queryClient.setQueryData(["user"], {
         data: null
       })

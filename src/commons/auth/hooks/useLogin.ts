@@ -7,6 +7,7 @@ export const useLogin = () => {
     return AuthService.login(username, password, remember_me)
   }, {
     onSuccess: ({data}) => {
+      localStorage.setItem("user", JSON.stringify(data))
       queryClient.setQueryData(["user"], {
         data
       })

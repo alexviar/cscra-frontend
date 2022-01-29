@@ -13,11 +13,11 @@ export const RowOptions = ({solicitud}: Props) => {
 
   const modal = useModal("pdfModal")
 
-  return   <Dropdown style={{position: "initial"}}>
+  return <Dropdown style={{position: "initial"}}>
     <Dropdown.Toggle as={VerticalEllipsisDropdownToggle}
       variant="link" id={`dropdown-solicitud-${solicitud.id}`}
     />
-    <Dropdown.Menu >
+    <Dropdown.Menu alignRight>
       <ProtectedContent
         authorize={(user) => solicitudAtencionExternaPolicy.emit(user, solicitud)}
       >

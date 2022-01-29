@@ -40,13 +40,13 @@ export class MedicoPolicy {
   }) => {
     const byRegionalOnly = this.editByRegionalOnly(user, context)
     if(byRegionalOnly !== undefined) return byRegionalOnly
-    if(user?.can(Permisos.EDITAR_MEDICOS)) return true
+    if(user?.can(Permisos.ACTUALIZAR_ESTADO_MEDICOS)) return true
   }
 
   editByRegionalOnly = (user: User, context?: {
     regionalId: number
   }) => {
-    if(user?.can(Permisos.EDITAR_MEDICOS_REGIONAL)) return !context?.regionalId || user.regionalId == context.regionalId
+    if(user?.can(Permisos.ACTUALIZAR_ESTADO_MEDICOS_REGIONAL)) return !context?.regionalId || user.regionalId == context.regionalId
   }
 
   updateStatus = (user: User, context?: {
@@ -54,12 +54,12 @@ export class MedicoPolicy {
   }) => {
     const byRegionalOnly = this.updateStatusByRegionalOnly(user, context)
     if(byRegionalOnly !== undefined) return byRegionalOnly
-    if(user?.can(Permisos.ACTUALIZAR_ESTADO_MEDICO)) return true
+    if(user?.can(Permisos.ACTUALIZAR_ESTADO_MEDICOS)) return true
   }
 
   updateStatusByRegionalOnly = (user: User, context?: {
     regionalId: number
   }) => {
-    if(user?.can(Permisos.ACTUALIZAR_ESTADO_MEDICO_REGIONAL)) return !context?.regionalId || user.regionalId == context.regionalId
+    if(user?.can(Permisos.ACTUALIZAR_ESTADO_MEDICOS_REGIONAL)) return !context?.regionalId || user.regionalId == context.regionalId
   }
 }

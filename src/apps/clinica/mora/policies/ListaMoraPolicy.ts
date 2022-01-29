@@ -26,13 +26,13 @@ export class ListaMoraPolicy {
   }) => {
     const byRegionalOnly = this.registerByRegionalOnly(user, context)
     if(byRegionalOnly !== undefined) return byRegionalOnly
-    if(user?.can(Permisos.AGREGAR_EMPLEADOR_EN_MORA)) return true
+    if(user?.can(Permisos.AGREGAR_A_LA_LISTA_DE_MORA)) return true
   }
 
   registerByRegionalOnly = (user: User, context?: {
     regionalId: number
   }) => {
-    if(user?.can(Permisos.AGREGAR_EMPLEADOR_EN_MORA_DE_LA_MISMA_REGIONAL)) return !context?.regionalId || user.regionalId == context.regionalId
+    if(user?.can(Permisos.AGREGAR_A_LA_LISTA_DE_MORA_MISMA_REGIONAL)) return !context?.regionalId || user.regionalId == context.regionalId
   }
 
   remove = (user: User, context?: {
@@ -40,12 +40,12 @@ export class ListaMoraPolicy {
   }) => {
     const byRegionalOnly = this.removeByRegionalOnly(user, context)
     if(byRegionalOnly !== undefined) return byRegionalOnly
-    if(user?.can(Permisos.QUITAR_EMPLEADOR_EN_MORA)) return true
+    if(user?.can(Permisos.QUITAR_DE_LA_LISTA_DE_MORA)) return true
   }
 
   removeByRegionalOnly = (user: User, context?: {
     regionalId: number
   }) => {
-    if(user?.can(Permisos.QUITAR_EMPLEADOR_EN_MORA_DE_LA_MISMA_REGIONAL)) return !context?.regionalId || user.regionalId == context.regionalId
+    if(user?.can(Permisos.QUITAR_DE_LA_LISTA_DE_MORA_MISMA_REGIONAL)) return !context?.regionalId || user.regionalId == context.regionalId
   }
 }

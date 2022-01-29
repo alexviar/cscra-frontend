@@ -40,12 +40,12 @@ export const UserFilterForm = (props: Props) => {
     reset
   } = useForm<Inputs>({
     defaultValues: {
-      regional: userPolicy.viewByRegionalOnly(user) ? [user!.regional] : [],
+      regional: userPolicy.viewByRegionalOnly(user) ? [user!.regional as Regional] : [],
       estado: 0
     }
   })
 
-  return <Form className="border rounded p-2" onSubmit={handleSubmit((data) => {
+  return <Form className="p-2 border rounded" onSubmit={handleSubmit((data) => {
     const filter: Filter = {}
     filter.ci = data.numCi ? {
       raiz: data.numCi,
@@ -56,7 +56,7 @@ export const UserFilterForm = (props: Props) => {
     props.onFilter(filter)
   })}>
     <Form.Row>
-      <Form.Group as={Col} md={6} lg={4}>
+      <Form.Group as={Col} sm={6} lg={4}>
         <fieldset className="border rounded" style={{padding: 5, paddingTop: 0, marginBottom: -6}}>
           <Form.Label as="legend" style={{width: "auto", fontSize:"1rem"}}>Carnet de identidad</Form.Label>
           <Form.Row>
@@ -79,7 +79,7 @@ export const UserFilterForm = (props: Props) => {
           </Form.Row>
         </fieldset>
       </Form.Group>
-      <Form.Group as={Col} md={6} lg={4}>
+      <Form.Group as={Col} sm={6} lg={4}>
         <Form.Label>Regional</Form.Label>
         <Controller
           control={control}
@@ -139,7 +139,7 @@ export const UserFilterForm = (props: Props) => {
                       paddingBottom: "0.375rem"
                     }}
                     type="radio"
-                    label="Ambos"
+                    label="Todos"
                     value={0}
                     checked={value == 0}
                     {...field}
@@ -157,7 +157,7 @@ export const UserFilterForm = (props: Props) => {
       </Col>
       <Col xs="auto">
         <Button variant="secondary" onClick={()=>reset({
-          regional: userPolicy.viewByRegionalOnly(user) ? [user!.regional] : [],
+          regional: userPolicy.viewByRegionalOnly(user) ? [user!.regional as Regional] : [],
           estado: 0
         })}>Limpiar</Button>
       </Col>

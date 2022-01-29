@@ -5,7 +5,7 @@ import 'core-js/es/object';
 import 'core-js/es/promise';
 import ReactDOM from 'react-dom';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary'
-import { Alert, Button } from 'react-bootstrap'
+import { Alert } from 'react-bootstrap'
 import App from "./bootstrap/components/App"
 import reportWebVitals from './reportWebVitals';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -29,7 +29,7 @@ const queryClient = new QueryClient({
 
 const ErrorFallback = ({error, resetErrorBoundary}: FallbackProps) => {
   return (
-    <Alert>
+    <Alert variant="danger">
       <p>Algo salió mal:</p>
       <pre>{error.message}</pre>
       {/* <Button onClick={resetErrorBoundary}>Intentar de nuevo</Button> */}

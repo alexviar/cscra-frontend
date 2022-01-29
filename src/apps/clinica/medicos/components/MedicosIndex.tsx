@@ -47,6 +47,12 @@ export const MedicosIndex = () => {
   if(buscar.data) {
     totalRef.current = buscar.data.data.meta.total
   }
+  
+  const updateFilter = (filter: Filter)=>{
+    buscar.remove()
+    setFilter(oldFilter => ({...oldFilter, ...filter}));
+    setPage(page => ({...page, current: 1}))
+  }
 
   const loader = useMemo(()=>{
     const rows = []
@@ -84,6 +90,7 @@ export const MedicosIndex = () => {
     <IndexTemplate
       policy={medicoPolicy}
       page={page}
+      onSearch={(search) => updateFilter({_busqueda: search})}
       onPageChange={setPage}
       total={totalRef.current}
       onRefetch={()=>{
@@ -133,11 +140,7 @@ export const MedicosIndex = () => {
         return <>{loader}</>
       }}
       renderFilterForm={()=>{
-        return <MedicosFilterForm onFilter={(filter) => {
-          buscar.remove()
-          setFilter(filter)
-          setPage(page => ({ ...page, current: 1 }))
-        }} />
+        return <MedicosFilterForm onFilter={updateFilter} />
       }}
       renderCreateButton={()=>{
         return  <Button

@@ -114,7 +114,7 @@ export function IndexTemplate<Data>({
               <Button className="ml-2" type="submit"><FaSearch /></Button>
             </Col>
           </Form.Row> */}
-          <InputGroup>
+          <InputGroup style={{minWidth: "15rem"}}>
               <Form.Control aria-label="Busqueda" type="search" value={search} onChange={(e)=>{
                 setSearch(e.target.value)
               }} />
@@ -154,7 +154,7 @@ export function IndexTemplate<Data>({
           {renderRows()}
         </tbody>
       </Table>
-      <Form.Row>
+      <Form.Row className="mt-2">
         <Col className="mr-auto" xs="auto">
           {total > 0 ? <span style={{whiteSpace: "nowrap"}}>Se encontraron {total} resultados</span> : ""}
         </Col>

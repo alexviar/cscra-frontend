@@ -40,6 +40,10 @@ export const solicitudesAtencionExternaFactory = BaseFactory.define<SolicitudAte
       matricula: faker.helpers.replaceSymbols("##-####-???"),
       nombreCompleto: `${faker.name.lastName()} ${faker.name.lastName()} ${faker.name.firstName()}`
     },
+    empleador: {
+      numeroPatronal: faker.helpers.replaceSymbols("##-####-???"),
+      nombre: faker.company.companyName()
+    },
     urlDm11: faker.internet.url()
   }
 

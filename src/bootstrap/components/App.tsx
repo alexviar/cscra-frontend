@@ -6,13 +6,11 @@ import {
   Link,
 } from "react-router-dom"
 import { MdApps } from 'react-icons/md'
-import { FaBell, FaUserCircle, FaBars, FaClinicMedical, FaCalendar } from 'react-icons/fa'
-import { useQueryClient } from 'react-query'
+import { FaUserCircle, FaClinicMedical } from 'react-icons/fa'
 import { QueryProgressModal, PdfModal } from "../../commons/components"
 import { useNavTitle } from "../../commons/hooks"
 import { useModal } from "../../commons/reusable-modal"
 import { Login, ProtectedRoute, useUser, useLogout, useUnauthorizedEffect } from "../../commons/auth"
-import { AuthService } from '../../commons/auth/services';
 import { ToggleSidebar } from './ToggleSidebar'
 import { Home } from './Home'
 import "../../configs/yup"
@@ -30,6 +28,18 @@ export default ()=>{
   useUnauthorizedEffect()
   
   const user = useUser()
+
+  useEffect(()=>{
+    if(user === null || user.isReady) modal.close()
+    else if(user?.isLoading) modal.open({
+      state: "loading",
+      // message: "Cargando la información del usuario"
+    })
+    else if(user?.error) modal.open({
+      state: "error",
+      error: user.error
+    })
+  }, [user])
 
   const logout = useLogout()
 
@@ -68,23 +78,26 @@ export default ()=>{
         >
           <Nav.Link><MdApps size="1.5em" /></Nav.Link>
         </OverlayTrigger>
-        {user ? <NavDropdown 
-          // menuAlign="right"
-          title={<>
-            <FaUserCircle />
-            <span className="d-none d-sm-inline ml-1">{user.username}</span>
-          </>} id="collasible-nav-dropdown">
-          {/* <NavDropdown.Item href="#action/3.2">Cuenta</NavDropdown.Item>
-          <NavDropdown.Item href="#action/3.3">Configuracion</NavDropdown.Item> */}
-          <NavDropdown.Item as={Link} to={`/iam/usuarios/cambiar-contrasena`}>Cambiar contraseña</NavDropdown.Item>
-          <NavDropdown.Divider />
-          <NavDropdown.Item as={Button} className="btn-link" onClick={()=>{
-            modal.open({
-              state: "loading"
-            })
-            logout.mutate()
-          }} >Cerrar sesión</NavDropdown.Item>
-        </NavDropdown> : user === null ? <Nav.Link as={Link} className="text-nowrap" to="/login">Iniciar sesión</Nav.Link> : null}
+        {
+        user === null ? <Nav.Link as={Link} className="text-nowrap" to="/login">Iniciar sesión</Nav.Link> :
+          user.isReady ? <NavDropdown 
+            // menuAlign="right"
+            title={<>
+              <FaUserCircle />
+              <span className="d-none d-sm-inline ml-1">{user.username}</span>
+            </>} id="collasible-nav-dropdown">
+            {/* <NavDropdown.Item href="#action/3.2">Cuenta</NavDropdown.Item>
+            <NavDropdown.Item href="#action/3.3">Configuracion</NavDropdown.Item> */}
+            <NavDropdown.Item as={Link} to={`/iam/usuarios/cambiar-contrasena`}>Cambiar contraseña</NavDropdown.Item>
+            <NavDropdown.Divider />
+            <NavDropdown.Item as={Button} className="btn-link" onClick={()=>{
+              modal.open({
+                state: "loading"
+              })
+              logout.mutate()
+            }} >Cerrar sesión</NavDropdown.Item>
+          </NavDropdown> : null
+        }
       </Nav>
     </Navbar>
 

@@ -54,7 +54,7 @@ export const ClinicaApp = ()=>{
       })
     }
 
-    if(superUserPolicyEnhancer(medicoPolicy.index)){
+    if(superUserPolicyEnhancer(medicoPolicy.index)(user)){
       items.push({
         id: "medicos",
         path: `${url}/medicos`,

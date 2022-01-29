@@ -5,7 +5,6 @@ import { Link } from "react-router-dom"
 import { useQuery, useMutation } from "react-query"
 import { FaSync, FaFilter, FaPlus } from "react-icons/fa"
 import { Page, PaginatedResponse } from "../../../../commons/services"
-import { RolFilterForm } from "./RolFilterForm"
 import { useUser } from "../../../../commons/auth/hooks"
 import { Rol, RolService, RolFilter } from "../services"
 import { rolPolicy } from "../policies"
@@ -41,6 +40,12 @@ export const RolIndex = ()=>{
     totalRef.current = buscar.data.data.meta.total
   }
 
+  const updateFilter = (filter: RolFilter)=>{
+    buscar.remove()
+    setFilter(oldFilter => ({...oldFilter, ...filter}));
+    setPage(page => ({...page, current: 1}))
+  }
+
   const loader = useMemo(()=>{
     const rows = []
     for(let index = 0; index < page.size; index++){
@@ -69,8 +74,7 @@ export const RolIndex = ()=>{
       policy={rolPolicy}
       page={page}
       onSearch={(search) => {
-        setFilter(filter => ({...filter, _busqueda: search}))
-        setPage(page => ({...page, current: 1}))
+        updateFilter(({_busqueda: search}))
       }}
       onPageChange={setPage}
       total={totalRef.current}

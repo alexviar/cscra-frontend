@@ -112,7 +112,7 @@ export const ProveedoresIndex = () => {
             {item.regional!.nombre}
           </td>
           <td>
-            {item.estado == 1 ? "Activo" : item.estado == 2 ? "De baja" : ""}
+            {item.estado == 1 ? "Activo" : item.estado == 2 ? "Baja" : ""}
           </td>
           <td style={{textTransform: "none"}}>
             <RowOptions proveedor={item} queryKey={queryKey} />

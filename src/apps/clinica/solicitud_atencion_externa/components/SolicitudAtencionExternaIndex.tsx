@@ -44,6 +44,12 @@ export const SolicitudAtencionExternaIndex = ()=>{
   if(buscar.data) {
     totalRef.current = buscar.data.data.meta.total
   }
+  
+  const updateFilter = (filter: Filter)=>{
+    buscar.remove()
+    setFilter(oldFilter => ({...oldFilter, ...filter}));
+    setPage(page => ({...page, current: 1}))
+  }
 
   const loader = useMemo(()=>{
     const rows = []
@@ -52,6 +58,15 @@ export const SolicitudAtencionExternaIndex = ()=>{
         <th scope="row">
           {i + 1}
         </th>
+        <td>
+          <Skeleton />
+        </td>
+        <td>
+          <Skeleton />
+        </td>
+        <td>
+          <Skeleton />
+        </td>
         <td>
           <Skeleton />
         </td>
@@ -96,20 +111,34 @@ export const SolicitudAtencionExternaIndex = ()=>{
           <th scope="row">
               {(page.current - 1)*page.size + index + 1}
           </th>
-          <td>{solicitud.numero}</td>
+          <td>{solicitud.id}</td>
           <td>{solicitud.fecha}</td>
-          <td>{solicitud.regional.nombre}</td>
           <td>
-            <div>{solicitud.paciente.nombreCompleto}</div>
-            <div className="text-muted">{solicitud.paciente.matricula}</div>
+            <div style={{width: "max-content", maxWidth: 300}}>{solicitud.regional.nombre}</div>
           </td>
           <td>
-            <div>{solicitud.titular?.nombreCompleto}</div>
-            <div className="text-muted">{solicitud.titular?.matricula}</div>
+            <div style={{width: "max-content", maxWidth: 300}}>{solicitud.paciente.nombreCompleto}</div>
+            <div className="text-small text-muted">{solicitud.paciente.matricula}</div>
           </td>
-          <td>{solicitud.prestacion}</td>
-          {/* <td>{solicitud.medico.nombreCompleto}</td>
-          <td>{solicitud.proveedor.razonSocial}</td> */}
+          <td>
+            <div style={{width: "max-content", maxWidth: 300}}>{solicitud.prestacion}</div>
+          </td>
+          <td>
+            <div style={{width: "max-content", maxWidth: 300}}>{solicitud.medico.nombreCompleto}</div>
+            <div className="text-small text-muted">{solicitud.medico.especialidad}</div>
+          </td>
+          <td>
+            <div style={{width: "max-content", maxWidth: 300}}>{solicitud.proveedor.razonSocial}</div>
+            <div className="text-small text-muted">{(solicitud.proveedor as any).especialidad}</div>
+          </td>
+          <td>
+            <div style={{width: "max-content", maxWidth: 300}}>{solicitud.empleador.nombre}</div>
+            <div className="text-small text-muted">{solicitud.empleador?.numeroPatronal}</div>
+          </td>
+          <td>
+            <div style={{width: "max-content", maxWidth: 300}}>{solicitud.titular?.nombreCompleto}</div>
+            <div className="text-small text-muted">{solicitud.titular?.matricula}</div>
+          </td>
           <td style={{textTransform: "none"}}>
             <RowOptions solicitud={solicitud} />
           </td>
@@ -119,22 +148,19 @@ export const SolicitudAtencionExternaIndex = ()=>{
         return <tr>
           <th style={{width: 1}}>#</th>
           <th>Nº</th>
-          <th>Fecha</th>
+          <th style={{minWidth: 155}}>Fecha</th>
           <th>Regional</th>
           <th>Paciente</th>
-          <th>Titular</th>
           <th>Prestación</th>
-          {/* <th>Médico</th>
-          <th>Proveedor</th> */}
+          <th>Proveedor</th>
+          <th>Medico</th>
+          <th>Empleador</th>
+          <th>Titular</th>
           <th style={{width: 1}}></th>
         </tr>
       }}
       renderFilterForm={()=>{
-        return <SolicitudAtencionExternaFilterForm onFilter={(filter)=>{
-          buscar.remove()
-          setFilter(filter)
-          setPage(page=>({ ...page, current: 1 }))
-        }} />
+        return <SolicitudAtencionExternaFilterForm onFilter={updateFilter} />
       }}
       renderCreateButton={()=>{
         return <Button
@@ -148,6 +174,9 @@ export const SolicitudAtencionExternaIndex = ()=>{
       onRefetch={()=>{
         buscar.remove()
         buscar.refetch({throwOnError: true})
+      }}
+      onSearch={(search)=>{
+        updateFilter({_busqueda: search})
       }}
     />
     {/* <div className="d-flex my-2">

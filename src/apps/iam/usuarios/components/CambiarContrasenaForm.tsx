@@ -17,13 +17,13 @@ type Inputs = {
 
 export const CambiarContrasenaForm = ()=>{
 
-  const { id } = useParams<{
+  const user = useUser()
+
+  const { id = user!.id as any} = useParams<{
     id: string
   }>()
 
   const history = useHistory()
-
-  const user = useUser()
 
   const schema = useMemo(()=>{
     return yup.object().shape({
@@ -49,9 +49,11 @@ export const CambiarContrasenaForm = ()=>{
     }
   })
 
+  console.log(id);
+
   const guardar = useMutation((data: Inputs) =>{
     const parsedId = parseInt(id)
-    return UserService.cambiarContrasena(isNaN(parsedId) ? user!.id : parsedId, {
+    return UserService.cambiarContrasena(parsedId, {
       password: data.password,
       oldPassword: data.oldPassword
     })

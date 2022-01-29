@@ -2,9 +2,9 @@ import { apiClient, Page, PaginatedResponse} from "../../../../commons/services"
 import { keysToUnderscore } from "../../../../commons/utils"
 
 export type ListaMoraFilter = {
+  _busqueda?: string,
   numeroPatronal?: string,
   nombre?: string,
-  nit?: number,
   regionalId?: number
 }
 

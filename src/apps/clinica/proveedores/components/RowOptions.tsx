@@ -91,7 +91,7 @@ export const RowOptions = ({proveedor, queryKey}: Props) => {
         <Dropdown.Item className="text-danger" onClick={()=>{
             actualizarEstado.mutate(proveedor.estado == 1 ? 2 : 1)
         }}>
-          {proveedor.estado == 1 ? "Baja" : "Habilitar"}
+          {proveedor.estado == 1 ? "Baja" : "Alta"}
         </Dropdown.Item>
       </ProtectedContent>
 

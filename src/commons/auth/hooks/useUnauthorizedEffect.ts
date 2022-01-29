@@ -13,6 +13,7 @@ export const useUnauthorizedEffect = ()=>{
       response=>response,
       error => {
         if(error.response?.status == 401 || error.response?.status == 419){
+          localStorage.removeItem("user")
           queryClient.setQueryData(["user"], {
             data: null
           })

@@ -44,7 +44,7 @@ export const SolicitudAtencionExternaFilterForm = (props: Props)=>{
     }
   })
   
-  return <Form className={"mb-2 border rounded p-2"} onSubmit={handleSubmit((input)=>{
+  return <Form className="p-2 border rounded" onSubmit={handleSubmit((input)=>{
     const filter: SolicitudesAtencionExternaFilter = {}
     
     props.onFilter({
@@ -58,17 +58,15 @@ export const SolicitudAtencionExternaFilterForm = (props: Props)=>{
     })
   })}>
     <Form.Row>
-      <Form.Group as={Col} md={6} lg={4}>
+      <Form.Group as={Col} xs={6} md={4} xl={2}>
         <Form.Label>Nº Patronal</Form.Label>
         <Form.Control {...register("numeroPatronal")} />
       </Form.Group>
-      <Form.Group as={Col} md={6} lg={4}>
+      <Form.Group as={Col} xs={6} md={4} xl={2}>
         <Form.Label>Matricula</Form.Label>
         <Form.Control {...register("matricula")} />
       </Form.Group>
-    </Form.Row>
-    <Form.Row>
-      <Form.Group as={Col} md={6} lg={4}>
+      <Form.Group as={Col} md={4} xl={2}>
         <Form.Label>Regional</Form.Label>
         <Controller
           control={control}
@@ -84,7 +82,7 @@ export const SolicitudAtencionExternaFilterForm = (props: Props)=>{
           }}
         />
       </Form.Group>
-      <Form.Group as={Col} md={6} lg={4}>
+      <Form.Group as={Col} md={6}>
         <Form.Label>Médico</Form.Label>
         <Controller
           control={control}
@@ -99,7 +97,7 @@ export const SolicitudAtencionExternaFilterForm = (props: Props)=>{
           }}
         />
       </Form.Group>
-      <Form.Group as={Col} md={6} lg={4}>
+      <Form.Group as={Col} md={6}>
         <Form.Label>Proveedor</Form.Label>
         <Controller
           control={control}
@@ -114,23 +112,22 @@ export const SolicitudAtencionExternaFilterForm = (props: Props)=>{
           }}
         />
       </Form.Group>
+      <Form.Group as={Col} xs={6} md={4} xl={2}>
+        <Form.Label>Desde</Form.Label>
+        <Form.Control
+          type="date"
+          {...register("desde")}
+        />
+      </Form.Group>
+      <Form.Group as={Col} xs={6} md={4} xl={2}>
+        <Form.Label>Hasta</Form.Label>
+        <Form.Control
+          type="date"
+          {...register("hasta")}
+        />
+      </Form.Group>
     </Form.Row>
-    <Form.Row>
-      <Form.Group as={Col} sm={4}>
-          <Form.Label>Desde</Form.Label>
-          <Form.Control
-            type="date"
-            {...register("desde")}
-          />
-        </Form.Group>
-        <Form.Group as={Col} sm={4}>
-          <Form.Label>Hasta</Form.Label>
-          <Form.Control
-            type="date"
-            {...register("hasta")}
-          />
-        </Form.Group>
-    </Form.Row>
+
     <Form.Row>
       <Col xs="auto" className="ml-auto">
         <Button type="submit">Aplicar</Button>

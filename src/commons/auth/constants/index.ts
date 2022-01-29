@@ -1,1 +1,0 @@
-export * as Permisos from "./Permisos"

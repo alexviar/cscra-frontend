@@ -40,13 +40,13 @@ export class ProveedorPolicy {
   }) => {
     const byRegionalOnly = this.editByRegionalOnly(user, context)
     if(byRegionalOnly !== undefined) return byRegionalOnly
-    if(user?.can(Permisos.EDITAR_PROVEEDORES)) return true
+    if(user?.can(Permisos.ACTUALIZAR_PROVEEDORES)) return true
   }
 
   editByRegionalOnly = (user: User, context?: {
     regionalId: number
   }) => {
-    if(user?.can(Permisos.EDITAR_PROVEEDORES_REGIONAL)) return !context?.regionalId || user.regionalId == context.regionalId
+    if(user?.can(Permisos.ACTUALIZAR_PROVEEDORES_REGIONAL)) return !context?.regionalId || user.regionalId == context.regionalId
   }
 
   updateStatus = (user: User, context?: {
@@ -54,12 +54,12 @@ export class ProveedorPolicy {
   }) => {
     const byRegionalOnly = this.updateStatusByRegionalOnly(user, context)
     if(byRegionalOnly !== undefined) return byRegionalOnly
-    if(user?.can(Permisos.ACTUALIZAR_ESTADO_PROVEEDOR)) return true
+    if(user?.can(Permisos.ACTUALIZAR_ESTADO_PROVEEDORES)) return true
   }
 
   updateStatusByRegionalOnly = (user: User, context?: {
     regionalId: number
   }) => {
-    if(user?.can(Permisos.ACTUALIZAR_ESTADO_PROVEEDOR_REGIONAL)) return !context?.regionalId || user.regionalId == context.regionalId
+    if(user?.can(Permisos.ACTUALIZAR_ESTADO_PROVEEDORES_REGIONAL)) return !context?.regionalId || user.regionalId == context.regionalId
   }
 }

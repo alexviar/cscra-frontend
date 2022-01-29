@@ -1,11 +1,9 @@
-import { AxiosError } from "axios"
-import { useEffect, useMemo, useRef, useState } from "react"
-import { Breadcrumb, Button, Col, Collapse, Form, Spinner, Table } from "react-bootstrap"
-import { FaFilter, FaSync, FaPlus } from "react-icons/fa"
+import { useMemo, useRef, useState } from "react"
+import { Breadcrumb, Button } from "react-bootstrap"
+import { FaPlus } from "react-icons/fa"
 import { useQuery } from "react-query"
 import { Link } from "react-router-dom"
-import {Pagination} from "../../../../commons/components"
-import { useUser, ProtectedContent, Permisos } from "../../../../commons/auth"
+import { useUser } from "../../../../commons/auth"
 import { ListaMoraService, ListaMoraFilter as Filter } from "../services"
 import { ListaMoraFilterForm } from "./ListaMoraFilterForm"
 import { RowOptions } from "./RowOptions"
@@ -47,6 +45,12 @@ export default () => {
     totalRef.current = buscar.data.data.meta.total
   }
 
+  const updateFilter = (filter: Filter)=>{
+    buscar.remove()
+    setFilter(oldFilter => ({...oldFilter, ...filter}));
+    setPage(page => ({...page, current: 1}))
+  }
+
   const loader = useMemo(()=>{
     const rows = []
     for(let i = 0; i < page.size; i++){
@@ -84,6 +88,7 @@ export default () => {
       total={totalRef.current}
       page={page}
       data={buscar.data?.data.records}
+      onSearch={(search)=>updateFilter({_busqueda: search})}
       renderLoader={()=>{
         return <>{loader}</>
       }}
@@ -120,11 +125,7 @@ export default () => {
         </tr>
       }}
       renderFilterForm={()=>{
-        return <ListaMoraFilterForm onApply={(filter)=>{
-          buscar.remove()
-          setFilter(filter)
-          setPage(page=>({ ...page, current: 1 }))
-        }} />
+        return <ListaMoraFilterForm onApply={updateFilter} />
       }}
       renderCreateButton={()=>{
         return <Button as={Link}
