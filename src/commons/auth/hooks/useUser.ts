@@ -1,22 +1,22 @@
+import { AxiosResponse } from "axios"
 import { useMemo } from "react"
 import { useQuery } from "react-query"
-import { AuthService } from "../services"
+import { User as TUser, AuthService } from "../services"
 
 export const useUser = () => {
-
-  let cache = localStorage.getItem("user")
 
   const fetchUser = useQuery(["user"], ()=>{
     return AuthService.fetch()
   }, {
-    refetchOnMount: false,
-    initialData: cache ? {status:200, statusText: "OK", headers: {}, config: {}, data: JSON.parse(cache)} : undefined,
+    // refetchOnMount: false,
+    initialData: ()=>{
+      let cache = localStorage.getItem("user")
+      if(cache) return{status:200, statusText: "OK", headers: {}, config: {}, data: JSON.parse(cache)} as AxiosResponse<TUser>
+    },
     onSuccess({data}){
       localStorage.setItem("user", JSON.stringify(data))
     }
   })
-
-  console.log(fetchUser, cache)
   
   // const user = fetchUser.isError ? null : fetchUser.data?.data
   const user = fetchUser.data?.data

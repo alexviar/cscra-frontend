@@ -79,7 +79,7 @@ export default ()=>{
           <Nav.Link><MdApps size="1.5em" /></Nav.Link>
         </OverlayTrigger>
         {
-        user === null ? <Nav.Link as={Link} className="text-nowrap" to="/login">Iniciar sesión</Nav.Link> :
+          user === null ? <Nav.Link as={Link} className="text-nowrap" to="/login">Iniciar sesión</Nav.Link> :
           user.isReady ? <NavDropdown 
             // menuAlign="right"
             title={<>

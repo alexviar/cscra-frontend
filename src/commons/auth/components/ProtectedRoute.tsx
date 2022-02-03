@@ -13,7 +13,6 @@ export const ProtectedRoute = ({ children, authorize, ...rest }: Props) => {
   }>()
   const ignoreAuthorization = location.state?.ignoreAuthorization
   const user = useUser()
-  
 
   return <Route
       {...rest}
@@ -24,6 +23,9 @@ export const ProtectedRoute = ({ children, authorize, ...rest }: Props) => {
           state: { from: location }
         }}
       />
+
+      if(!user.isReady) return null
+
       if(ignoreAuthorization || !authorize || superUserPolicyEnhancer(authorize)(user, location.pathname)) return children
       return <Redirect
         to="/forbidden"
