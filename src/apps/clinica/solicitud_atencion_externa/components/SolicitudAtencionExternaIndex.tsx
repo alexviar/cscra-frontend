@@ -152,8 +152,8 @@ export const SolicitudAtencionExternaIndex = ()=>{
           <th>Regional</th>
           <th>Paciente</th>
           <th>Prestación</th>
+          <th>Médico</th>
           <th>Proveedor</th>
-          <th>Medico</th>
           <th>Empleador</th>
           <th>Titular</th>
           <th style={{width: 1}}></th>

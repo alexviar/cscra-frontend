@@ -53,7 +53,7 @@ export const SolicitudAtencionExternaFilterForm = (props: Props)=>{
       desde: input.desde && moment(input.desde).format("YYYY-MM-DD"),
       hasta: input.hasta && moment(input.hasta).format("YYYY-MM-DD"),
       medicoId: input.medico.length && input.medico[0].id,
-      proveedorId: input.medico.length ? input.proveedor[0].id : undefined,
+      proveedorId: input.proveedor.length ? input.proveedor[0].id : undefined,
       regionalId: input.regional.length && input.regional[0].id
     })
   })}>
@@ -87,12 +87,14 @@ export const SolicitudAtencionExternaFilterForm = (props: Props)=>{
         <Controller
           control={control}
           name="medico"
-          render={({field})=>{
+          render={({field: {ref, value, ...field}})=>{
             return <MedicosTypeahead
               id="medicos-typeahead"
               filter={{
                 regionalId: medicoPolicy.viewByRegionalOnly(user) ? user!.regionalId : watch("regional").length && watch("regional")[0].id
               }}
+              selected={value}
+              {...field}
             />
           }}
         />
@@ -101,13 +103,15 @@ export const SolicitudAtencionExternaFilterForm = (props: Props)=>{
         <Form.Label>Proveedor</Form.Label>
         <Controller
           control={control}
-          name="medico"
-          render={()=>{
+          name="proveedor"
+          render={({field: {ref, value, ...field}})=>{
             return <ProveedoresTypeahead
               id="proveedores-typeahead"
               filter={{
                 regionalId: proveedorPolicy.viewByRegionalOnly(user) ? user!.regionalId : watch("regional").length && watch("regional")[0].id
               }}
+              selected={value}
+              {...field}
             />
           }}
         />
