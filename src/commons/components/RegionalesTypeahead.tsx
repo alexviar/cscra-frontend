@@ -9,6 +9,7 @@ import { useQuery } from 'react-query'
 import { Regional, RegionalesService } from "../services/RegionalesService";
 import { isMatch } from "../utils";
 import 'react-bootstrap-typeahead/css/Typeahead.css';
+import classNames from "classnames"
 
 export type { Regional }
 
@@ -52,7 +53,7 @@ export const RegionalesTypeahead = ({initialized = true, isInvalid, feedback, fi
       align="left"
       {...props}
       selected={options.filter(o => selected?.some(s => s.id == o.id))}
-      className={`position-unset${(buscar.isError || isInvalid) ? " is-invalid" : ""}${props.className ? ` ${props.className}` : ""}`} 
+      className={classNames(props.className, "position-unset", (buscar.isError || isInvalid) && "is-invalid")} 
       isInvalid={buscar.isError || isInvalid}
       filterBy={(regional, props)=>{
         return (!props.text || isMatch(regional.nombre, props)) 

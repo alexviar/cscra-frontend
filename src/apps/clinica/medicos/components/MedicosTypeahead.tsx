@@ -5,6 +5,7 @@ import { AsyncTypeahead, AsyncTypeaheadProps } from 'react-bootstrap-typeahead'
 import { useInfiniteQuery } from 'react-query'
 import { Medico, MedicoFilter, MedicosService } from "../services"
 import 'react-bootstrap-typeahead/css/Typeahead.css'
+import classNames from "classnames"
 
 export type { Medico }
 
@@ -58,8 +59,7 @@ export const MedicosTypeahead = ({isInvalid, feedback, filter, ...props}: Props)
       searchText="Buscando..."
       paginationText="Cargar más..."
       {...props}
-      labelKey={medico => medico.nombreCompleto!}
-      className={props.className + ((buscar.isError || isInvalid) ? " is-invalid" : "")}
+      labelKey={medico => medico.nombreCompleto!}className={classNames(props.className, "position-unset", (buscar.isError || isInvalid) && "is-invalid")} 
       isInvalid={buscar.isError || isInvalid}
       filterBy={()=>true}
       maxResults={10}
